@@ -16,6 +16,11 @@ import { login } from '@/api'
 
 import { ref } from 'vue'
 import router from '@/router'
+import { useAuthStore } from '@/stores'
+import type { AxiosResponse } from 'axios'
+
+const authStore = useAuthStore()
+
 const user = ref<LoginRequestType>({
   email: '',
   password: '',
@@ -25,16 +30,27 @@ const redirectToHome = () => {
   router.replace('/')
 }
 
+const saveTokens = (res: AxiosResponse) => {
+  authStore.setAccessToken(res.data.data.accessToken)
+  authStore.setRefreshToken(res.data.data.refreshToken)
+}
+
 const onLogin = async () => {
   try {
     if (user.value) {
       const res = await login(user.value)
+
       if (res.status == 200) {
+        saveTokens(res)
+
         alert('Login successfull.')
+
         redirectToHome()
       }
     }
-  } catch {
+  } catch (e) {
+    console.log(e)
+
     alert(`Login failed.`)
   }
 }
