@@ -1,0 +1,262 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
+  output          = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleEnum {
+  User
+  Assistant
+}
+
+enum OrderStatusEnum {
+  PENDING
+  PROCESSING
+  COMPLETED
+  CANCELED
+}
+
+model Category {
+  id          String    @id @default(uuid()) @map("id")
+  name        String    @unique @map("name")
+  description String?   @map("description")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+  products    Product[]
+
+  @@index([name])
+  @@map("categories")
+}
+
+model Brand {
+  id            String    @id @default(uuid()) @map("id")
+  name          String    @unique @map("name")
+  originCountry String?   @map("origin_country")
+  description   String?   @map("description")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
+  products      Product[]
+
+  @@index([name])
+  @@index([originCountry])
+  @@map("brands")
+}
+
+model Product {
+  id               String         @id @default(uuid()) @map("id")
+  name             String         @unique @map("name")
+  code             String         @unique @map("code")
+  shortDescription String?        @map("short_description")
+  longDescription  String?        @map("long_description")
+  price            Decimal        @map("price")
+  quantity         Int            @map("quantity")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+  deletedAt        DateTime?      @map("deleted_at")
+  category         Category?      @relation(fields: [categoryId], references: [id])
+  categoryId       String?        @map("category_id")
+  brand            Brand?         @relation(fields: [brandId], references: [id])
+  brandId          String?        @map("brand_id")
+  attributes       Attributes[]
+  productMedias    ProductMedia[]
+  carts            Cart[]
+  reviews          Review[]
+  orderDetails     OrderDetail[]
+
+  @@index([categoryId])
+  @@index([brandId])
+  @@map("products")
+}
+
+model Attributes {
+  id             String  @id @default(uuid()) @map("id")
+  attributeKey   String  @map("attribute_key")
+  attributeValue String  @map("attribute_value")
+  product        Product @relation(fields: [productId], references: [id])
+  productId      String  @map("product_id")
+
+  @@index([attributeKey])
+  @@index([attributeValue])
+  @@index([productId])
+  @@map("attributes")
+}
+
+model ProductMedia {
+  id        String  @id @default(uuid()) @map("id")
+  product   Product @relation(fields: [productId], references: [id])
+  productId String  @map("product_id")
+  media     Media   @relation(fields: [mediaId], references: [id])
+  mediaId   String  @map("media_id")
+
+  @@index([productId])
+  @@index([mediaId])
+  @@map("product_medias")
+}
+
+model Media {
+  id           String         @id @default(uuid()) @map("id")
+  url          String         @unique @map("url")
+  description  String?        @map("description")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  userId       String?        @map("user_id")
+  user         User?
+  productMedia ProductMedia[]
+
+  @@index([userId])
+  @@map("media")
+}
+
+model Cart {
+  id        String    @id @default(uuid()) @map("id")
+  quantity  Int       @default(1) @map("quantity")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id])
+  productId String    @map("product_id")
+  product   Product   @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+  @@unique([productId])
+  @@index([userId])
+  @@map("carts")
+}
+
+model Review {
+  id        String   @id @default(uuid()) @map("id")
+  rating    Int      @default(1) @map("rating")
+  comment   String   @map("comment")
+  productId String   @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id])
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([productId])
+  @@index([userId])
+  @@map("reviews")
+}
+
+model User {
+  id              String         @id @default(uuid()) @map("id")
+  fullName        String?        @map("full_name")
+  email           String         @unique @map("email")
+  phoneNumber     String?        @map("phone_number")
+  passwordHash    String         @map("password_hash")
+  address         String?        @map("address")
+  isAdmin         Boolean        @default(false) @map("is_admin")
+  isVerifiedEmail Boolean        @default(false) @map("is_verified_email")
+  forgotToken     String?        @map("forgot_token")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+  deletedAt       DateTime?      @map("deleted_at")
+  mediaId         String?        @unique @map("media_id")
+  media           Media?         @relation(fields: [mediaId], references: [id])
+  carts           Cart[]
+  reviews         Review[]
+  conversations   Conversation[]
+  orders          Order[]
+  tokens          Token[]
+
+  @@index([forgotToken])
+  @@map("users")
+}
+
+model Token {
+  id           Int      @id @default(autoincrement()) @map("id")
+  refreshToken String   @unique @map("refresh_token")
+  expiresAt    DateTime @map("expires_at")
+  ipAddress    String?  @map("ip_address")
+  userId       String   @map("user_id")
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@index([refreshToken])
+  @@index([ipAddress])
+  @@map("tokens")
+}
+
+model Conversation {
+  id        String   @id @default(uuid()) @map("id")
+  role      RoleEnum @map("role")
+  content   Json     @map("content")
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("conversations")
+}
+
+model Order {
+  id           String          @id @default(uuid()) @map("id")
+  userId       String          @map("user_id")
+  user         User            @relation(fields: [userId], references: [id])
+  phoneNumber  String          @map("phone_number")
+  note         String?         @map("note")
+  totalAmount  Decimal         @map("total_amount")
+  orderDate    DateTime        @map("order_date")
+  orderStatus  OrderStatusEnum @default(PENDING) @map("order_status")
+  orderDetails OrderDetail[]
+  payments     Payment[]
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([orderStatus])
+  @@index([orderDate])
+  @@map("orders")
+}
+
+model OrderDetail {
+  id          String   @id @default(uuid()) @map("id")
+  orderId     String   @map("order_id")
+  order       Order    @relation(fields: [orderId], references: [id])
+  productId   String   @map("product_id")
+  product     Product  @relation(fields: [productId], references: [id])
+  productName String   @map("product_name")
+  quantity    Int      @map("quantity")
+  unitPrice   Decimal  @map("unit_price")
+  subtotal    Decimal  @map("subtotal")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([orderId, productId])
+  @@map("order_details")
+}
+
+model Payment {
+  id              String   @id @default(uuid()) @map("id")
+  order           Order    @relation(fields: [orderId], references: [id])
+  orderId         String   @map("order_id")
+  stripeChargeId  String   @map("stripe_charge_id")
+  amount          Decimal  @map("amount")
+  currency        String   @map("currency")
+  paymentMethod   String   @map("payment_method")
+  paymentIntentId String   @map("payment_intent_id")
+  status          String   @map("status")
+  metadata        Json?    @map("metadata")
+  errorMessage    String?  @map("error_message")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([orderId])
+  @@index([stripeChargeId])
+  @@index([paymentIntentId])
+  @@map("payments")
+}
