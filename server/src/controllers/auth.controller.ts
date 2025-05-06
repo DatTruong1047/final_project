@@ -1,21 +1,22 @@
+import { FastifyReply, FastifyRequest } from 'fastify';
+
 import { emailTokenOption, ErrorCodes } from '@config';
 import { binding } from '@decorators/binding.decorator';
 import {
   EmailTokenPayloadType,
   ErrorResponseType,
   LoginRequestType,
+  LoginResponseType,
   RefreshTokenType,
   RegisterUserRequestType,
   SuccessResponseType,
   SuccessResWithoutDataType,
   TokenPayloadType,
-  TokenResponseType,
   VerifyEmailTokenType,
 } from '@model';
 import AuthService from '@services/auth.service';
 import MailService from '@services/mail.service';
 import UserService from '@services/user.service';
-import { FastifyReply, FastifyRequest } from 'fastify';
 
 export default class AuthController {
   constructor(
@@ -25,7 +26,10 @@ export default class AuthController {
   ) {}
 
   @binding
-  async register(request: FastifyRequest<{ Body: RegisterUserRequestType }>, reply: FastifyReply) {
+  async register(
+    request: FastifyRequest<{ Body: RegisterUserRequestType }>,
+    reply: FastifyReply
+  ): Promise<FastifyReply> {
     try {
       // Register user
       const result = await this.authService.register(request.body);
@@ -65,7 +69,10 @@ export default class AuthController {
   }
 
   @binding
-  async verifyEmail(request: FastifyRequest<{ Body: VerifyEmailTokenType }>, reply: FastifyReply) {
+  async verifyEmail(
+    request: FastifyRequest<{ Body: VerifyEmailTokenType }>,
+    reply: FastifyReply
+  ): Promise<FastifyReply> {
     try {
       const result = await this.userService.verifiedEmail(request.decodedEmailToken.userId);
 
@@ -88,7 +95,7 @@ export default class AuthController {
   }
 
   @binding
-  async login(request: FastifyRequest<{ Body: LoginRequestType }>, reply: FastifyReply) {
+  async login(request: FastifyRequest<{ Body: LoginRequestType }>, reply: FastifyReply): Promise<FastifyReply> {
     try {
       const ipAddress = request.ip;
 
@@ -108,7 +115,7 @@ export default class AuthController {
         userEmail: result.data.email,
       };
 
-      const tokens: TokenResponseType = this.authService.generateTokens(payload);
+      const tokens: LoginResponseType = this.authService.generateTokens(payload);
 
       const refreshTokenData: RefreshTokenType = {
         refreshToken: tokens.refreshToken,
@@ -119,7 +126,7 @@ export default class AuthController {
 
       await this.authService.saveRefreshToken(refreshTokenData);
 
-      const res: SuccessResponseType<TokenResponseType> = {
+      const res: SuccessResponseType<LoginResponseType> = {
         code: 200,
         data: tokens,
       };

@@ -1,12 +1,15 @@
-import * as config from '@config';
-import { EmailTokenPayloadType, ErrorResponseType } from '@model';
 import { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify';
 import fastifuPlugin from 'fastify-plugin';
 
 import app from '@app/app';
 import { VerifyEmailTokenType } from '@app/models/email.schema';
+import * as config from '@config';
+import { EmailTokenPayloadType, ErrorResponseType } from '@model';
 
-export async function verifyEmailToken(request: FastifyRequest<{ Body: VerifyEmailTokenType }>, reply: FastifyReply) {
+export async function verifyEmailToken(
+  request: FastifyRequest<{ Body: VerifyEmailTokenType }>,
+  reply: FastifyReply
+): Promise<void> {
   try {
     const { token } = request.body;
 

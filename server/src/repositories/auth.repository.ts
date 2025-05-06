@@ -1,6 +1,5 @@
-import { RefreshTokenType, RefreshTokenResponeType } from '@model';
-
 import prisma from '@app/lib/prisma';
+import { RefreshTokenType, RefreshTokenResponeType } from '@model';
 
 import { PrismaClient, Token } from '../../generated/prisma';
 
@@ -56,7 +55,7 @@ export default class AuthRepository {
     return stored_token;
   }
 
-  async saveRefreshToken(input: RefreshTokenType) {
+  async saveRefreshToken(input: RefreshTokenType): Promise<RefreshTokenType> {
     const new_token = await this._prisma.token.create({
       data: {
         refreshToken: input.refreshToken,
@@ -69,7 +68,7 @@ export default class AuthRepository {
     return new_token;
   }
 
-  async deleteResfeshToken(token: string) {
+  async deleteResfeshToken(token: string): Promise<Token> {
     const deleted_token = await this._prisma.token.delete({
       where: { refreshToken: token },
     });

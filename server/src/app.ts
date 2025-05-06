@@ -1,8 +1,9 @@
-import { loggerConfig } from '@config';
-import Fastify from 'fastify';
+import Fastify, { FastifyInstance } from 'fastify';
 import { serializerCompiler, validatorCompiler, ZodTypeProvider } from 'fastify-type-provider-zod';
 
-function app() {
+import { loggerConfig } from '@config';
+
+function app(): FastifyInstance {
   const app = Fastify({
     logger: loggerConfig,
   });

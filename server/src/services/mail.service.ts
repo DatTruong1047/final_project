@@ -1,10 +1,10 @@
+import nodemailer from 'nodemailer';
+import SMTPTransport from 'nodemailer/lib/smtp-transport';
+
+import { EmailTokenPayloadType, TokenOption } from '@app/models';
 import { emailConfig } from '@config';
 import UserService from '@services/user.service';
 import { generateToken } from '@util';
-import nodemailer from 'nodemailer';
-
-import prisma from '@app/lib/prisma';
-import { EmailTokenPayloadType, TokenOption } from '@app/models';
 
 export default class MailService {
   private readonly _userService: UserService;
@@ -13,7 +13,7 @@ export default class MailService {
     this._userService = new UserService();
   }
 
-  createTransporter() {
+  createTransporter(): nodemailer.Transporter<SMTPTransport.SentMessageInfo, SMTPTransport.Options> {
     return nodemailer.createTransport({
       ...emailConfig.options,
     });
@@ -44,7 +44,7 @@ export default class MailService {
     }
   }
 
-  generateEmailToken(payload: EmailTokenPayloadType, option: TokenOption) {
+  generateEmailToken(payload: EmailTokenPayloadType, option: TokenOption): string {
     try {
       return generateToken(payload, option);
     } catch (error) {

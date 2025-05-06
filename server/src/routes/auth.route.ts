@@ -1,3 +1,5 @@
+import { FastifyInstance } from 'fastify';
+
 import AuthController from '@controller/auth.controller';
 import {
   SuccessResWithoutDataSchema,
@@ -6,14 +8,13 @@ import {
   ErrorResponseSchema,
   VerifyEmailTokenSchema,
   LoginRequestSchema,
-  TokenResponseSchema,
+  LoginResponseSchema,
 } from '@model';
 import AuthService from '@services/auth.service';
 import MailService from '@services/mail.service';
 import UserService from '@services/user.service';
-import { FastifyInstance } from 'fastify';
 
-async function authRoute(app: FastifyInstance) {
+async function authRoute(app: FastifyInstance): Promise<void> {
   const authController = new AuthController(new AuthService(), new UserService(), new MailService());
 
   app.post('/sign-up', {
@@ -33,7 +34,7 @@ async function authRoute(app: FastifyInstance) {
       tags: ['Auth'],
       body: LoginRequestSchema,
       response: {
-        200: SuccessResponseSchema(TokenResponseSchema),
+        200: SuccessResponseSchema(LoginResponseSchema),
         400: ErrorResponseSchema,
         404: ErrorResponseSchema,
       },

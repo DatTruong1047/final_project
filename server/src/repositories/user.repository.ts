@@ -1,8 +1,8 @@
-import { UpdateProfileRequestType } from '@model';
+import prisma from '@app/lib/prisma';
+import { VerifyEmailType } from '@app/types/fastify';
+import { ProfileResponseType, UpdateProfileRequestType } from '@model';
 import { hashPassword } from '@util';
 import { PrismaClient, User } from 'generated/prisma';
-
-import prisma from '@app/lib/prisma';
 
 export default class UserRepository {
   private readonly _prisma: PrismaClient;
@@ -10,19 +10,19 @@ export default class UserRepository {
     this._prisma = prisma;
   }
 
-  async getUserById(id: string) {
+  async getUserById(id: string): Promise<User> {
     return await this._prisma.user.findFirst({
       where: { id },
     });
   }
 
-  async getUserByEmail(email: string) {
+  async getUserByEmail(email: string): Promise<User> {
     return await this._prisma.user.findUnique({
       where: { email },
     });
   }
 
-  async getUserProfile(email: string) {
+  async getUserProfile(email: string): Promise<ProfileResponseType> {
     return this._prisma.user.findUnique({
       where: { email },
       select: {
@@ -52,7 +52,7 @@ export default class UserRepository {
     return user;
   }
 
-  async verifyEmail(id: string) {
+  async verifyEmail(id: string): Promise<VerifyEmailType> {
     return this._prisma.user.update({
       where: { id },
       data: {
@@ -66,7 +66,7 @@ export default class UserRepository {
     });
   }
 
-  async updateProfile(id: string, input: UpdateProfileRequestType) {
+  async updateProfile(id: string, input: UpdateProfileRequestType): Promise<User> {
     return this._prisma.user.update({
       where: { id },
       data: {
@@ -75,7 +75,7 @@ export default class UserRepository {
     });
   }
 
-  async updateUserAvatar(id: string, mediaId: string) {
+  async updateUserAvatar(id: string, mediaId: string): Promise<User> {
     return this._prisma.user.update({
       where: { id },
       data: {
@@ -84,7 +84,7 @@ export default class UserRepository {
     });
   }
 
-  async updatePassword(id: string, password: string) {
+  async updatePassword(id: string, password: string): Promise<User> {
     const { passwordHash } = await hashPassword(password);
     return this._prisma.user.update({
       where: { id },
@@ -94,7 +94,7 @@ export default class UserRepository {
     });
   }
 
-  async saveForgotToken(id: string, token: string) {
+  async saveForgotToken(id: string, token: string): Promise<User> {
     return this._prisma.user.update({
       where: { id },
       data: {

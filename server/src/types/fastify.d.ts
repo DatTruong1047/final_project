@@ -1,6 +1,18 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 
-import { EmailTokenPayloadType, ErrorResponseType, SuccessResponseType, SuccessResWithoutDataType, TokenPayloadType } from './models';
+import {
+  EmailTokenPayloadType,
+  ErrorResponseType,
+  SuccessResponseType,
+  SuccessResWithoutDataType,
+  TokenPayloadType,
+} from '../models';
+
+type VerifyEmailType = {
+  id: string;
+  email: string;
+  isVerifiedEmail: boolean;
+}
 
 declare module 'fastify' {
   interface FastifyInstance {

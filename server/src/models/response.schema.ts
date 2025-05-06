@@ -15,10 +15,16 @@ export const SuccessResWithoutDataSchema = z.object({
   success: z.boolean().nullish(),
 });
 
-export const SuccessResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T | z.ZodArray<T>) => {
+export const SuccessResponseSchema = <T extends z.ZodTypeAny>(
+  dataSchema: T | z.ZodArray<T>
+): z.ZodObject<{
+  code: z.ZodNumber;
+  status: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+  data: T | z.ZodArray<T>;
+}> => {
   return z.object({
     ...ResponseCore,
-    status: z.string().optional().nullish(),
+    status: z.string().nullish(),
     data: dataSchema,
   });
 };

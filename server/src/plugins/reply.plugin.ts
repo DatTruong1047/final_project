@@ -1,6 +1,7 @@
-import { ErrorResponseType, SuccessResponseType } from '@model';
 import { FastifyInstance, FastifyPluginAsync, FastifyReply } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
+
+import { ErrorResponseType, SuccessResponseType } from '@model';
 
 const replyPlugin: FastifyPluginAsync = async (app: FastifyInstance) => {
   app.decorateReply('NotFound', function (this: FastifyReply, err: ErrorResponseType) {
