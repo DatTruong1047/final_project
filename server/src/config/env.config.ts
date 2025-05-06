@@ -13,3 +13,7 @@ export const VERIFICATION_URL = process.env.VERIFICATION_URL;
 export const RESETPASSWORD_URL = process.env.RESETPASSWORD_URL;
 
 export const HOST = process.env.HOST;
+
+export const CLIENT_HOST = process.env.CLIENT_HOST || 'http://localhost';
+export const CLIENT_POST = process.env.CLIENT_POST || 5173;
+export const CLIENT_FORGOT_PASS_URL = process.env.CLIENT_FORGOT_PASS_URL || '/forgot-password/';

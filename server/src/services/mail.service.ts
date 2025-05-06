@@ -44,6 +44,31 @@ export default class MailService {
     }
   }
 
+  async sendForgotPasswordEmail(email: string, forgotToken: string): Promise<boolean> {
+    try {
+      const transporter = this.createTransporter();
+      const verificationLink = `${emailConfig.forgotPasswordUrl}?token=${forgotToken}`;
+
+      const mailOptions = {
+        from: emailConfig.fromEmail,
+        to: email,
+        subject: 'Quên mật khẩu',
+        html: `
+              <h1>Quên mật khẩu</h1>
+              <p>Nhấp vào đừơng dẫn để thay đôỉ mật khẩu. Không chia sẻ đường dẫn vơí bất cứ ai.</p>
+              <a href="${verificationLink}">Quên mật khẩu</a>
+              <p>Liên kết này sẽ hết hạn sau 24 giờ.</p>
+            `,
+      };
+
+      await transporter.sendMail(mailOptions);
+
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
   generateEmailToken(payload: EmailTokenPayloadType, option: TokenOption): string {
     try {
       return generateToken(payload, option);

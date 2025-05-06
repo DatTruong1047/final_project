@@ -407,7 +407,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/thanhdat/Desktop/training/finalProject/Repo/server/generated/prisma",
+      "value": "/src/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -416,14 +416,14 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "debian-openssl-3.0.x",
+        "value": "debian-openssl-1.1.x",
         "native": true
       }
     ],
     "previewFeatures": [
       "fullTextSearchPostgres"
     ],
-    "sourceFilePath": "/home/thanhdat/Desktop/training/finalProject/Repo/server/prisma/schema.prisma",
+    "sourceFilePath": "/src/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

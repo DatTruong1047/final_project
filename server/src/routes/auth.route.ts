@@ -9,6 +9,7 @@ import {
   VerifyEmailTokenSchema,
   LoginRequestSchema,
   LoginResponseSchema,
+  ForgotPasswordRequestSchema,
 } from '@model';
 import AuthService from '@services/auth.service';
 import MailService from '@services/mail.service';
@@ -54,6 +55,19 @@ async function authRoute(app: FastifyInstance): Promise<void> {
     },
     preHandler: [app.verifyEmailToken],
     handler: authController.verifyEmail,
+  });
+
+  app.post('/forgot-password', {
+    schema: {
+      tags: ['Auth'],
+      body: ForgotPasswordRequestSchema,
+      response: {
+        200: SuccessResWithoutDataSchema,
+        400: ErrorResponseSchema,
+        404: ErrorResponseSchema,
+      },
+    },
+    handler: authController.forgotPassword,
   });
 }
 

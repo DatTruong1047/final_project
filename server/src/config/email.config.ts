@@ -12,6 +12,7 @@ export const emailConfig = {
       pass: envConfig.SMTP_PASS,
     },
   },
+  forgotPasswordUrl: `${envConfig.CLIENT_HOST}/${envConfig.CLIENT_POST}${envConfig.CLIENT_FORGOT_PASS_URL}`,
   verificationUrl: `${envConfig.HOST}${envConfig.VERIFICATION_URL}` || 'http://localhost:3000/api/auth/verify-email',
   resetPasswordUrl:
     `${envConfig.HOST}${envConfig.RESETPASSWORD_URL}` || 'http://localhost:3000/api/auth/reset-password',

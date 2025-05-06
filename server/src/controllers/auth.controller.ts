@@ -5,6 +5,7 @@ import { binding } from '@decorators/binding.decorator';
 import {
   EmailTokenPayloadType,
   ErrorResponseType,
+  ForgotPasswordRequestType,
   LoginRequestType,
   LoginResponseType,
   RefreshTokenType,
@@ -85,7 +86,7 @@ export default class AuthController {
       }
 
       const res: SuccessResWithoutDataType = {
-        code: 200,
+        code: 201,
         success: true,
       };
       return reply.OK(res);
@@ -129,6 +130,43 @@ export default class AuthController {
       const res: SuccessResponseType<LoginResponseType> = {
         code: 200,
         data: tokens,
+      };
+      return reply.OK(res);
+    } catch (error) {
+      return reply.InternalServer(error);
+    }
+  }
+
+  @binding
+  async forgotPassword(
+    request: FastifyRequest<{ Body: ForgotPasswordRequestType }>,
+    reply: FastifyReply
+  ): Promise<FastifyReply> {
+    try {
+      const result = await this.userService.getUserByEmail(request.body.email);
+
+      if (!result.success) {
+        const errorResponse: ErrorResponseType = {
+          message: result.message,
+          code: result.code,
+        };
+        return reply.NotFound(errorResponse);
+      }
+
+      const forgotToken = await this.userService.createForgotToken(result.data.id);
+      const emailSent = await this.mailService.sendForgotPasswordEmail(result.data.email, forgotToken);
+
+      if (!emailSent) {
+        const errorResponse: ErrorResponseType = {
+          message: 'Could not send forgot-password email',
+          code: ErrorCodes.SENT_EMAIL_FAIL,
+        };
+        return reply.BadRequest(errorResponse);
+      }
+
+      const res: SuccessResWithoutDataType = {
+        code: 200,
+        success: true,
       };
       return reply.OK(res);
     } catch (error) {
