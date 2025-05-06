@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import NavBarComponent from './components/organisms/NavBarComponent.vue'
+import NavBarComponent from './components/_utils/NavBarComponent.vue'
 </script>
 
 <template>

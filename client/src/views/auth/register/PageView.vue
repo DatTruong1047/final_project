@@ -1,43 +1,75 @@
 <template>
-  <div>
-    <div class="flex lg:grid lg:grid-cols-2 max-lg:p-4 justify-center-safe items-center bg-gray-50">
-      <div class="side_image col-span max-lg:hidden">
-        <img src="/images/Side_Image.png" class="w-[60rem]" />
-      </div>
-      <FormComponent :data="newUser" :handler="onRegister" />
+  <div class="bg-gray-50">
+    <div v-if="isLoading" class="flex justify-center-safe items-center h-[80vh]">
+      <LoadingComponent />
     </div>
+
+    <template v-else>
+      <div v-if="isShowToast" class="flex justify-end">
+        <ToastComponent :type="toastType" :message="toastMessage" />
+      </div>
+
+      <div class="flex lg:grid lg:grid-cols-2 max-lg:p-4 justify-center-safe items-center">
+        <div class="side_image col-span max-lg:hidden">
+          <img src="/images/Side_Image.png" class="w-[60rem]" />
+        </div>
+        <FormComponent :data="newUser" :handler="onRegister" />
+      </div>
+    </template>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { type RegisterUserRequestType } from '@/types/authType'
-import FormComponent from '@/components/auth/register/FormComponent.vue'
-import { register } from '@/api'
-
 import { ref } from 'vue'
 import router from '@/router'
+import { register } from '@/api'
+import { ErrorCodes } from '@/configs/errorConfig'
+import { ToastEnum } from '@/types/enum'
+import { type RegisterUserRequestType } from '@/types/authType'
+
+import FormComponent from '@/components/auth/register/FormComponent.vue'
+import ToastComponent from '@/components/molecules/_utils/ToastComponent.vue'
+import LoadingComponent from '@/components/_utils/LoadingComponent.vue'
 
 const newUser = ref<RegisterUserRequestType>({
   email: '',
   password: '',
   confirmPassword: '',
 })
+const isShowToast = ref<boolean>(false)
+const toastType = ref<ToastEnum>(ToastEnum.Info)
+const toastMessage = ref<string>('')
+const isLoading = ref<boolean>(false)
+
+const showToast = (type: ToastEnum, message: string) => {
+  toastType.value = type
+  toastMessage.value = message
+  isShowToast.value = true
+
+  setTimeout(() => {
+    isShowToast.value = false
+  }, 3000)
+}
 
 const redirectToHome = () => {
-  router.replace('/')
+  router.push('/')
 }
 
 const onRegister = async () => {
   try {
-    if (newUser.value) {
-      const res = await register(newUser.value)
-      if (res.status == 201) {
-        alert('Register successfull. Please check your email')
-        redirectToHome()
-      }
+    await register(newUser.value)
+
+    showToast(ToastEnum.Success, 'Register successfull. Please check your email')
+
+    redirectToHome()
+  } catch (e) {
+    if (e === ErrorCodes.EMAIL_ALREADY_EXISTS) {
+      showToast(ToastEnum.Error, 'Email alrealdy exist')
+    } else {
+      showToast(ToastEnum.Error, 'Register failed.')
     }
-  } catch {
-    alert(`Register failed.`)
+  } finally {
+    isLoading.value = false
   }
 }
 </script>

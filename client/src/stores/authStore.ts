@@ -1,17 +1,25 @@
-import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
-export const useAuthStore = defineStore('auth', () => {
-  const accessToken = ref('')
-  const refreshToken = ref('')
+interface State {
+  accessToken: string
+  refreshToken: string
+}
 
-  const setAccessToken = (token: string) => {
-    accessToken.value = token
-  }
+export const useAuthStore = defineStore('auth', {
+  state: (): State => {
+    return {
+      accessToken: '',
+      refreshToken: '',
+    }
+  },
 
-  const setRefreshToken = (token: string) => {
-    refreshToken.value = token
-  }
+  actions: {
+    setAccessToken(newToken: string) {
+      this.accessToken = newToken
+    },
 
-  return { accessToken, refreshToken, setAccessToken, setRefreshToken }
+    setRefreshToken(newToken: string) {
+      this.refreshToken = newToken
+    },
+  },
 })
