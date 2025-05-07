@@ -75,7 +75,7 @@ export default class AuthController {
     reply: FastifyReply
   ): Promise<FastifyReply> {
     try {
-      const result = await this.userService.verifiedEmail(request.decodedEmailToken.userId);
+      const result = await this.userService.verifyEmail(request.decodedEmailToken.userId);
 
       if (!result) {
         const errorResponse: ErrorResponseType = {

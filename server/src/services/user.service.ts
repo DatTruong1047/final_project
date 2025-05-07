@@ -1,8 +1,9 @@
+import crypto from 'crypto';
+
 import { ErrorCodes } from '@app/config';
 import { ResultType } from '@app/models';
 import UserRepository from '@app/repositories/user.repository';
 import { VerifyEmailType } from '@app/types/fastify';
-import { encodeBase64 } from '@app/utils';
 import { User } from 'generated/prisma';
 
 export default class UserService {
@@ -33,12 +34,12 @@ export default class UserService {
     };
   }
 
-  async verifiedEmail(id: string): Promise<VerifyEmailType> {
+  async verifyEmail(id: string): Promise<VerifyEmailType> {
     return this._userRepository.verifyEmail(id);
   }
 
   async createForgotToken(id: string): Promise<string> {
-    const token = encodeBase64(id);
+    const token = crypto.randomBytes(32).toString('hex');
 
     await this._userRepository.saveForgotToken(id, token);
 
