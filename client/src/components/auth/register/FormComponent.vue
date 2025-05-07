@@ -6,13 +6,13 @@
     v-if="userData"
     class="flex-auto flex w-1/2 md:flex-none grid grid-cols lg:gap-4 mx-auto lg:col-span items-center space-y-4"
   >
-    <p class="flex lg:text-5xl text-3xl font-meidum mb-6 antialiased pb-4">Create an account</p>
-    <div class="relative z-0 w-full mb-5 group text-2xl">
+    <p class="flex lg:text-5xl text-3xl font-normal mb-6 antialiased pb-4">Create an account</p>
+    <div class="relative z-0 w-full mb-5 mt-2 group text-2xl">
       <Field
         type="email"
         name="email"
         id="floating_email"
-        class="block p-4 w-full lg:text-2xl text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+        class="block p-4 w-full lg:text-2xl text-lg text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
         placeholder=" "
         required
         :class="{ 'is-invalid': errors.email }"
@@ -30,7 +30,7 @@
         type="password"
         name="password"
         id="password"
-        class="block p-4 w-full text-2xl text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+        class="block p-4 w-full text-lg lg:text-2xl text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
         placeholder=" "
         required
         :class="{ 'is-invalid': errors.password }"
@@ -48,7 +48,7 @@
         type="password"
         name="confirmPassword"
         id="floating_repeat_password"
-        class="block p-4 w-full text-2xl text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+        class="block p-4 w-full text-lg lg:text-2xl text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
         placeholder=" "
         required
         :class="{ 'is-invalid': errors.confirmPassword }"

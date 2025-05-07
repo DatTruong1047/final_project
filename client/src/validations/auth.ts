@@ -1,7 +1,16 @@
 import * as Yup from 'yup'
 
+const validDomains = ['.com', '.net', '.org', '.com.vn']
+
 export const RegisterRequestSchema = Yup.object().shape({
-  email: Yup.string().typeError('Email must be string').required('Email is required').email(),
+  email: Yup.string()
+    .typeError('Email must be string')
+    .required('Email is required')
+    .email()
+    .test('valid-domain', 'Email domain must be one of: .com, .net, .org, .com.vn', (value) => {
+      if (!value) return false
+      return validDomains.some((domain) => value.toLowerCase().endsWith(domain))
+    }),
   password: Yup.string()
     .typeError('Password must be a string')
     .min(8, 'Password must be at least 8 characters long')
@@ -17,7 +26,14 @@ export const RegisterRequestSchema = Yup.object().shape({
 })
 
 export const LoginRequestSchema = Yup.object().shape({
-  email: Yup.string().typeError('Email must be string').required('Email is required').email(),
+  email: Yup.string()
+    .typeError('Email must be string')
+    .required('Email is required')
+    .email()
+    .test('valid-domain', 'Email domain must be one of: .com, .net, .org, .com.vn', (value) => {
+      if (!value) return false
+      return validDomains.some((domain) => value.toLowerCase().endsWith(domain))
+    }),
   password: Yup.string()
     .typeError('Password must be a string')
     .min(8, 'Password must be at least 8 characters long')

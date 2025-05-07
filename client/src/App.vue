@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterView } from 'vue-router'
+
 import NavBarComponent from './components/_utils/NavBarComponent.vue'
+import ToastComponent from './components/molecules/_utils/ToastComponent.vue'
 </script>
 
 <template>
   <header>
     <NavBarComponent />
   </header>
-  <main class="m-2 p-3">
-    <RouterView />
+  <main class="p-3">
+    <RouterView> </RouterView>
   </main>
+  <ToastComponent />
 </template>
 
 <style scoped>
