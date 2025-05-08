@@ -22,7 +22,7 @@ export default class MailService {
   async sendVerificationEmail(email: string, verificationToken: string): Promise<boolean> {
     try {
       const transporter = this.createTransporter();
-      const verificationLink = `${emailConfig.verificationUrl}?token=${verificationToken}`;
+      const verificationLink = `${emailConfig.verificationUrl}/${verificationToken}`;
 
       const mailOptions = {
         from: emailConfig.fromEmail,
@@ -47,7 +47,7 @@ export default class MailService {
   async sendForgotPasswordEmail(email: string, forgotToken: string): Promise<boolean> {
     try {
       const transporter = this.createTransporter();
-      const verificationLink = `${emailConfig.resetPasswordUrl}?token=${forgotToken}`;
+      const verificationLink = `${emailConfig.resetPasswordUrl}/${forgotToken}`;
 
       const mailOptions = {
         from: emailConfig.fromEmail,

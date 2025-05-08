@@ -29,7 +29,6 @@ export async function verifyEmailToken(
       message: error.message,
       code: config.ErrorCodes.INVALID_EMAIL_TOKEN,
     };
-
     return reply.BadRequest(errorResponse);
   }
 }
