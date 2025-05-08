@@ -5,13 +5,9 @@
     </div>
 
     <template v-else>
-      <div v-if="isShowToast" class="flex justify-end">
-        <ToastComponent :type="toastType" :message="toastMessage" />
-      </div>
-
       <div class="flex lg:grid lg:grid-cols-2 max-lg:p-4 justify-center-safe items-center">
         <div class="side_image col-span max-lg:hidden">
-          <img src="/images/Side_Image.png" class="w-[60rem]" />
+          <img src="/images/side-image.png" class="w-[60rem]" />
         </div>
         <FormComponent :data="newUser" :handler="onRegister" />
       </div>
@@ -27,46 +23,40 @@ import { ErrorCodes } from '@/configs/errorConfig'
 import { ToastEnum } from '@/types/enum'
 import { type RegisterUserRequestType } from '@/types/authType'
 
+import { useToast } from '@/hooks/useToast'
+import { useI18n } from 'vue-i18n'
+
 import FormComponent from '@/components/auth/register/FormComponent.vue'
-import ToastComponent from '@/components/molecules/_utils/ToastComponent.vue'
-import LoadingComponent from '@/components/_utils/LoadingComponent.vue'
+import LoadingComponent from '@/components/atoms/_utils/LoadingComponent.vue'
+
+const { showToast } = useToast()
 
 const newUser = ref<RegisterUserRequestType>({
   email: '',
   password: '',
   confirmPassword: '',
 })
-const isShowToast = ref<boolean>(false)
-const toastType = ref<ToastEnum>(ToastEnum.Info)
-const toastMessage = ref<string>('')
+
 const isLoading = ref<boolean>(false)
 
-const showToast = (type: ToastEnum, message: string) => {
-  toastType.value = type
-  toastMessage.value = message
-  isShowToast.value = true
-
-  setTimeout(() => {
-    isShowToast.value = false
-  }, 3000)
-}
-
+const { t } = useI18n()
 const redirectToHome = () => {
   router.push('/')
 }
 
 const onRegister = async () => {
   try {
+    isLoading.value = true
     await register(newUser.value)
 
-    showToast(ToastEnum.Success, 'Register successfull. Please check your email')
+    showToast(ToastEnum.Success, t('message.success.register'))
 
     redirectToHome()
   } catch (e) {
     if (e === ErrorCodes.EMAIL_ALREADY_EXISTS) {
-      showToast(ToastEnum.Error, 'Email alrealdy exist')
+      showToast(ToastEnum.Error, t('message.error.emailAlreadyExists'))
     } else {
-      showToast(ToastEnum.Error, 'Register failed.')
+      showToast(ToastEnum.Error, t('message.error.register'))
     }
   } finally {
     isLoading.value = false
