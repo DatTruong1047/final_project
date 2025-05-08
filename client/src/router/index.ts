@@ -12,16 +12,27 @@ const router = createRouter({
     },
     {
       path: '/auth/',
+      name: 'auth',
       children: [
         {
-          path: `/${authRoute.register}`,
+          path: authRoute.register,
           name: authRoute.register,
           component: () => import('../views/auth/register/PageView.vue'),
         },
         {
-          path: `/${authRoute.login}`,
+          path: authRoute.login,
           name: authRoute.login,
           component: () => import('../views/auth/login/PageView.vue'),
+        },
+        {
+          path: authRoute.forgotPassword,
+          name: authRoute.forgotPassword,
+          component: () => import('../views/auth/forgot-password/PageView.vue'),
+        },
+        {
+          path: `${authRoute.resetPassword}/:token`,
+          name: authRoute.resetPassword,
+          component: () => import('../views/auth/reset-password/PageView.vue'),
         },
       ],
     },

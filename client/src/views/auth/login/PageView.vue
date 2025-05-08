@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-50">
+  <div class="bg-gray-50 dark:bg-gray-600">
     <div v-if="isLoading" class="flex justify-center-safe items-center h-[80vh]">
       <LoadingComponent />
     </div>
