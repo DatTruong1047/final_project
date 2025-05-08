@@ -21,3 +21,9 @@ Run the test cases.
 ## Learn More
 
 To learn Fastify, check out the [Fastify documentation](https://fastify.dev/docs/latest/).
+
+
+## Sử dụng Docker
+# Lưu ý: Cấu hình port trong connect string là 5432
+npx prisma generate 
+npx prisma migrate deploy

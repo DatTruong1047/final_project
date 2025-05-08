@@ -1,23 +1,32 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",                                
-    "declaration": true,                        
-    "removeComments": true,                             
-    "emitDecoratorMetadata": true,                              
+    "module": "CommonJS",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "skipLibCheck": true  ,         
-    "esModuleInterop": true,    
-    "allowSyntheticDefaultImports": true,             
-    "target": "ES2019",                                 
-    "sourceMap": true,                                     
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2019",
+    "sourceMap": true,
     "outDir": "dist/src",
-    "baseUrl": "./",                                  
-    "incremental": true,            
+    "baseUrl": "./",
+    "incremental": true,
     "paths": {
-      "@app":["src"],
+      "@app": ["src"],
       "@app/*": ["src/*"],
-      "@config": ["src/config/"]
-    },                        
+      "@config": ["src/config/"],
+      "@model": ["src/models/"],
+      "@util": ["src/utils/"],
+      "@repository/*": ["src/repositories/*"],
+      "@services/*": ["src/services/*"],
+      "@decorators/*": ["src/decorator/*"],
+      "@controller/*": ["src/controllers/*"],
+      "@routes": ["src/routes/"],
+      "@plugins/*": ["src/plugins/*"]
+    }
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

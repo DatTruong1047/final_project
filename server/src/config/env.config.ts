@@ -9,7 +9,8 @@ export const SMTP_PORT = process.env.SMTP_PORT;
 export const SMTP_USER = process.env.SMTP_USER;
 export const SMTP_PASS = process.env.SMTP_PASS;
 
-export const VERIFICATION_URL = process.env.VERIFICATION_URL;
-export const RESETPASSWORD_URL = process.env.RESETPASSWORD_URL;
-
 export const HOST = process.env.HOST;
+
+export const CLIENT_HOST = process.env.CLIENT_HOST || 'http://localhost:5137/';
+export const CLIENT_RESET_PASS_URL = process.env.CLIENT_FORGOT_PASS_URL || 'reset-password';
+export const CLIENT_VERIFICATION_URL = process.env.CLIENT_VERIFICATION_URL || 'verify-email';
