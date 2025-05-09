@@ -261,4 +261,32 @@ export default class AuthController {
       return reply.InternalServer(error);
     }
   }
+
+  @binding
+  async resetPassword(
+    request: FastifyRequest<{ Body: ResetPasswordRequestType }>,
+    reply: FastifyReply
+  ): Promise<FastifyReply> {
+    try {
+      const { resetToken, password } = request.body;
+
+      const result = await this.userService.resetPassword(resetToken, password);
+
+      if (!result.success) {
+        const errorResponse: ErrorResponseType = {
+          message: result.message,
+          code: result.code,
+        };
+        return reply.BadRequest(errorResponse);
+      }
+
+      const res: SuccessResWithoutDataType = {
+        code: 200,
+        success: true,
+      };
+      return reply.OK(res);
+    } catch (error) {
+      return reply.InternalServer(error);
+    }
+  }
 }
