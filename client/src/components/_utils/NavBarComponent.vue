@@ -33,7 +33,7 @@
           </RouterLink>
 
           <RouterLink
-            to="/about"
+            to="/"
             class="px-3 py-2 text-gray-700 text-xl lg:text-base hover:text-red-600 relative group dark:text-gray-300 dark:hover:text-white transition-colors duration-200"
             active-class="text-red-600 dark:text-red-400"
           >
@@ -44,7 +44,7 @@
           </RouterLink>
 
           <RouterLink
-            to="/contact"
+            to="/"
             class="px-3 py-2 text-gray-700 text-xl lg:text-base hover:text-red-600 relative group dark:text-gray-300 dark:hover:text-white transition-colors duration-200"
             active-class="text-red-600 dark:text-red-400"
           >
@@ -56,14 +56,14 @@
 
           <div class="flex items-center ml-4 space-x-4">
             <RouterLink
-              :to="authRoute.register"
+              :to="{ name: authRoute.register }"
               class="px-4 py-2 text-xl lg:text-base border-2 border-red-500 text-red-500 rounded-md hover:bg-red-500 hover:text-white transition-colors duration-300 dark:border-red-400 dark:text-red-400 dark:hover:bg-red-400 dark:hover:text-gray-900"
             >
               Sign Up
             </RouterLink>
 
             <RouterLink
-              :to="authRoute.login"
+              :to="{ name: authRoute.login }"
               class="px-4 py-2 text-xl lg:text-base bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-300 shadow-md hover:shadow-lg dark:bg-red-600 dark:hover:bg-red-700"
             >
               Sign In
@@ -128,7 +128,7 @@
           </RouterLink>
 
           <RouterLink
-            to="/about"
+            to="/"
             class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-500 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700 transition-colors duration-200"
             active-class="text-red-500 bg-gray-50 dark:bg-gray-700 dark:text-red-400"
             @click="isMobileMenuOpen = false"
@@ -137,7 +137,7 @@
           </RouterLink>
 
           <RouterLink
-            to="/contact"
+            to="/"
             class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-500 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700 transition-colors duration-200"
             active-class="text-red-500 bg-gray-50 dark:bg-gray-700 dark:text-red-400"
             @click="isMobileMenuOpen = false"
@@ -148,7 +148,7 @@
           <div class="pt-4 pb-2 border-t border-gray-200 dark:border-gray-700">
             <div class="flex items-center space-x-3 px-3">
               <RouterLink
-                :to="authRoute.register"
+                :to="{ name: authRoute.register }"
                 class="flex-1 px-4 py-2 text-center border border-red-500 text-red-500 rounded-md hover:bg-red-500 hover:text-white transition-colors duration-300 dark:border-red-400 dark:text-red-400 dark:hover:bg-red-400 dark:hover:text-gray-900"
                 @click="isMobileMenuOpen = false"
               >
@@ -156,7 +156,7 @@
               </RouterLink>
 
               <RouterLink
-                :to="authRoute.login"
+                :to="{ name: authRoute.login }"
                 class="flex-1 px-4 py-2 text-center bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-300 shadow-md dark:bg-red-600 dark:hover:bg-red-700"
                 @click="isMobileMenuOpen = false"
               >

@@ -10,7 +10,7 @@ import router from './router'
 import { en } from './i18n'
 
 const app = createApp(App)
-const i18n = createI18n({
+export const i18n = createI18n({
   locale: 'en',
   fallbackLocale: 'vn',
   globalInjection: true,

@@ -36,14 +36,32 @@ export const en = {
 
       loginFail: 'Login fail. Email or password was wrong',
       register: 'Register fail',
+      forgotPassword: 'Forgot password fail',
+      resetPassword: 'Reset password fail',
     },
     success: {
       login: 'Login successfull',
       register: 'Register successfull. Please check your email',
+      forgotPassword: 'Forgot password email has been sent',
+      resetPassword: 'Password reset successfully',
     },
   },
   validation: {
-    invalidDomains: 'Email domain must be one of: .com, .net, .org, .com.vn',
-    emailMustBeString: 'Email must be string',
-  },
+    invalidEmailFormat: 'Invalid email format',
+    invalidEmailDomain: 'Invalid email domain',
+    emailMustBeString: 'Email must be a string',
+    emailAndPasswordAreRequired: 'Email and password are required.',
+    emailRequired: 'Email is required',
+
+    passwordMinLength: 'Password must be at least 8 characters long',
+    passwordMaxLength: 'Password must be at most 16 characters long',
+    passwordFormat: 'Password must contain at least one lowercase letter, one uppercase letter, and one special character',
+    passwordsMustMatch: 'Passwords must match',
+    passwordRequired: 'Password is required',
+
+    confirmPasswordRequired: 'Please confirm your password',
+
+    resetTokenRequired: 'Reset token is required',
+
+  }
 }

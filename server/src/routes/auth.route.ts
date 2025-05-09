@@ -11,6 +11,7 @@ import {
   ForgotPasswordRequestSchema,
   RefreshTokenRequestSchema,
   RefreshTokenResponeSchema,
+  ResetPasswordRequestSchema,
 } from '@model';
 
 import AuthService from '@services/auth.service';
@@ -87,6 +88,19 @@ async function authRoute(app: FastifyInstance): Promise<void> {
     },
     preHandler: [app.verifyRefreshToken],
     handler: authController.refreshToken,
+  });
+
+  app.post('/reset-password', {
+    schema: {
+      tags: ['Auth'],
+      body: ResetPasswordRequestSchema,
+      response: {
+        200: SuccessResWithoutDataSchema,
+        400: ErrorResponseSchema,
+        404: ErrorResponseSchema,
+      },
+    },
+    handler: authController.resetPassword,
   });
 }
 

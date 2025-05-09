@@ -16,6 +16,12 @@ export default class UserRepository {
     });
   }
 
+  async getUserByForgotToken(forgotToken: string): Promise<User> {
+    return await this._prisma.user.findFirst({
+      where: { forgotToken },
+    });
+  }
+
   async getUserByEmail(email: string): Promise<User> {
     return await this._prisma.user.findUnique({
       where: { email },
@@ -107,6 +113,15 @@ export default class UserRepository {
       where: { id },
       data: {
         forgotToken: token,
+      },
+    });
+  }
+
+  async deleteForgotToken(id: string): Promise<User> {
+    return this._prisma.user.update({
+      where: { id },
+      data: {
+        forgotToken: null,
       },
     });
   }

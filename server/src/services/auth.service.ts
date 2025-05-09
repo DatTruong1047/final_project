@@ -111,10 +111,6 @@ export default class AuthService {
     };
   }
 
-  async comparePassword(password: string, hashed_password: string): Promise<boolean> {
-    return comparePassword(password, hashed_password);
-  }
-
   generateTokens(payload: TokenPayloadType): LoginResponseType {
     const refreshTokenPayload: TokenPayloadType = {
       userId: payload.userId,
