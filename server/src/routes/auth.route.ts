@@ -1,6 +1,5 @@
 import { FastifyInstance } from 'fastify';
 
-import AuthController from '@controller/auth.controller';
 import {
   SuccessResWithoutDataSchema,
   SuccessResponseSchema,
@@ -10,10 +9,15 @@ import {
   LoginRequestSchema,
   LoginResponseSchema,
   ForgotPasswordRequestSchema,
+  RefreshTokenRequestSchema,
+  RefreshTokenResponeSchema,
 } from '@model';
+
 import AuthService from '@services/auth.service';
 import MailService from '@services/mail.service';
 import UserService from '@services/user.service';
+
+import AuthController from '@controller/auth.controller';
 
 async function authRoute(app: FastifyInstance): Promise<void> {
   const authController = new AuthController(new AuthService(), new UserService(), new MailService());
@@ -68,6 +72,21 @@ async function authRoute(app: FastifyInstance): Promise<void> {
       },
     },
     handler: authController.forgotPassword,
+  });
+
+  app.post('/refresh-token', {
+    schema: {
+      tags: ['Auth'],
+      body: RefreshTokenRequestSchema,
+      response: {
+        200: SuccessResponseSchema(RefreshTokenResponeSchema),
+        400: ErrorResponseSchema,
+        401: ErrorResponseSchema,
+        404: ErrorResponseSchema,
+      },
+    },
+    preHandler: [app.verifyRefreshToken],
+    handler: authController.refreshToken,
   });
 }
 

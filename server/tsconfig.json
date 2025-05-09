@@ -10,6 +10,8 @@
     "allowSyntheticDefaultImports": true,
     "target": "ES2019",
     "sourceMap": true,
+    "inlineSourceMap": false,
+    "inlineSources": true,
     "outDir": "dist/src",
     "baseUrl": "./",
     "incremental": true,
@@ -24,9 +26,10 @@
       "@decorators/*": ["src/decorator/*"],
       "@controller/*": ["src/controllers/*"],
       "@routes": ["src/routes/"],
-      "@plugins/*": ["src/plugins/*"]
+      "@plugins/*": ["src/plugins/*"],
+      "generated/prisma": ["generated/prisma"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "generated/**/*"],
   "exclude": ["node_modules", "dist"]
 }

@@ -1,5 +1,7 @@
 import z from 'zod';
 
+import { LoginResponseSchema } from './auth.schema';
+
 export const TokenOptionSchema = z.object({
   expiresIn: z.string(),
 });
@@ -25,20 +27,22 @@ export const RefreshTokenRequestSchema = z.object({
   refreshToken: z.string(),
 });
 
-export const RefreshTokenResponeSchema = z.object({
-  refreshToken: z.string(),
-  expiresAt: z.date(),
-  ipAddress: z.string(),
-  userId: z.string(),
-  users: z.object({
-    isAdmin: z.boolean(),
-    email: z.string(),
-  }),
-});
+export const RefreshTokenResponeSchema = LoginResponseSchema.extend({});
 
 export const VerifyTokenResponseSchema = z.object({
   status: z.number(),
   message: z.string(),
+});
+
+export const FindRefreshTokenResponseSchema = z.object({
+  refreshToken: z.string(),
+  expiresAt: z.date(),
+  ipAddress: z.string(),
+  userId: z.string(),
+  user: z.object({
+    isAdmin: z.boolean(),
+    email: z.string().email(),
+  }),
 });
 
 export type TokenOption = z.infer<typeof TokenOptionSchema>;
@@ -48,3 +52,4 @@ export type RefreshTokenType = z.infer<typeof RefreshTokenSchema>;
 export type RefreshTokenRequestType = z.infer<typeof RefreshTokenRequestSchema>;
 export type RefreshTokenResponeType = z.infer<typeof RefreshTokenResponeSchema>;
 export type VerifyTokenResponse = z.infer<typeof VerifyTokenResponseSchema>;
+export type FindRefreshTokenResponseType = z.infer<typeof FindRefreshTokenResponseSchema>;
