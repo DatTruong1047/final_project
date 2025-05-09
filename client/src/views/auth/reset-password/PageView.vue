@@ -9,7 +9,7 @@
         <div class="side_image col-span max-lg:hidden">
           <img src="/images/side-image.png" class="w-[60rem]" />
         </div>
-        <FormComponent :data="newUser" :handler="onRegister" />
+        <FormComponent v-model:resetData="resetData" :handler="onResetPassword" />
       </div>
     </template>
   </div>
@@ -18,21 +18,25 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import router from '@/router'
-import { register } from '@/api'
+import { resetPassword } from '@/api'
 import { ErrorCodes } from '@/configs/errorConfig'
 import { ToastEnum } from '@/types/enum'
-import { type RegisterUserRequestType } from '@/types/authType'
+import { type ResetPasswordRequestType } from '@/types/authType'
 
 import { useToast } from '@/hooks/useToast'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 
-import FormComponent from '@/components/auth/register/FormComponent.vue'
+import FormComponent from '@/components/auth/reset-password/FormComponent.vue'
 import LoadingComponent from '@/components/atoms/_utils/LoadingComponent.vue'
+import { authRoute } from '@/configs'
 
 const { showToast } = useToast()
+const route = useRoute()
+const resetToken = route.params.token as string
 
-const newUser = ref<RegisterUserRequestType>({
-  email: '',
+const resetData = ref<ResetPasswordRequestType>({
+  resetToken: resetToken,
   password: '',
   confirmPassword: '',
 })
@@ -40,23 +44,23 @@ const newUser = ref<RegisterUserRequestType>({
 const isLoading = ref<boolean>(false)
 
 const { t } = useI18n()
-const redirectToHome = () => {
-  router.push('/')
+const redirectToLogin = () => {
+  router.push({ name: authRoute.login })
 }
 
-const onRegister = async () => {
+const onResetPassword = async () => {
   try {
     isLoading.value = true
-    await register(newUser.value)
+    await resetPassword(resetData.value)
 
-    showToast(ToastEnum.Success, t('message.success.register'))
+    showToast(ToastEnum.Success, t('message.success.resetPassword'))
 
-    redirectToHome()
+    redirectToLogin()
   } catch (e) {
-    if (e === ErrorCodes.EMAIL_ALREADY_EXISTS) {
-      showToast(ToastEnum.Error, t('message.error.emailAlreadyExists'))
+    if (e === ErrorCodes.USER_NOT_FOUND) {
+      showToast(ToastEnum.Error, t('message.error.userNotFound'))
     } else {
-      showToast(ToastEnum.Error, t('message.error.register'))
+      showToast(ToastEnum.Error, t('message.error.resetPassword'))
     }
   } finally {
     isLoading.value = false

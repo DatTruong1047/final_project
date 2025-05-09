@@ -1,7 +1,6 @@
 import prisma from '@app/lib/prisma';
 import { VerifyEmailType } from '@app/types/fastify';
 import { ProfileResponseType, UpdateProfileRequestType } from '@model';
-import { hashPassword } from '@util';
 import { PrismaClient, User } from 'generated/prisma';
 
 export default class UserRepository {
@@ -13,6 +12,12 @@ export default class UserRepository {
   async getUserById(id: string): Promise<User> {
     return await this._prisma.user.findFirst({
       where: { id },
+    });
+  }
+
+  async getUserByForgotToken(forgotToken: string): Promise<User> {
+    return await this._prisma.user.findFirst({
+      where: { forgotToken },
     });
   }
 
@@ -39,9 +44,7 @@ export default class UserRepository {
     });
   }
 
-  async createUser(email: string, password: string): Promise<User> {
-    const { passwordHash } = await hashPassword(password);
-
+  async createUser(email: string, passwordHash: string): Promise<User> {
     const user = await this._prisma.user.create({
       data: {
         email,
@@ -84,8 +87,7 @@ export default class UserRepository {
     });
   }
 
-  async updatePassword(id: string, password: string): Promise<User> {
-    const { passwordHash } = await hashPassword(password);
+  async updatePassword(id: string, passwordHash: string): Promise<User> {
     return this._prisma.user.update({
       where: { id },
       data: {
@@ -99,6 +101,15 @@ export default class UserRepository {
       where: { id },
       data: {
         forgotToken: token,
+      },
+    });
+  }
+
+  async deleteForgotToken(id: string): Promise<User> {
+    return this._prisma.user.update({
+      where: { id },
+      data: {
+        forgotToken: null,
       },
     });
   }
