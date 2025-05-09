@@ -1,4 +1,4 @@
-import { comparePassword, generateToken } from '@app/utils';
+import { comparePassword, generateToken, hashPassword } from '@app/utils';
 import { accessTokenOption, refreshTokenOption, ErrorCodes } from '@config';
 import {
   LoginRequestType,
@@ -32,7 +32,8 @@ export default class AuthService {
       };
     }
 
-    const user = await this._userRepository.createUser(req.email, req.password);
+    const { passwordHash } = await hashPassword(req.password);
+    const user = await this._userRepository.createUser(req.email, passwordHash);
 
     return {
       success: true,
@@ -63,7 +64,7 @@ export default class AuthService {
     if (!isComparedPass) {
       return {
         code: ErrorCodes.INCORRECT_PASSWORD,
-        message: 'User is not verified',
+        message: 'Incorrect password',
         success: false,
       };
     }
@@ -77,10 +78,6 @@ export default class AuthService {
   async refreshToken(oldRefreshToken: string, newRefreshToken: RefreshTokenType): Promise<RefreshTokenType> {
     const token = await this._authRepository.updateRefreshToken(oldRefreshToken, newRefreshToken);
     return token;
-  }
-
-  async comparePassword(password: string, hashed_password: string): Promise<boolean> {
-    return comparePassword(password, hashed_password);
   }
 
   generateTokens(payload: TokenPayloadType): LoginResponseType {

@@ -10,6 +10,7 @@ import {
   LoginRequestSchema,
   LoginResponseSchema,
   ForgotPasswordRequestSchema,
+  ResetPasswordRequestSchema,
 } from '@model';
 import AuthService from '@services/auth.service';
 import MailService from '@services/mail.service';
@@ -68,6 +69,19 @@ async function authRoute(app: FastifyInstance): Promise<void> {
       },
     },
     handler: authController.forgotPassword,
+  });
+
+  app.post('/reset-password', {
+    schema: {
+      tags: ['Auth'],
+      body: ResetPasswordRequestSchema,
+      response: {
+        200: SuccessResWithoutDataSchema,
+        400: ErrorResponseSchema,
+        404: ErrorResponseSchema,
+      },
+    },
+    handler: authController.resetPassword,
   });
 }
 

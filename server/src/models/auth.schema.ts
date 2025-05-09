@@ -23,7 +23,6 @@ export const ForgotPasswordRequestSchema = z.object({
 
 export const ResetPasswordRequestSchema = z
   .object({
-    email: UserCore.email,
     resetToken: z.string({
       required_error: 'Reset token is required',
     }),

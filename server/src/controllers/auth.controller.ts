@@ -10,6 +10,7 @@ import {
   LoginResponseType,
   RefreshTokenType,
   RegisterUserRequestType,
+  ResetPasswordRequestType,
   SuccessResponseType,
   SuccessResWithoutDataType,
   TokenPayloadType,
@@ -160,6 +161,34 @@ export default class AuthController {
         const errorResponse: ErrorResponseType = {
           message: 'Could not send forgot-password email',
           code: ErrorCodes.SENT_EMAIL_FAIL,
+        };
+        return reply.BadRequest(errorResponse);
+      }
+
+      const res: SuccessResWithoutDataType = {
+        code: 200,
+        success: true,
+      };
+      return reply.OK(res);
+    } catch (error) {
+      return reply.InternalServer(error);
+    }
+  }
+
+  @binding
+  async resetPassword(
+    request: FastifyRequest<{ Body: ResetPasswordRequestType }>,
+    reply: FastifyReply
+  ): Promise<FastifyReply> {
+    try {
+      const { resetToken, password } = request.body;
+
+      const result = await this.userService.resetPassword(resetToken, password);
+
+      if (!result.success) {
+        const errorResponse: ErrorResponseType = {
+          message: result.message,
+          code: result.code,
         };
         return reply.BadRequest(errorResponse);
       }
