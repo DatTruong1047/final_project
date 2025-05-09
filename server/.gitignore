@@ -28,6 +28,7 @@ build/Release
 
 # Dependency directories
 node_modules
+server/public
 generated
 jspm_packages
 
@@ -60,3 +61,4 @@ profile*
 
 .env
 .dockerignore
+package-lock.json

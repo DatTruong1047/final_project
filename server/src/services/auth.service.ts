@@ -1,4 +1,3 @@
-import { comparePassword, generateToken } from '@app/utils';
 import { accessTokenOption, refreshTokenOption, ErrorCodes } from '@config';
 import {
   LoginRequestType,
@@ -8,9 +7,12 @@ import {
   ResultType,
   LoginResponseType,
 } from '@model';
-import AuthRepository from '@repository/auth.repository';
-import UserRepository from '@repository/user.repository';
 import { User } from 'generated/prisma';
+
+import AuthRepository from '@app/repositories/auth.repository';
+import { comparePassword, generateToken, hashPassword } from '@app/utils';
+
+import UserRepository from '@repository/user.repository';
 
 export default class AuthService {
   private readonly _authRepository: AuthRepository;
@@ -32,7 +34,8 @@ export default class AuthService {
       };
     }
 
-    const user = await this._userRepository.createUser(req.email, req.password);
+    const { passwordHash } = await hashPassword(req.password);
+    const user = await this._userRepository.createUser(req.email, passwordHash);
 
     return {
       success: true,
@@ -63,7 +66,7 @@ export default class AuthService {
     if (!isComparedPass) {
       return {
         code: ErrorCodes.INCORRECT_PASSWORD,
-        message: 'User is not verified',
+        message: 'Incorrect password',
         success: false,
       };
     }
@@ -74,9 +77,38 @@ export default class AuthService {
     };
   }
 
-  async refreshToken(oldRefreshToken: string, newRefreshToken: RefreshTokenType): Promise<RefreshTokenType> {
-    const token = await this._authRepository.updateRefreshToken(oldRefreshToken, newRefreshToken);
-    return token;
+  async refreshToken(tokem: string, ipAddress: string): Promise<ResultType<string>> {
+    const oldRefreshToken = await this._authRepository.findRefreshToken(tokem, ipAddress);
+
+    if (!oldRefreshToken) {
+      return {
+        code: ErrorCodes.INVALID_REFRESH_TOKEN,
+        message: 'Invalid refresh token',
+        success: false,
+      };
+    }
+
+    if (oldRefreshToken.expiresAt < new Date()) {
+      await this._authRepository.deleteResfeshToken(oldRefreshToken.refreshToken);
+      return {
+        code: ErrorCodes.REFRESH_TOKEN_EXPIRED,
+        message: 'Refresh token expired',
+        success: false,
+      };
+    }
+
+    const tokenPayload: TokenPayloadType = {
+      userId: oldRefreshToken.userId,
+      userEmail: oldRefreshToken.user.email,
+      isAdmin: oldRefreshToken.user.isAdmin,
+    };
+
+    const accessToken = generateToken(tokenPayload, accessTokenOption);
+
+    return {
+      data: accessToken,
+      success: true,
+    };
   }
 
   async comparePassword(password: string, hashed_password: string): Promise<boolean> {

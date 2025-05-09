@@ -1,8 +1,8 @@
+import { ProfileResponseType, UpdateProfileRequestType } from '@model';
+import { PrismaClient, User } from 'generated/prisma';
+
 import prisma from '@app/lib/prisma';
 import { VerifyEmailType } from '@app/types/fastify';
-import { ProfileResponseType, UpdateProfileRequestType } from '@model';
-import { hashPassword } from '@util';
-import { PrismaClient, User } from 'generated/prisma';
 
 export default class UserRepository {
   private readonly _prisma: PrismaClient;
@@ -22,9 +22,9 @@ export default class UserRepository {
     });
   }
 
-  async getUserProfile(email: string): Promise<ProfileResponseType> {
+  async getUserProfile(id: string): Promise<ProfileResponseType> {
     return this._prisma.user.findUnique({
-      where: { email },
+      where: { id },
       select: {
         email: true,
         fullName: true,
@@ -39,9 +39,7 @@ export default class UserRepository {
     });
   }
 
-  async createUser(email: string, password: string): Promise<User> {
-    const { passwordHash } = await hashPassword(password);
-
+  async createUser(email: string, passwordHash: string): Promise<User> {
     const user = await this._prisma.user.create({
       data: {
         email,
@@ -66,11 +64,22 @@ export default class UserRepository {
     });
   }
 
-  async updateProfile(id: string, input: UpdateProfileRequestType): Promise<User> {
+  async updateProfile(id: string, input: UpdateProfileRequestType): Promise<ProfileResponseType> {
     return this._prisma.user.update({
       where: { id },
       data: {
         ...input,
+      },
+      select: {
+        email: true,
+        fullName: true,
+        phoneNumber: true,
+        address: true,
+        media: {
+          select: {
+            url: true,
+          },
+        },
       },
     });
   }
@@ -84,8 +93,7 @@ export default class UserRepository {
     });
   }
 
-  async updatePassword(id: string, password: string): Promise<User> {
-    const { passwordHash } = await hashPassword(password);
+  async updatePassword(id: string, passwordHash: string): Promise<User> {
     return this._prisma.user.update({
       where: { id },
       data: {

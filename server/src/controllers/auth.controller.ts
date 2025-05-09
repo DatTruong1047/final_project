@@ -1,13 +1,14 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { emailTokenOption, ErrorCodes } from '@config';
-import { binding } from '@decorators/binding.decorator';
 import {
   EmailTokenPayloadType,
   ErrorResponseType,
   ForgotPasswordRequestType,
   LoginRequestType,
   LoginResponseType,
+  RefreshTokenRequestType,
+  RefreshTokenResponeType,
   RefreshTokenType,
   RegisterUserRequestType,
   SuccessResponseType,
@@ -15,9 +16,12 @@ import {
   TokenPayloadType,
   VerifyEmailTokenType,
 } from '@model';
+
 import AuthService from '@services/auth.service';
 import MailService from '@services/mail.service';
 import UserService from '@services/user.service';
+
+import { binding } from '@decorators/binding.decorator';
 
 export default class AuthController {
   constructor(
@@ -65,7 +69,11 @@ export default class AuthController {
 
       return reply.Created(res);
     } catch (error) {
-      return reply.InternalServer(error);
+      const errorResponse: ErrorResponseType = {
+        code: ErrorCodes.SERVER_ERROR,
+        message: 'Internal server error',
+      };
+      return reply.InternalServer(errorResponse);
     }
   }
 
@@ -91,7 +99,11 @@ export default class AuthController {
       };
       return reply.OK(res);
     } catch (error) {
-      return reply.InternalServer(error);
+      const errorResponse: ErrorResponseType = {
+        code: ErrorCodes.SERVER_ERROR,
+        message: 'Internal server error',
+      };
+      return reply.InternalServer(errorResponse);
     }
   }
 
@@ -133,7 +145,11 @@ export default class AuthController {
       };
       return reply.OK(res);
     } catch (error) {
-      return reply.InternalServer(error);
+      const errorResponse: ErrorResponseType = {
+        code: ErrorCodes.SERVER_ERROR,
+        message: 'Internal server error',
+      };
+      return reply.InternalServer(errorResponse);
     }
   }
 
@@ -170,7 +186,50 @@ export default class AuthController {
       };
       return reply.OK(res);
     } catch (error) {
-      return reply.InternalServer(error);
+      const errorResponse: ErrorResponseType = {
+        code: ErrorCodes.SERVER_ERROR,
+        message: 'Internal server error',
+      };
+      return reply.InternalServer(errorResponse);
+    }
+  }
+
+  @binding
+  async refreshToken(
+    request: FastifyRequest<{ Body: RefreshTokenRequestType }>,
+    reply: FastifyReply
+  ): Promise<FastifyReply> {
+    try {
+      const { refreshToken } = request.body;
+      const ipAddress = request.ip;
+
+      const result = await this.authService.refreshToken(refreshToken, ipAddress);
+
+      if (!result.success) {
+        const errorResponse: ErrorResponseType = {
+          message: result.message,
+          code: result.code,
+        };
+        if (result.code === ErrorCodes.INVALID_REFRESH_TOKEN) {
+          return reply.Unauthorized(errorResponse);
+        }
+        return reply.BadRequest(errorResponse);
+      }
+
+      const res: SuccessResponseType<RefreshTokenResponeType> = {
+        code: 200,
+        data: {
+          accessToken: result.data,
+          refreshToken: refreshToken,
+        },
+      };
+      return reply.OK(res);
+    } catch (error) {
+      const errorResponse: ErrorResponseType = {
+        code: ErrorCodes.SERVER_ERROR,
+        message: 'Internal server error',
+      };
+      return reply.InternalServer(errorResponse);
     }
   }
 }

@@ -1,10 +1,11 @@
 import { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify';
 import fastifuPlugin from 'fastify-plugin';
 
-import app from '@app/app';
-import { VerifyEmailTokenType } from '@app/models/email.schema';
 import * as config from '@config';
 import { EmailTokenPayloadType, ErrorResponseType } from '@model';
+
+import app from '@app/app';
+import { VerifyEmailTokenType } from '@app/models/email.schema';
 
 export async function verifyEmailToken(
   request: FastifyRequest<{ Body: VerifyEmailTokenType }>,
