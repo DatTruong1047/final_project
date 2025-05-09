@@ -57,6 +57,7 @@ export default class MailService {
               <h1>Quên mật khẩu</h1>
               <p>Nhấp vào đừơng dẫn để thay đôỉ mật khẩu. Không chia sẻ đường dẫn vơí bất cứ ai.</p>
               <a href="${verificationLink}">Quên mật khẩu</a>
+              <p>Đường dẫn này sẽ hết hạn sau 5 phút.</p>
             `,
       };
 

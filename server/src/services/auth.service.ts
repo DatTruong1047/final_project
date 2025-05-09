@@ -64,7 +64,7 @@ export default class AuthService {
     if (!isComparedPass) {
       return {
         code: ErrorCodes.INCORRECT_PASSWORD,
-        message: 'User is not verified',
+        message: 'Incorrect password',
         success: false,
       };
     }
