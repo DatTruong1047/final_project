@@ -1,10 +1,12 @@
 import nodemailer from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 
-import { EmailTokenPayloadType, TokenOption } from '@app/models';
 import { emailConfig } from '@config';
-import UserService from '@services/user.service';
 import { generateToken } from '@util';
+
+import { EmailTokenPayloadType, TokenOption } from '@app/models';
+
+import UserService from '@services/user.service';
 
 export default class MailService {
   private readonly _userService: UserService;

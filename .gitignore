@@ -1,0 +1,7 @@
+server/public
+server/node_modules
+server/dist
+server/build
+server/coverage
+server/logs
+server/temp

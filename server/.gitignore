@@ -28,8 +28,12 @@ build/Release
 
 # Dependency directories
 node_modules
+server/public
 generated
 jspm_packages
+
+# Build output
+dist
 
 # Optional npm cache directory
 .npm
@@ -59,4 +63,8 @@ profile*
 *flamegraph*
 
 .env
-.dockerignore
+.dockerignore   
+package-lock.json
+
+public/media
+
