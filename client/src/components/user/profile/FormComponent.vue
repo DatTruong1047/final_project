@@ -83,6 +83,7 @@ import {
   UserIcon,
 } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores'
+import AvatarComponent from '@/components/atoms/user/AvatarComponent.vue'
 
 const authStore = useAuthStore()
 const user = authStore.user as NonNullable<typeof authStore.user>
