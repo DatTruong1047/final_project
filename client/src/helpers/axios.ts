@@ -1,6 +1,11 @@
 import axios from 'axios'
-import { axiosConfig } from '../configs'
+import { authRoute, axiosConfig } from '../configs'
+import { useAuthStore } from '../stores'
+import { refreshToken } from '@/api'
+import { useRouter } from 'vue-router'
+import { ErrorCodes } from '@/configs/errorConfig'
 
+const router = useRouter()
 const axiosInstance = axios.create({
   baseURL: axiosConfig.baseURL,
   timeout: axiosConfig.timeout,
@@ -8,21 +13,26 @@ const axiosInstance = axios.create({
 })
 
 axiosInstance.interceptors.request.use(
-  function (config) {
+  (config) => {
+    const authStore = useAuthStore()
+    const token = authStore.accessToken
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+
     return config
   },
-  function (error) {
+  (error) => {
     return Promise.reject(error)
   },
 )
 
 axiosInstance.interceptors.response.use(
-  async (response) => {
-    return response.data
-  },
+  (response) => response.data,
   async (error) => {
+    const originalRequest = error.config
     let errorCode = 5001
-
     const code = error.response && Number(error.response.status)
 
     switch (code) {
@@ -31,6 +41,26 @@ axiosInstance.interceptors.response.use(
         break
       case 401:
         errorCode = error.response.data.code
+        if (!originalRequest._retry) {
+          originalRequest._retry = true
+          const authStore = useAuthStore()
+
+          try {
+            const response: { data: { accessToken: string; refreshToken: string } } =
+              await refreshToken({ refreshToken: authStore.refreshToken })
+
+            const { accessToken } = response.data
+            authStore.setAccessToken(accessToken)
+
+            originalRequest.headers.Authorization = `Bearer ${accessToken}`
+            return axiosInstance(originalRequest)
+          } catch (refreshError: any) {
+            authStore.logout()
+            router.push({ name: authRoute.login })
+
+            return Promise.reject(ErrorCodes.UNAUTHORIZED)
+          }
+        }
         break
       case 403:
         errorCode = error.response.data.code
@@ -50,6 +80,7 @@ axiosInstance.interceptors.response.use(
       default:
         break
     }
+
     throw errorCode
   },
 )
