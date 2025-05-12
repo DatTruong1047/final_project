@@ -28,8 +28,8 @@ export const swaggerConfig: SwaggerOptions = {
     tags: [
       { name: 'Auth', description: 'Endpoints related to Authenticate' },
       { name: 'Category', description: 'Endpoints related to Categories' },
+      { name: 'Product', description: 'Endpoints related to Products' },
       { name: 'User', description: 'Endpoints related to Users' },
-      { name: 'Product', description: 'Endpoints related to Posts' },
       { name: 'Media', description: 'Endpoints related to Media' },
       { name: 'Review', description: 'Endpoints related to Comment' },
       { name: 'Admin', description: 'Endpoints related to Admin' },
