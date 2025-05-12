@@ -43,13 +43,15 @@ export const ProductListSchema = z.object({
       quantity: true,
       productMedias: true,
     }).extend({
-      productMedias: z
+      thumbnail: z
         .array(
           z.object({
             id: z.string(),
-            mediaId: z.string(),
-            url: z.string(),
-            description: z.string(),
+            media: z.object({
+              id: z.string(),
+              url: z.string(),
+              description: z.string().optional().nullable(),
+            }),
           })
         )
         .max(1),

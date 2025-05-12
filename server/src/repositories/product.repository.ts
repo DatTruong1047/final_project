@@ -53,7 +53,7 @@ export default class ProductRepository {
     });
 
     if (!product) {
-      throw new Error('Product not found');
+      throw new Error('PRODUCT_NOT_FOUND');
     }
 
     return {
@@ -91,11 +91,13 @@ export default class ProductRepository {
       products: products.map((product) => ({
         ...product,
         price: product.price.toNumber(),
-        productMedias: product.productMedias.map((pm) => ({
+        thumbnail: product.productMedias.map((pm) => ({
           id: pm.id,
-          mediaId: pm.media.id,
-          url: pm.media.url,
-          description: pm.media.description,
+          media: {
+            id: pm.media.id,
+            url: pm.media.url,
+            description: pm.media.description,
+          },
         })),
       })),
       total: total,
