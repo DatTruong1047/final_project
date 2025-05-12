@@ -10,7 +10,8 @@ import {
 } from '@model';
 import ProductService from '@services/product.service';
 export default async function productRoutes(app: FastifyInstance): Promise<void> {
-  const productController = new ProductController(new ProductService());
+  const productService = new ProductService();
+  const productController = new ProductController(productService);
 
   app.get('/:id', {
     schema: {

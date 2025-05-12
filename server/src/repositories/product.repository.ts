@@ -53,7 +53,7 @@ export default class ProductRepository {
     });
 
     if (!product) {
-      return null;
+      throw new Error('Product not found');
     }
 
     return {
@@ -80,7 +80,12 @@ export default class ProductRepository {
         take: limit,
         select: this._productSelectBase,
       }),
-      this._prisma.product.count(),
+      this._prisma.product.count({
+        where: {
+          ...(brandId && { brandId }),
+          ...(categoryId && { categoryId }),
+        },
+      }),
     ]);
     return {
       products: products.map((product) => ({

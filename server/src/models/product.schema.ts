@@ -76,21 +76,17 @@ export const ProductDetailSchema = ProductBaseSchema.extend({
 
 export const ProductFilterSchema = z.object({
   page: z
-    .string()
-    .transform((val) => {
-      const num = parseInt(val, 10);
+    .preprocess((val) => {
+      const num = parseInt(String(val), 10);
       return isNaN(num) ? 1 : num;
-    })
-    .optional()
-    .default('1'),
+    }, z.number().min(1).default(1))
+    .optional(),
   limit: z
-    .string()
-    .transform((val) => {
-      const num = parseInt(val, 10);
+    .preprocess((val) => {
+      const num = parseInt(String(val), 10);
       return isNaN(num) ? 8 : num;
-    })
-    .optional()
-    .default('8'),
+    }, z.number().min(1).default(8))
+    .optional(),
   brandId: z.string().optional(),
   categoryId: z.string().optional(),
 });
