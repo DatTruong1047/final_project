@@ -91,14 +91,7 @@ export default class ProductRepository {
       products: products.map((product) => ({
         ...product,
         price: product.price.toNumber(),
-        thumbnail: product.productMedias.map((pm) => ({
-          id: pm.id,
-          media: {
-            id: pm.media.id,
-            url: pm.media.url,
-            description: pm.media.description,
-          },
-        })),
+        thumbnail: product.productMedias.length > 0 ? product.productMedias[0] : null,
       })),
       total: total,
       page,

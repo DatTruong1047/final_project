@@ -42,12 +42,29 @@ async function seedProducts(): Promise<void> {
   const productsPath = path.join(__dirname, '../data/all_products.json');
   const products = JSON.parse(fs.readFileSync(productsPath, 'utf-8'));
 
+  // Lấy danh sách categories và brands từ DB
+  const categories = await prisma.category.findMany();
+  const brands = await prisma.brand.findMany();
+  
+  // Đọc file categories.json và brands.json để lấy thông tin mapping
+  const categoriesPath = path.join(__dirname, '../data/categories.json');
+  const brandsPath = path.join(__dirname, '../data/brands.json');
+  const categoriesJson = JSON.parse(fs.readFileSync(categoriesPath, 'utf-8'));
+  const brandsJson = JSON.parse(fs.readFileSync(brandsPath, 'utf-8'));
+
   for (const product of products) {
-    // Lấy categoryId và brandId thực tế từ DB (giả sử id trong JSON là số thứ tự, cần map sang id thực tế)
-    const categories = await prisma.category.findMany({ orderBy: { name: 'asc' } });
-    const brands = await prisma.brand.findMany({ orderBy: { name: 'asc' } });
-    const category = categories[product.category_id - 1];
-    const brand = brands[product.brand_id - 1];
+    // Map category_id và brand_id từ JSON sang ID trong DB
+    const categoryName = categoriesJson[product.category_id - 1]?.name;
+    const brandName = brandsJson[product.brand_id - 1]?.name;
+    
+    // Tìm category và brand trong DB dựa trên tên
+    const category = categories.find(c => c.name === categoryName);
+    const brand = brands.find(b => b.name === brandName);
+    
+    if (!category || !brand) {
+      console.log(`Không tìm thấy category hoặc brand cho sản phẩm ${product.name}`);
+      continue;
+    }
 
     // Tạo product
     const createdProduct = await prisma.product.upsert({
@@ -60,8 +77,8 @@ async function seedProducts(): Promise<void> {
         longDescription: product.long_description || null,
         price: product.sale_price || product.price,
         quantity: product.stock_quantity || 0,
-        categoryId: category?.id,
-        brandId: brand?.id,
+        categoryId: category.id,
+        brandId: brand.id,
       },
     });
 
