@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { useCategoryStore } from '@/stores/categoryStore'
 
 const categoryStore = useCategoryStore()
@@ -17,9 +17,9 @@ onMounted(async () => {
       selectedCategory.value = categoryStore.categories[0].id
     }
     updateSliderMeasurements()
-    setTimeout(() => {
+    nextTick(() => {
       scrollToSelectedCategory()
-    }, 300)
+    })
   } catch (error) {
     showToast(ToastEnum.Error, t('message.error.loadCategoriesFail'))
   }
@@ -42,12 +42,12 @@ const showRightArrow = computed(() => {
 })
 
 function updateSliderMeasurements() {
-  setTimeout(() => {
+  nextTick(() => {
     if (sliderRef.value) {
       visibleWidth.value = sliderRef.value.clientWidth
       totalWidth.value = sliderRef.value.scrollWidth
     }
-  }, 100)
+  })
 }
 
 const onScrollLeft = () => {
@@ -76,7 +76,10 @@ const scrollToSelectedCategory = () => {
   const itemLeft = selectedEl.offsetLeft
   const itemWidth = selectedEl.offsetWidth
 
-  const targetPosition = Math.max(0, itemLeft - containerWidth / 2 + itemWidth / 2)
+  const targetPosition = Math.max(
+    0,
+    Math.min(itemLeft - containerWidth / 2 + itemWidth / 2, totalWidth.value - visibleWidth.value),
+  )
 
   sliderRef.value.scrollTo({
     left: targetPosition,

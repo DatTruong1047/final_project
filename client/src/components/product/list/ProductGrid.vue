@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/useToast'
 import { ToastEnum } from '@/types/enum'
 import { useI18n } from 'vue-i18n'
 import { vndFormat } from '@/helpers/processPrice'
+import { imageConfig } from '@/configs/image.config'
 
 const router = useRouter()
 const route = useRoute()
@@ -21,7 +22,6 @@ const { t } = useI18n()
 
 const products = ref(productStore.products)
 const isLoading = ref(false)
-
 const isDisabledLoadMore = computed(() => products.value.length >= productStore.total)
 
 const defaultFilter: ProductFilterType = {
@@ -129,9 +129,6 @@ watch(
 onMounted(async () => {
   try {
     isLoading.value = true
-    if (categoryStore.selectedCategory && !filter.value.categoryId) {
-      filter.value.categoryId = categoryStore.selectedCategory
-    }
 
     if (Object.keys(route.query).length === 0) {
       updateQueryParams()
@@ -195,7 +192,7 @@ onMounted(async () => {
             class="relative bg-white h-40 bg-gray-50 flex items-center justify-center p-4 w-full h-full"
           >
             <img
-              :src="product.thumbnail.media.url"
+              :src="product.thumbnail.media.url || imageConfig.productDefault"
               :alt="product.name"
               class="max-h-full max-w-full object-contain"
             />
@@ -247,7 +244,7 @@ onMounted(async () => {
                 @click.prevent="onAddToCart(product.id)"
                 class="flex-1 font-bold text-2xl bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-colors duration-300"
               >
-                Buy now
+                See More
               </button>
             </div>
           </div>

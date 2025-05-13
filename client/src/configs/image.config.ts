@@ -7,4 +7,5 @@ export const imageConfig = {
     '/images/panasonic-deal-_712_959.png.webp',
     '/images/sieu-tu-lanh-to_61_959.png.webp',
   ],
+  productDefault: '/images/product-img-fallback.png',
 }
