@@ -7,7 +7,7 @@ interface State {
   total: number
   page: number
   limit: number
-  productDetail: ProductDetailType | undefined
+  productDetail: ProductDetailType | null
 }
 
 export const useProductStore = defineStore('product', {
@@ -16,7 +16,7 @@ export const useProductStore = defineStore('product', {
     total: 0,
     page: 1,
     limit: 8,
-    productDetail: undefined,
+    productDetail: null,
   }),
 
   actions: {

@@ -13,7 +13,6 @@ const selectedCategory = computed({
 
 onMounted(async () => {
   try {
-    await categoryStore.getCategories()
     if (categoryStore.categories.length > 0 && !categoryStore.selectedCategory) {
       selectedCategory.value = categoryStore.categories[0].id
     }
@@ -22,7 +21,7 @@ onMounted(async () => {
       scrollToSelectedCategory()
     }, 300)
   } catch (error) {
-    console.error('Failed to load categories:', error)
+    showToast(ToastEnum.Error, t('message.error.loadCategoriesFail'))
   }
 })
 
@@ -88,7 +87,7 @@ const scrollToSelectedCategory = () => {
 }
 
 const onScroll = (event) => {
-  scrollPosition.value = event.target.onScrollLeft
+  scrollPosition.value = event.target.scrollLeft
 }
 
 const onSelectCategory = (id) => {

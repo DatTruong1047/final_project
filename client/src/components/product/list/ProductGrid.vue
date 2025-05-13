@@ -9,12 +9,16 @@ import { useRouter, useRoute } from 'vue-router'
 import SearchFilterComponent from './SearchFilterComponent.vue'
 import { useToast } from '@/hooks/useToast'
 import { ToastEnum } from '@/types/enum'
+import { useI18n } from 'vue-i18n'
+import { vndFormat } from '@/helpers/processPrice'
 
 const router = useRouter()
 const route = useRoute()
 const productStore = useProductStore()
 const categoryStore = useCategoryStore()
 const { showToast } = useToast()
+const { t } = useI18n()
+
 const products = ref(productStore.products)
 const isLoading = ref(false)
 
@@ -74,7 +78,7 @@ const onLoadMore = async () => {
     products.value = [...products.value, ...productStore.products]
   } catch (error) {
     console.error(error)
-    showToast(ToastEnum.Error, 'Load products failed')
+    showToast(ToastEnum.Error, t('message.error.loadProductsFail'))
   } finally {
     isLoading.value = false
   }
@@ -101,7 +105,7 @@ watch(
       products.value = productStore.products
       updateQueryParams()
     } catch (error) {
-      showToast(ToastEnum.Error, 'Load products failed')
+      showToast(ToastEnum.Error, t('message.error.loadProductsFail'))
     } finally {
       isLoading.value = false
     }
@@ -139,9 +143,9 @@ onMounted(async () => {
     }
 
     await productStore.getProducts(filter.value)
-    showToast(ToastEnum.Success, 'Load products successfully')
+    showToast(ToastEnum.Success, t('message.success.loadProductsSuccess'))
   } catch (error) {
-    showToast(ToastEnum.Error, 'Load products failed')
+    showToast(ToastEnum.Error, t('message.error.loadProductsFail'))
   } finally {
     isLoading.value = false
   }
@@ -216,11 +220,7 @@ onMounted(async () => {
 
             <div class="mb-3">
               <span class="text-2xl font-bold text-red-600">
-                {{
-                  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
-                    product.price,
-                  )
-                }}
+                {{ vndFormat(product.price ?? 0) }}
               </span>
             </div>
 

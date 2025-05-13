@@ -24,15 +24,19 @@ import BannerComponent from '@/components/product/list/BannerComponent.vue'
 import CategorySlider from '@/components/product/list/CategorySlider.vue'
 import ProductGrid from '@/components/product/list/ProductGrid.vue'
 import { useCategoryStore } from '@/stores/categoryStore'
+import { useToast } from '@/hooks/useToast'
+import { ToastEnum } from '@/types/enum'
+import { useI18n } from 'vue-i18n'
 
 const categoryStore = useCategoryStore()
+const { showToast } = useToast()
+const { t } = useI18n()
 
 onMounted(async () => {
   try {
     await categoryStore.getCategories()
-    console.log('Categories loaded:', categoryStore.categories)
   } catch (error) {
-    console.error('Failed to load categories:', error)
+    showToast(ToastEnum.Error, t('message.error.loadCategoriesFail'))
   }
 })
 </script>

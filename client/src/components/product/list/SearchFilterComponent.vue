@@ -117,11 +117,19 @@ watch(localSearchText, (newValue) => {
 })
 
 watch(localSortBy, (newValue) => {
-  emit('update:sortBy', newValue as ProductSortBy)
+  if (Object.values(ProductSortBy).includes(newValue as ProductSortBy)) {
+    emit('update:sortBy', newValue as ProductSortBy)
+  } else {
+    emit('update:sortBy', ProductSortBy.CREATED_AT)
+  }
 })
 
 watch(localSortOrder, (newValue) => {
-  emit('update:sortOrder', newValue as ProductSort)
+  if (Object.values(ProductSort).includes(newValue as ProductSort)) {
+    emit('update:sortOrder', newValue as ProductSort)
+  } else {
+    emit('update:sortOrder', ProductSort.DESC)
+  }
 })
 
 watch(

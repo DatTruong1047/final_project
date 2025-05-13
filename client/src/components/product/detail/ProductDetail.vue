@@ -39,11 +39,7 @@
         </div>
         <div class="text-3xl font-bold text-red-600 mb-6">
           Giá bán:
-          {{
-            new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
-              productStore.productDetail!.price,
-            )
-          }}
+          {{ vndFormat(productStore.productDetail?.price ?? 0) }}
         </div>
         <div class="mb-6">
           <h3 class="text-xl font-medium text-gray-900 mb-2">Tính năng nổi bật:</h3>
@@ -125,6 +121,7 @@ import { ref, onMounted } from 'vue'
 import { useProductStore } from '@/stores/productStore'
 import { useToast } from '@/hooks/useToast'
 import { ToastEnum } from '@/types/enum'
+import { vndFormat } from '@/helpers/processPrice'
 
 const productStore = useProductStore()
 const selectedImageIndex = ref(0)

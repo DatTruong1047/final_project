@@ -11,22 +11,14 @@
     </li>
   </ul>
   <div v-else>
-    <p>No categories found</p>
+    <p>{{ t('message.error.noCategoriesFound') }}</p>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
 import { useCategoryStore } from '@/stores/categoryStore'
+import { useI18n } from 'vue-i18n'
 
 const categoryStore = useCategoryStore()
-
-onMounted(async () => {
-  try {
-    await categoryStore.getCategories()
-    console.log('Categories loaded:', categoryStore.categories)
-  } catch (error) {
-    console.error('Failed to load categories:', error)
-  }
-})
+const { t } = useI18n()
 </script>

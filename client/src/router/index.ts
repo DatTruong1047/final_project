@@ -37,8 +37,8 @@ const router = createRouter({
       ],
     },
     {
-      path: '/product/',
-      name: 'product',
+      path: '/products/',
+      name: 'products',
       children: [
         {
           path: ':id',
