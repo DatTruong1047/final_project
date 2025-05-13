@@ -1,6 +1,6 @@
 import prisma from '@app/lib/prisma';
 import { ProductDetailType, ProductFilterType, ProductListType } from '@model';
-import { PrismaClient } from 'generated/prisma';
+import { Prisma, PrismaClient } from 'generated/prisma';
 
 export default class ProductRepository {
   private readonly _prisma: PrismaClient;
@@ -68,22 +68,31 @@ export default class ProductRepository {
   }
 
   async getProductList(filter: ProductFilterType): Promise<ProductListType> {
-    const { page = 1, limit = 8, brandId, categoryId } = filter;
+    const { page = 1, limit = 8, brandId, categoryId, searchText, minPrice, maxPrice, sortBy, sortOrder } = filter;
     const skip = (page - 1) * limit;
     const [products, total] = await this._prisma.$transaction([
       this._prisma.product.findMany({
         where: {
           ...(brandId && { brandId }),
           ...(categoryId && { categoryId }),
+          ...this._textSearchQuery(searchText),
+          ...(minPrice && { price: { gte: minPrice } }),
+          ...(maxPrice && { price: { lte: maxPrice } }),
         },
         skip,
         take: limit,
         select: this._productSelectBase,
+        orderBy: {
+          ...(sortBy && { [sortBy]: sortOrder }),
+        },
       }),
       this._prisma.product.count({
         where: {
           ...(brandId && { brandId }),
           ...(categoryId && { categoryId }),
+          ...this._textSearchQuery(searchText),
+          ...(minPrice && { price: { gte: minPrice } }),
+          ...(maxPrice && { price: { lte: maxPrice } }),
         },
       }),
     ]);
@@ -99,6 +108,37 @@ export default class ProductRepository {
     };
   }
 
+  private _textSearchQuery(searchText: string) {
+    if (!searchText || searchText.trim() === '') {
+      return {};
+    }
+    return {
+      OR: [
+        {
+          name: {
+            contains: searchText,
+            mode: Prisma.QueryMode.insensitive,
+          }
+        },
+        {
+          shortDescription: {
+            contains: searchText,
+            mode: Prisma.QueryMode.insensitive,
+          }
+        },
+        {
+          attributes: {
+            some: {
+              attributeValue: {
+                contains: searchText,
+                mode: Prisma.QueryMode.insensitive,
+              },
+            },
+          }
+        }
+      ],
+    };
+  }
   private readonly _productSelectBase = {
     id: true,
     name: true,

@@ -49,7 +49,7 @@ export const ProductListSchema = z.object({
           id: z.string(),
           url: z.string(),
           description: z.string().optional().nullable(),
-        }),
+        }).nullable(),
       }),
     })
   ),
@@ -87,6 +87,21 @@ export const ProductFilterSchema = z.object({
     .optional(),
   brandId: z.string().optional(),
   categoryId: z.string().optional(),
+  searchText: z.string().optional(),
+  minPrice: z
+    .preprocess((val) => {
+      const num = parseInt(String(val), 10);
+      return isNaN(num) ? 0 : num;
+    }, z.number().min(0).default(0))
+    .optional(),
+  maxPrice: z
+    .preprocess((val) => {
+      const num = parseInt(String(val), 10);
+      return isNaN(num) ? 1000000000 : num;
+    }, z.number().min(0).default(1000000000))
+    .optional(),
+  sortBy: z.enum(['price', 'createdAt']).optional().default('createdAt'),
+  sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
 });
 
 export type ProductFilterType = z.infer<typeof ProductFilterSchema>;

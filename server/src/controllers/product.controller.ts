@@ -41,8 +41,7 @@ export default class ProductController {
     reply: FastifyReply
   ): Promise<FastifyReply> {
     try {
-      const { page, limit, brandId, categoryId } = request.query;
-      const result = await this.productService.getProductList({ page, limit, brandId, categoryId });
+      const result = await this.productService.getProductList(request.query);
 
       const response: SuccessResponseType<ProductListType> = {
         code: 200,
