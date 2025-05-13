@@ -5,3 +5,7 @@ export enum authRoute {
   resetPassword = 'reset-password',
   changePassword = 'change-password',
 }
+
+export enum productRoute {
+  productDetail = 'product-detail',
+}
