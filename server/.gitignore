@@ -60,3 +60,7 @@ profile*
 
 .env
 .dockerignore
+
+public/media
+
+data

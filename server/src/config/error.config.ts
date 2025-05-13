@@ -31,4 +31,6 @@ export enum ErrorCodes {
 
   CATE_NOT_FOUND = 9000,
   CATE_NAME_IS_EXIST = 9001,
+
+  PRODUCT_NOT_FOUND = 10001,
 }

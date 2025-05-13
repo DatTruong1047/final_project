@@ -38,12 +38,21 @@ export const en = {
       register: 'Register fail',
       forgotPassword: 'Forgot password fail',
       resetPassword: 'Reset password fail',
+
+      loadProductsFail: 'Load products fail',
+      loadCategoriesFail: 'Load categories fail',
+
+      noCategoriesFound: 'No categories found',
+      noProductsFound: 'No products found',
     },
     success: {
       login: 'Login successfull',
       register: 'Register successfull. Please check your email',
       forgotPassword: 'Forgot password email has been sent',
       resetPassword: 'Password reset successfully',
+
+      loadProductsSuccess: 'Load products successfully',
+      loadCategoriesSuccess: 'Load categories successfully',
     },
   },
   validation: {
@@ -55,13 +64,13 @@ export const en = {
 
     passwordMinLength: 'Password must be at least 8 characters long',
     passwordMaxLength: 'Password must be at most 16 characters long',
-    passwordFormat: 'Password must contain at least one lowercase letter, one uppercase letter, and one special character',
+    passwordFormat:
+      'Password must contain at least one lowercase letter, one uppercase letter, and one special character',
     passwordsMustMatch: 'Passwords must match',
     passwordRequired: 'Password is required',
 
     confirmPasswordRequired: 'Please confirm your password',
 
     resetTokenRequired: 'Reset token is required',
-
-  }
+  },
 }
