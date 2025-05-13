@@ -21,10 +21,21 @@ const containerClass = computed(() => {
 </script>
 
 <template>
-  <Transition name="toast" :class="containerClass">
+  <Transition
+    enter-active-class="transition ease-out duration-300"
+    enter-from-class="transform -translate-y-10 opacity-0"
+    enter-to-class="transform translate-y-0 opacity-100"
+    leave-active-class="transition ease-in duration-200"
+    leave-from-class="transform translate-y-0 opacity-100"
+    leave-to-class="transform -translate-y-10 opacity-0"
+  >
     <div
       v-if="toastMessageStore.isShowToast"
-      class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex items-center w-full max-w-sm p-4 space-x-4 rtl:space-x-reverse text-white divide-x rtl:divide-x-reverse divide-gray-200 rounded-lg shadow-md dark:divide-gray-700"
+      :class="[
+        'fixed left-1/2 transform -translate-x-1/2 z-[100] flex items-center w-full max-w-sm p-4 space-x-4 rtl:space-x-reverse text-white divide-x rtl:divide-x-reverse divide-gray-200 rounded-lg shadow-lg dark:divide-gray-700',
+        containerClass,
+      ]"
+      style="top: calc(88px + 1rem)"
       role="alert"
     >
       <template v-if="toastMessageStore.toastType === ToastEnum.Success">
@@ -62,3 +73,16 @@ const containerClass = computed(() => {
     </div>
   </Transition>
 </template>
+
+<style scoped>
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.3s ease;
+}
+
+.toast-enter-from,
+.toast-leave-to {
+  transform: translateY(-20px);
+  opacity: 0;
+}
+</style>

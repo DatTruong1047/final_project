@@ -1,14 +1,13 @@
 import * as Yup from 'yup'
 import { i18n } from '../main'
 
-const t = i18n.global.t;
+const t = i18n.global.t
 
 const emailType = Yup.string()
   .typeError(() => t('validation.emailMustBeString'))
   .required(() => t('validation.emailAndPasswordAreRequired'))
   .email(() => t('validation.invalidEmailFormat'))
   .matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, () => t('validation.invalidEmailDomain'))
-
 
 const passwordType = Yup.string()
   .typeError('Password must be string')
@@ -30,7 +29,7 @@ export const RegisterRequestSchema = Yup.object().shape({
 
 export const LoginRequestSchema = Yup.object().shape({
   email: emailType,
-  password: passwordType
+  password: passwordType,
 })
 
 export const ForgotPasswordRequestSchema = Yup.object().shape({
@@ -43,4 +42,8 @@ export const ResetPasswordRequestSchema = Yup.object().shape({
   confirmPassword: Yup.string()
     .oneOf([Yup.ref('password')], () => t('validation.passwordsMustMatch'))
     .required(() => t('validation.confirmPasswordRequired')),
+})
+
+export const RefreshTokenRequestSchema = Yup.object().shape({
+  refreshToken: Yup.string().required(() => t('validation.refreshTokenRequired')),
 })

@@ -55,7 +55,8 @@ export const en = {
 
     passwordMinLength: 'Password must be at least 8 characters long',
     passwordMaxLength: 'Password must be at most 16 characters long',
-    passwordFormat: 'Password must contain at least one lowercase letter, one uppercase letter, and one special character',
+    passwordFormat:
+      'Password must contain at least one lowercase letter, one uppercase letter, and one special character',
     passwordsMustMatch: 'Passwords must match',
     passwordRequired: 'Password is required',
 
@@ -63,5 +64,6 @@ export const en = {
 
     resetTokenRequired: 'Reset token is required',
 
-  }
+    refreshTokenRequired: 'Refresh token is required',
+  },
 }

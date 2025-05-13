@@ -6,19 +6,18 @@ import ToastComponent from './components/molecules/_utils/ToastComponent.vue'
 </script>
 
 <template>
-  <header>
+  <div class="flex flex-col min-h-screen">
     <NavBarComponent />
-  </header>
-  <main class="p-3">
-    <RouterView> </RouterView>
-  </main>
+    <main class="pt-[88px]">
+      <RouterView />
+    </main>
+  </div>
   <ToastComponent />
 </template>
 
 <style scoped>
 header {
   line-height: 1.5;
-  max-height: 100vh;
 }
 
 .logo {
@@ -30,7 +29,6 @@ nav {
   width: 100%;
   font-size: 12px;
   text-align: center;
-  margin-top: 2rem;
 }
 
 nav a.router-link-exact-active {
@@ -44,7 +42,6 @@ nav a.router-link-exact-active:hover {
 nav a {
   display: inline-block;
   padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
 }
 
 nav a:first-of-type {
@@ -55,11 +52,6 @@ nav a:first-of-type {
   header {
     display: flex;
     place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
   }
 
   header .wrapper {
@@ -70,11 +62,8 @@ nav a:first-of-type {
 
   nav {
     text-align: left;
-    margin-left: -1rem;
     font-size: 1rem;
-
     padding: 1rem 0;
-    margin-top: 1rem;
   }
 }
 </style>
