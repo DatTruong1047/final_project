@@ -30,7 +30,7 @@ export default class CartService {
     }
   }
 
-  async upSertToCart(upSertCart: CartUpsertRequestType, userId: string): Promise<ResultType<boolean>> {
+  async upSertCart(upSertCart: CartUpsertRequestType, userId: string): Promise<ResultType<boolean>> {
     try {
       const existCart = await this._cartRepository.getCartWithProductIdAndUserId(upSertCart.productId, userId);
       let result = false;
@@ -38,6 +38,14 @@ export default class CartService {
       const newQuantity = existCart ? existCart.quantity + upSertCart.quantity : upSertCart.quantity;
 
       const product = await this._productRepository.getProductById(upSertCart.productId);
+
+      if (!product) {
+        return {
+          success: false,
+          code: ErrorCodes.PRODUCT_NOT_FOUND,
+          message: 'Product not found',
+        };
+      }
 
       if (newQuantity > product.quantity) {
         return {
@@ -74,6 +82,14 @@ export default class CartService {
           success: false,
           code: ErrorCodes.CART_NOT_FOUND,
           message: 'Cart not found',
+        };
+      }
+
+      if (!cart.product) {
+        return {
+          success: false,
+          code: ErrorCodes.PRODUCT_NOT_FOUND,
+          message: 'Product not found',
         };
       }
 

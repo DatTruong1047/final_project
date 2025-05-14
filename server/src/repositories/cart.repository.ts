@@ -1,5 +1,5 @@
-import { CartBaseType, CartDetailType, CartUpsertRequestType, CartListType, CartCheckType } from '@model';
-import { Cart, Prisma, PrismaClient } from 'generated/prisma';
+import { CartDetailType, CartUpsertRequestType, CartListType, CartCheckType } from '@model';
+import { Prisma, PrismaClient } from 'generated/prisma';
 
 import prisma from '@app/lib/prisma';
 
@@ -115,8 +115,8 @@ export default class CartRepository {
       });
 
       return true;
-    } catch {
-      return false;
+    } catch (error) {
+      throw new Error('Failed to create cart');
     }
   }
 
@@ -127,8 +127,8 @@ export default class CartRepository {
       });
 
       return true;
-    } catch {
-      return false;
+    } catch (error) {
+      throw new Error('Failed to delete cart');
     }
   }
 
@@ -142,8 +142,8 @@ export default class CartRepository {
       });
 
       return true;
-    } catch {
-      return false;
+    } catch (error) {
+      throw new Error('Failed to update cart');
     }
   }
 

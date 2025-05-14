@@ -121,7 +121,7 @@ export default class ProductRepository {
     }
   }
 
-  private _textSearchQuery(searchText: string) {
+  private _textSearchQuery(searchText: string): Prisma.ProductWhereInput {
     if (!searchText || searchText.trim() === '') {
       return {};
     }

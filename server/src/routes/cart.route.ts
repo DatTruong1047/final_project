@@ -42,7 +42,7 @@ export default async function cartRoutes(app: FastifyInstance): Promise<void> {
       },
     },
     preHandler: [app.verifyToken],
-    handler: cartController.upSertToCart,
+    handler: cartController.upSertCart,
   });
 
   app.put('/', {

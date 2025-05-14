@@ -50,14 +50,14 @@ export default class CartController {
   }
 
   @binding
-  async upSertToCart(
+  async upSertCart(
     request: FastifyRequest<{ Body: CartUpsertRequestType }>,
     reply: FastifyReply
   ): Promise<FastifyReply> {
     try {
       const { decodedAccessToken } = request;
 
-      const result = await this._cartService.upSertToCart(request.body, decodedAccessToken.userId);
+      const result = await this._cartService.upSertCart(request.body, decodedAccessToken.userId);
 
       if (!result.success) {
         const errorResponse: ErrorResponseType = {
@@ -90,7 +90,11 @@ export default class CartController {
     try {
       const { decodedAccessToken } = request;
 
-      const result = await this._cartService.updateCartQuantity(request.body.id, request.body.count, decodedAccessToken.userId);
+      const result = await this._cartService.updateCartQuantity(
+        request.body.id,
+        request.body.count,
+        decodedAccessToken.userId
+      );
 
       if (!result.success) {
         const errorResponse: ErrorResponseType = {
