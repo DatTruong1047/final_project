@@ -8,7 +8,7 @@ import ToastComponent from './components/molecules/_utils/ToastComponent.vue'
 <template>
   <div class="flex flex-col min-h-screen">
     <NavBarComponent />
-    <main class="pt-[88px]">
+    <main class="pt-[6rem]">
       <RouterView />
     </main>
   </div>

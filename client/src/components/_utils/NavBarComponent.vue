@@ -1,6 +1,6 @@
 <template>
   <nav
-    class="bg-white border-b border-gray-200 shadow-sm dark:bg-gray-900 dark:border-gray-700 fixed top-0 left-0 right-0 z-40 h-[88px]"
+    class="bg-white border-b border-gray-200 shadow-sm dark:bg-gray-900 dark:border-gray-700 fixed top-0 left-0 right-0 z-40 h-[6rem]"
   >
     <div class="max-w-screen-3xl px-4 sm:px-6 lg:px-8 mx-auto h-full">
       <div class="flex justify-between items-center h-full">
@@ -102,7 +102,7 @@
             @click="isMobileMenuOpen = !isMobileMenuOpen"
             class="inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-red-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
           >
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 :class="{ hidden: isMobileMenuOpen, 'inline-flex': !isMobileMenuOpen }"
                 stroke-linecap="round"
@@ -134,7 +134,7 @@
     >
       <div
         v-if="isMobileMenuOpen"
-        class="md:hidden absolute top-[88px] left-0 right-0 bg-white shadow-lg dark:bg-gray-800"
+        class="md:hidden fixed top-[8rem] left-0 right-0 bg-white shadow-lg dark:bg-gray-800 z-50"
       >
         <div class="px-4 pt-2 pb-3 space-y-2">
           <RouterLink
