@@ -139,7 +139,7 @@ onMounted(async () => {
       }
     }
 
-    await productStore.getProducts(filter.value)
+    // await productStore.getProducts(filter.value)
     showToast(ToastEnum.Success, t('message.success.loadProductsSuccess'))
   } catch (error) {
     showToast(ToastEnum.Error, t('message.error.loadProductsFail'))
@@ -188,9 +188,7 @@ onMounted(async () => {
           class="bg-white rounded-lg md:h-[60rem] overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col"
         >
           <!-- Product image -->
-          <div
-            class="relative bg-white h-40 bg-gray-50 flex items-center justify-center p-4 w-full h-full"
-          >
+          <div class="relative bg-white flex items-center justify-center p-4 w-full h-full">
             <img
               :src="product.thumbnail.media.url || imageConfig.productDefault"
               :alt="product.name"

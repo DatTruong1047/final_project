@@ -44,6 +44,7 @@ export const en = {
 
       noCategoriesFound: 'Loading categories...',
       noProductsFound: 'No products found',
+      productNotFound: 'Product not found',
     },
     success: {
       login: 'Login successfull',
