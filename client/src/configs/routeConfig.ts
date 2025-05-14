@@ -8,4 +8,8 @@ export enum authRoute {
 
 export enum productRoute {
   productDetail = 'product-detail',
+
+export enum userRoute {
+  profile = 'profile',
+
 }

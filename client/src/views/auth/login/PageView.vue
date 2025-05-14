@@ -18,9 +18,9 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import router from '@/router'
-import { login } from '@/api'
+import { login, getProfile } from '@/api'
 
-import { useAuthStore } from '@/stores'
+import { useAuthStore, type User } from '@/stores'
 import { useToast } from '@/hooks/useToast'
 import { useI18n } from 'vue-i18n'
 
@@ -56,6 +56,18 @@ const onLogin = async () => {
     const res = await login(user.value)
 
     saveTokens(res)
+    const userInfo = await getProfile()
+
+    const profile: User = {
+      email: userInfo.data.email,
+      fullName: userInfo.data.fullName,
+      address: userInfo.data.address,
+      phoneNumber: userInfo.data.phoneNumber,
+      media: {
+        url: userInfo.data?.media?.url ?? '',
+      },
+    }
+    authStore.setUser(profile)
 
     showToast(ToastEnum.Success, t('message.success.login'))
 

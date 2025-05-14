@@ -1,0 +1,18 @@
+<template>
+  <div class="py-8 px-4 sm:px-6 lg:px-8 bg-gray-50 min-h-screen flex justify-center items-start">
+    <template v-if="authStore.isAuthenticated">
+      <FormComponent />
+    </template>
+    <div v-else class="flex justify-center items-center h-screen w-full">
+      <LoadingComponent />
+    </div>
+  </div>
+</template>
+
+<script setup>
+import LoadingComponent from '@/components/atoms/_utils/LoadingComponent.vue'
+import FormComponent from '@/components/user/profile/FormComponent.vue'
+import { useAuthStore } from '@/stores'
+
+const authStore = useAuthStore()
+</script>
