@@ -38,12 +38,21 @@ export const en = {
       register: 'Register fail',
       forgotPassword: 'Forgot password fail',
       resetPassword: 'Reset password fail',
+
+      loadProductsFail: 'Load products fail',
+      loadCategoriesFail: 'Load categories fail',
+
+      noCategoriesFound: 'No categories found',
+      noProductsFound: 'No products found',
     },
     success: {
       login: 'Login successfull',
       register: 'Register successfull. Please check your email',
       forgotPassword: 'Forgot password email has been sent',
       resetPassword: 'Password reset successfully',
+
+      loadProductsSuccess: 'Load products successfully',
+      loadCategoriesSuccess: 'Load categories successfully',
     },
   },
   validation: {
@@ -64,6 +73,9 @@ export const en = {
 
     resetTokenRequired: 'Reset token is required',
 
+
+
     refreshTokenRequired: 'Refresh token is required',
+
   },
 }
