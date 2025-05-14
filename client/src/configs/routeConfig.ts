@@ -6,9 +6,12 @@ export enum authRoute {
   changePassword = 'change-password',
 }
 
+export enum userRoute {
+  profile = 'profile',
+}
 export enum productRoute {
   productDetail = 'product-detail',
-
+}
 export enum userRoute {
   profile = 'profile',
 

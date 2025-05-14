@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import { authRoute, productRoute, userRoute } from '@/configs'
+import { authRoute, userRoute, productRoute } from '@/configs'
 
 
 
@@ -37,6 +37,17 @@ const router = createRouter({
           component: () => import('../views/auth/reset-password/PageView.vue'),
         },
       ],
+    },
+    {
+
+      path: '/user/',
+      name: 'user',
+      children: [
+        {
+          path: userRoute.profile,
+          name: userRoute.profile,
+          component: () => import('../views/user/profile/PageView.vue'),
+        }]
     },
     {
       path: '/products/',

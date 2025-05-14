@@ -1,163 +1,97 @@
 <template>
-  <div class="mx-auto px-4 py-8">
-    <div class="flex flex-col lg:flex-row gap-32">
-      <div class="w-full lg:w-1/2">
-        <div class="relative bg-white flex items-center justify-center rounded-lg aspect-video">
-          <img
-            v-if="productStore.productDetail?.productMedias?.length"
-            :src="productStore.productDetail?.productMedias[selectedImageIndex].media.url"
-            alt="Ảnh sản phẩm"
-            class="w-full h-full object-contain max-h-96 lg:max-h-[600px] transition-all duration-300 ease-in-out"
-          />
+  <div class="mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Product content -->
 
-          <!-- Nút điều hướng -->
-          <button
-            @click="prevImage"
-            class="absolute left-2 top-1/2 -translate-y-1/2 w-12 h-12 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center hover:bg-gray-300 shadow-md"
-          >
-            ‹
-          </button>
-          <button
-            @click="nextImage"
-            class="absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center hover:bg-gray-300 shadow-md"
-          >
-            ›
-          </button>
-        </div>
+    <div class="flex text-xl font-medium text-red-500 mb-8 items-center space-x-2">
+      <span class="hover:text-red-700 cursor-pointer">
+        {{ productStore.productDetail?.brand?.name }}
+      </span>
+      <span class="text-gray-400 font-bold flex-shrink-0">•</span>
+      <span class="hover:text-red-700 cursor-pointer">
+        {{ productStore.productDetail?.category?.name }}
+      </span>
+    </div>
+
+    <!-- Product Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 mb-16">
+      <!-- Product Gallery -->
+      <div class="lg:col-span-7">
+        <ProductGallery :productMedias="productStore.productDetail?.productMedias || []" />
       </div>
-
-      <!-- Right Column - Product Info -->
-      <div class="w-full lg:w-2/5">
-        <h1 class="text-3xl font-bold text-gray-900 mb-4">
-          {{ productStore.productDetail?.name }}
-        </h1>
-        <div class="flex items-center justify-start mb-6 gap-6">
-          <div class="text-xl font-medium">Mã sản phẩm: {{ productStore.productDetail?.code }}</div>
-          <div class="text-xl font-medium">
-            Thương hiệu: {{ productStore.productDetail?.brand.name }}
-          </div>
-        </div>
-        <div class="text-3xl font-bold text-red-600 mb-6">
-          Giá bán:
-          {{ vndFormat(productStore.productDetail?.price ?? 0) }}
-        </div>
-        <div class="mb-6">
-          <h3 class="text-xl font-medium text-gray-900 mb-2">Tính năng nổi bật:</h3>
-          <div
-            class="text-xl text-gray-600 space-y-2"
-            v-if="productStore.productDetail?.shortDescription"
-          >
-            <p
-              v-for="(line, index) in productStore.productDetail!.shortDescription!.split('\n')"
-              :key="index"
-            >
-              {{ line }}
-            </p>
-          </div>
-        </div>
-
-        <!-- Quantity and Add to Cart -->
-        <div class="flex items-center gap-4 mb-6">
-          <div class="flex border border-gray-300 rounded-md">
-            <button
-              class="px-2 py-1 text-gray-600 hover:bg-gray-100 focus:outline-none"
-              @click="decrementQuantity"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-7 w-7"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M20 12H4"
-                />
-              </svg>
-            </button>
-            <input
-              type="text"
-              v-model="quantity"
-              class="w-12 text-center border-x border-gray-300 focus:outline-none text-2xl"
-              readonly
-            />
-            <button
-              class="px-2 py-1 text-gray-600 hover:bg-gray-100 focus:outline-none"
-              @click="incrementQuantity"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-7 w-7"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-            </button>
-          </div>
-          <button
-            class="bg-red-500 w-64 hover:bg-red-600 text-white py-2 px-6 rounded-md text-2xl font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-            @click="addToCart"
-          >
-            Thêm vào giỏ
-          </button>
-        </div>
+      <!-- Product Info -->
+      <div class="lg:col-span-5">
+        <ProductInfo
+          :product="productStore.productDetail || {}"
+          @add-to-cart="onAddToCart"
+          @buy-now="onBuyNow"
+        />
       </div>
+    </div>
+
+    <!-- Product Attributes -->
+    <div
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 mb-16"
+      v-if="productStore.productDetail?.attributes?.length"
+    >
+      <div class="lg:col-span-7">
+        <ProductAttributes :attributes="productStore.productDetail?.attributes || []" />
+      </div>
+    </div>
+
+    <!-- Product Description -->
+    <div class="mb-16" v-if="productStore.productDetail?.longDescription">
+      <ProductDescription
+        :description="productStore.productDetail?.longDescription || ''"
+        :maxLength="300"
+      />
+    </div>
+
+    <!-- Related Products -->
+    <div v-if="relatedProducts.length">
+      <RelatedProducts :products="relatedProducts" :productRoute="productRoute.productDetail" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useProductStore } from '@/stores/productStore'
 import { useToast } from '@/hooks/useToast'
 import { ToastEnum } from '@/types/enum'
-import { vndFormat } from '@/helpers/processPrice'
+import { productRoute } from '@/configs'
+
+import ProductGallery from './ProductGallery.vue'
+import ProductInfo from './ProductInfo.vue'
+import ProductAttributes from './ProductAttributes.vue'
+import ProductDescription from './ProductDescription.vue'
+import RelatedProducts from './RelatedProducts.vue'
 
 const productStore = useProductStore()
-const selectedImageIndex = ref(0)
-const quantity = ref(1)
 const { showToast } = useToast()
 
-const addToCart = () => {
+// Only include related products from same category
+const relatedProducts = computed(() => {
+  return productStore.products.filter(
+    (product) =>
+      product.id !== productStore.productDetail?.id &&
+      product.category?.id === productStore.productDetail?.category?.id,
+  )
+})
+
+const onAddToCart = (quantity: number) => {
   if (productStore.productDetail) {
     console.log(
-      `Đã thêm sản phẩm ${productStore.productDetail.id} vào giỏ hàng với số lượng ${quantity.value}`,
+      `Đã thêm sản phẩm ${productStore.productDetail.id} vào giỏ hàng với số lượng ${quantity}`,
     )
 
     showToast(ToastEnum.Success, 'Đã thêm sản phẩm vào giỏ hàng')
   }
 }
 
-const incrementQuantity = () => {
-  quantity.value++
-}
-
-const decrementQuantity = () => {
-  if (quantity.value > 1) {
-    quantity.value--
-  }
-}
-
-const prevImage = () => {
-  if (selectedImageIndex.value > 0) {
-    selectedImageIndex.value--
-  }
-}
-
-const nextImage = () => {
-  const total = productStore.productDetail?.productMedias?.length || 0
-  if (selectedImageIndex.value < total - 1) {
-    selectedImageIndex.value++
+const onBuyNow = (quantity: number) => {
+  if (productStore.productDetail) {
+    console.log(`Mua ngay sản phẩm ${productStore.productDetail.id} với số lượng ${quantity}`)
+    showToast(ToastEnum.Success, 'Đã mua sản phẩm')
   }
 }
 </script>
