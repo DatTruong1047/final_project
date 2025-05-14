@@ -4,3 +4,6 @@ export * from './user.schema';
 export * from './request.schema';
 export * from './response.schema';
 export * from './email.schema';
+export * from './product.schema';
+export * from './category.schema';
+export * from './brand.schema';

@@ -9,3 +9,7 @@ export enum authRoute {
 export enum userRoute {
   profile = 'profile',
 }
+export enum productRoute {
+  productDetail = 'product-detail',
+
+}
