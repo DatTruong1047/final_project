@@ -8,6 +8,10 @@ interface State {
   page: number
   limit: number
   productDetail: ProductDetailType | null
+  loading: {
+    products: boolean
+    productDetail: boolean
+  }
 }
 
 export const useProductStore = defineStore('product', {
@@ -17,21 +21,60 @@ export const useProductStore = defineStore('product', {
     page: 1,
     limit: 8,
     productDetail: null,
+    loading: {
+      products: false,
+      productDetail: false,
+    },
   }),
 
   actions: {
     async getProducts(filter: ProductFilterType) {
-      const response = await getProducts(filter)
+      try {
+        this.loading.products = true
+        const response = await getProducts(filter)
 
-      this.products = response.data.products
-      this.total = response.data.total
-      this.page = response.data.page
-      this.limit = response.data.limit
+        this.products = response.data.products
+        this.total = response.data.total
+        this.page = response.data.page
+        this.limit = response.data.limit
+
+        return response.data
+      } catch (error) {
+        console.error('Error getting products:', error)
+        throw error
+      } finally {
+        this.loading.products = false
+      }
     },
 
     async getProductDetail(id: string) {
-      const response = await getProductDetail(id)
-      this.productDetail = response.data
+      if (this.productDetail?.id === id && !this.loading.productDetail) {
+        return this.productDetail
+      }
+
+      try {
+        this.loading.productDetail = true
+        this.productDetail = null
+
+        const response = await getProductDetail(id)
+        this.productDetail = response.data
+
+        return response.data
+      } catch (error) {
+        console.error('Error getting product detail:', error)
+        throw error
+      } finally {
+        this.loading.productDetail = false
+      }
+    },
+
+    resetProductDetail() {
+      this.productDetail = null
+    },
+
+    resetProducts() {
+      this.products = []
+      this.total = 0
     },
   },
 })
