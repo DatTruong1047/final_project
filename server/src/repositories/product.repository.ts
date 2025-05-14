@@ -118,13 +118,13 @@ export default class ProductRepository {
           name: {
             contains: searchText,
             mode: Prisma.QueryMode.insensitive,
-          }
+          },
         },
         {
           shortDescription: {
             contains: searchText,
             mode: Prisma.QueryMode.insensitive,
-          }
+          },
         },
         {
           attributes: {
@@ -134,8 +134,8 @@ export default class ProductRepository {
                 mode: Prisma.QueryMode.insensitive,
               },
             },
-          }
-        }
+          },
+        },
       ],
     };
   }
