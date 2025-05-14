@@ -1,10 +1,12 @@
-import prisma from '@app/lib/prisma';
-import { RefreshTokenType, RefreshTokenResponeType } from '@model';
+import { PrismaClient } from '@prisma/client';
 
-import { PrismaClient, Token } from '../../generated/prisma';
+import { RefreshTokenType, RefreshTokenResponeType, FindRefreshTokenResponseType } from '@model';
+
+import prisma from '@app/lib/prisma';
 
 export default class AuthRepository {
-  private readonly _prisma: PrismaClient;
+  private _prisma: PrismaClient;
+
   constructor() {
     this._prisma = prisma;
   }
@@ -21,18 +23,7 @@ export default class AuthRepository {
     return token;
   }
 
-  async findTokenByUserId(userId: string, ipAddress: string): Promise<Token | null> {
-    const token = await this._prisma.token.findFirst({
-      where: {
-        userId: userId,
-        ipAddress: ipAddress,
-      },
-    });
-
-    return token;
-  }
-
-  async findRefreshToken(token: string, ipAddress: string): Promise<RefreshTokenResponeType | null> {
+  async findRefreshToken(token: string, ipAddress: string): Promise<FindRefreshTokenResponseType> {
     const stored_token = await this._prisma.token.findUnique({
       where: {
         refreshToken: token,
@@ -51,8 +42,18 @@ export default class AuthRepository {
         },
       },
     });
-
     return stored_token;
+  }
+
+  async findTokenByUserId(userId: string, ipAddress: string): Promise<RefreshTokenResponeType | null> {
+    const token = await this._prisma.token.findFirst({
+      where: {
+        userId: userId,
+        ipAddress: ipAddress,
+      },
+    });
+
+    return token;
   }
 
   async saveRefreshToken(input: RefreshTokenType): Promise<RefreshTokenType> {
@@ -68,7 +69,7 @@ export default class AuthRepository {
     return new_token;
   }
 
-  async deleteResfeshToken(token: string): Promise<Token> {
+  async deleteResfeshToken(token: string): Promise<RefreshTokenResponeType> {
     const deleted_token = await this._prisma.token.delete({
       where: { refreshToken: token },
     });

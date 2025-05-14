@@ -12,7 +12,10 @@
     "prepush": "",
     "prebuild": "rimraf dist",
     "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start:dev": "tsx watch src/server.ts"
     "seed": "tsx src/seed.ts"
+
   },
   "keywords": [],
   "author": "",
@@ -63,9 +66,10 @@
     "globals": "^16.0.0",
     "husky": "^7.0.4",
     "lint-staged": "^12.5.0",
+    "module-alias": "^2.2.3",
     "prettier": "^2.7.1",
     "ts-loader": "^9.3.1",
-    "tsconfig-paths": "^3.11.0",
+    "tsconfig-paths": "^3.15.0",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.31.1"

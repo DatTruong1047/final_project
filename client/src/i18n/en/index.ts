@@ -73,6 +73,7 @@ export const en = {
     confirmPasswordRequired: 'Please confirm your password',
 
     resetTokenRequired: 'Reset token is required',
+
     refreshTokenRequired: 'Refresh token is required',
 
   },

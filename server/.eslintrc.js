@@ -67,50 +67,16 @@ module.exports = {
   ignorePatterns: ['.eslintrc.js', 'dist', 'node_modules'],
   rules: {
     '@typescript-eslint/interface-name-prefix': 'off',
-    '@typescript-eslint/explicit-function-return-type': 'warn', //return type
-    '@typescript-eslint/explicit-module-boundary-types': 'warn',
+    '@typescript-eslint/explicit-function-return-type': 'error',
+    '@typescript-eslint/explicit-module-boundary-types': 'error',
     '@typescript-eslint/no-explicit-any': 'error',
     'import/order': [
       'error',
       {
+        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
         pathGroups: [
           {
             pattern: '@app/**',
-            group: 'internal',
-            position: 'after',
-          },
-          {
-            pattern: '@controllers/**',
-            group: 'internal',
-            position: 'after',
-          },
-          {
-            pattern: '@middleware/**',
-            group: 'internal',
-            position: 'after',
-          },
-          {
-            pattern: '@plugins/**',
-            group: 'internal',
-            position: 'after',
-          },
-          {
-            pattern: '@routes/**',
-            group: 'internal',
-            position: 'after',
-          },
-          {
-            pattern: '@schemas/**',
-            group: 'internal',
-            position: 'after',
-          },
-          {
-            pattern: '@services/**',
-            group: 'internal',
-            position: 'after',
-          },
-          {
-            pattern: '@utils/**',
             group: 'internal',
             position: 'after',
           },
@@ -120,14 +86,47 @@ module.exports = {
             position: 'after',
           },
           {
-            pattern: '@decorator/**',
+            pattern: '@model/**',
             group: 'internal',
             position: 'after',
           },
+          {
+            pattern: '@util/**',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: '@repository/**',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: '@services/**',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: '@decorators/**',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: '@controller/**',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: '@routes/**',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: '@plugins/**',
+            group: 'internal',
+            position: 'after',
+          }
         ],
-        pathGroupsExcludedImportTypes: ['internal'],
         'newlines-between': 'always',
-        groups: ['builtin', 'external', 'internal', 'unknown', 'parent', 'sibling', 'index', 'object', 'type'],
         alphabetize: {
           order: 'asc',
           caseInsensitive: true,

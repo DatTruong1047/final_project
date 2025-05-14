@@ -1,5 +1,6 @@
-import app from '@app/app';
 import { TokenPayloadType, TokenOption } from '@model';
+
+import app from '@app/app';
 
 export function generateToken(payload: TokenPayloadType, options: TokenOption): string {
   try {

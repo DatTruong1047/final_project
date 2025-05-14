@@ -54,7 +54,11 @@ export const ProfileResponseSchema = z.object({
   fullName: z.string().nullish(),
   phoneNumber: z.string().nullish(),
   address: z.string().nullish(),
-  mediaUrl: z.string(),
+  media: z
+    .object({
+      url: z.string().nullish(),
+    })
+    .nullish(),
 });
 
 export type UserQueryType = z.infer<typeof UserQuerySchema>;

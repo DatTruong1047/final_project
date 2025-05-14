@@ -3,16 +3,19 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import {
   EmailTokenPayloadType,
   ErrorResponseType,
+  FileType,
   SuccessResponseType,
   SuccessResWithoutDataType,
   TokenPayloadType,
 } from '../models';
 
+import { MultipartFile } from '@fastify/multipart';
+
 type VerifyEmailType = {
   id: string;
   email: string;
   isVerifiedEmail: boolean;
-}
+};
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -34,14 +37,14 @@ declare module 'fastify' {
     OK<T>(res: T | SuccessResponseType<T> | SuccessResWithoutDataType): FastifyReply;
     Created<T>(res: SuccessResponseType<T> | SuccessResWithoutDataType): FastifyReply;
 
-    InternalServer(err: Error): FastifyReply;
+    InternalServer(err: ErrorResponseType | Error): FastifyReply;
   }
 }
 
 declare module 'fastify' {
   interface FastifyRequest {
     decodedEmailToken: EmailTokenPayloadType;
-    decodeAccessToken: TokenPayloadType;
-    // uploadedFile?: FileType;
+    decodedAccessToken: TokenPayloadType;
+    uploadedFile?: FileType;
   }
 }
