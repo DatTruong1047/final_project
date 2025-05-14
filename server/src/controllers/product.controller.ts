@@ -1,8 +1,10 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { binding } from '@decorators/binding.decorator';
 import { ErrorResponseType, ProductDetailType, ProductFilterType, ProductListType, SuccessResponseType } from '@model';
+
 import ProductService from '@services/product.service';
+
+import { binding } from '@decorators/binding.decorator';
 
 export default class ProductController {
   constructor(private readonly productService: ProductService) {}

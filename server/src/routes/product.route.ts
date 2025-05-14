@@ -1,6 +1,5 @@
 import { FastifyInstance } from 'fastify';
 
-import ProductController from '@controller/product.controller';
 import {
   SuccessResponseSchema,
   ErrorResponseSchema,
@@ -8,7 +7,10 @@ import {
   ProductListSchema,
   ProductFilterSchema,
 } from '@model';
+
 import ProductService from '@services/product.service';
+
+import ProductController from '@controller/product.controller';
 export default async function productRoutes(app: FastifyInstance): Promise<void> {
   const productService = new ProductService();
   const productController = new ProductController(productService);
