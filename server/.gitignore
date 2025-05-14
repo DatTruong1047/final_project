@@ -63,8 +63,11 @@ profile*
 *flamegraph*
 
 .env
+
 .dockerignore   
 package-lock.json
 
 public/media
+
+data
 

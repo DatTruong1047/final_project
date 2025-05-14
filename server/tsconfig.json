@@ -30,6 +30,6 @@
       "generated/prisma": ["generated/prisma"]
     }
   },
-  "include": ["src/**/*", "generated/**/*"],
+  "include": ["src/**/*", "register-paths.js"],
   "exclude": ["node_modules", "dist"]
 }
