@@ -19,6 +19,7 @@ import emailPlugin from '@plugins/email.plugin';
 import replyPlugin from '@plugins/reply.plugin';
 
 import { ErrorResponseType } from './models';
+import errorHandlerPlugin from './plugins/error-handler.plugin';
 
 const PORT = config.PORT || 3000;
 
@@ -60,7 +61,8 @@ const startServer = async (): Promise<void> => {
     // Plugins
     app.register(authPlugin);
     app.register(emailPlugin);
-
+    app.register(errorHandlerPlugin);
+    
     // Static
     app.register(fastifyStatic, {
       root: path.join(__dirname, '..', 'public', 'media'),

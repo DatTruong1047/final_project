@@ -5,6 +5,7 @@ import { ErrorResponseType, CategoryListType, SuccessResponseType } from '@model
 import CategoryService from '@services/category.service';
 
 import { binding } from '@decorators/binding.decorator';
+import app from '@app/app';
 
 export default class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
@@ -21,11 +22,7 @@ export default class CategoryController {
 
       return reply.OK(response);
     } catch (error) {
-      const errorResponse: ErrorResponseType = {
-        message: error.message,
-        code: error.code,
-      };
-      return reply.BadRequest(errorResponse);
+      return app.handleErrorResponse(error, reply);
     }
   }
 }

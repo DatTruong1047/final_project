@@ -13,6 +13,7 @@ import {
 import CartService from '@services/cart.service';
 
 import { binding } from '@decorators/binding.decorator';
+import app from '@app/app';
 
 export default class CartController {
   constructor(private readonly _cartService: CartService) {}
@@ -40,12 +41,7 @@ export default class CartController {
 
       return reply.OK(response);
     } catch (error) {
-      console.log(error);
-      const errorResponse: ErrorResponseType = {
-        code: ErrorCodes.SERVER_ERROR,
-        message: 'Internal server error',
-      };
-      return reply.InternalServer(errorResponse);
+      return app.handleErrorResponse(error, reply);
     }
   }
 
@@ -74,11 +70,7 @@ export default class CartController {
 
       return reply.Created(response);
     } catch (error) {
-      const errorResponse: ErrorResponseType = {
-        code: ErrorCodes.SERVER_ERROR,
-        message: 'Internal server error',
-      };
-      return reply.InternalServer(errorResponse);
+      return app.handleErrorResponse(error, reply);
     }
   }
 
@@ -102,7 +94,7 @@ export default class CartController {
           message: result.message,
         };
         if (result.code === ErrorCodes.CART_NOT_FOUND) {
-          return reply.NotFound(errorResponse);
+          return reply.Forbidden(errorResponse);
         }
         return reply.BadRequest(errorResponse);
       }
@@ -114,11 +106,7 @@ export default class CartController {
 
       return reply.OK(response);
     } catch (error) {
-      const errorResponse: ErrorResponseType = {
-        code: ErrorCodes.SERVER_ERROR,
-        message: 'Internal server error',
-      };
-      return reply.InternalServer(errorResponse);
+      return app.handleErrorResponse(error, reply);
     }
   }
 
@@ -144,11 +132,7 @@ export default class CartController {
 
       return reply.OK(response);
     } catch (error) {
-      const errorResponse: ErrorResponseType = {
-        code: ErrorCodes.SERVER_ERROR,
-        message: 'Internal server error',
-      };
-      return reply.InternalServer(errorResponse);
+      return app.handleErrorResponse(error, reply);
     }
   }
 }

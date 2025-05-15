@@ -29,20 +29,22 @@ export default class CartRepository {
     ]);
 
     const cartsWithTotalPrice = carts.map((cart) => {
-      const itemTotalPrice = cart.quantity * Number(cart.product.price);
+      const productPrice = Number(cart.product.price);
+      const itemTotalPrice = cart.quantity * productPrice;
+      const productThumbnail = cart.product.productMedias[0]?.media;
 
       return {
         ...cart,
         product: {
           ...cart.product,
-          price: Number(cart.product.price),
+          price: productPrice,
           thumbnail: {
-            id: cart.product.productMedias[0]?.id || '',
-            media: cart.product.productMedias[0]?.media
+            id: productThumbnail?.id || '',
+            media: productThumbnail
               ? {
-                  id: cart.product.productMedias[0].media.id,
-                  url: cart.product.productMedias[0].media.url,
-                  description: cart.product.productMedias[0].media.description,
+                  id: productThumbnail.id,
+                  url: productThumbnail.url,
+                  description: productThumbnail.description,
                 }
               : null,
           },
@@ -69,23 +71,27 @@ export default class CartRepository {
     if (!cart) {
       throw new Error('Cart not found');
     }
+    const productPrice = Number(cart.product.price);
+    const itemTotalPrice = cart.quantity * productPrice;
+    const productThumbnail = cart.product.productMedias[0]?.media;
+
     return {
       ...cart,
       product: {
         ...cart.product,
-        price: Number(cart.product.price),
+        price: productPrice,
         thumbnail: {
-          id: cart.product.productMedias[0]?.id || '',
-          media: cart.product.productMedias[0]?.media
+          id: productThumbnail?.id || '',
+          media: productThumbnail
             ? {
-                id: cart.product.productMedias[0].media.id,
-                url: cart.product.productMedias[0].media.url,
-                description: cart.product.productMedias[0].media.description,
+                id: productThumbnail.id,
+                url: productThumbnail.url,
+                description: productThumbnail.description,
               }
             : null,
         },
       },
-      totalPrice: cart.quantity * Number(cart.product.price),
+      totalPrice: itemTotalPrice,
     };
   }
 
@@ -116,7 +122,7 @@ export default class CartRepository {
 
       return true;
     } catch (error) {
-      throw new Error('Failed to create cart');
+      throw new Error(`Failed to create cart: ${error.message}`);
     }
   }
 
@@ -128,7 +134,7 @@ export default class CartRepository {
 
       return true;
     } catch (error) {
-      throw new Error('Failed to delete cart');
+      throw new Error(`Failed to delete cart: ${error.message}`);
     }
   }
 
@@ -143,7 +149,7 @@ export default class CartRepository {
 
       return true;
     } catch (error) {
-      throw new Error('Failed to update cart');
+      throw new Error(`Failed to update cart: ${error.message}`);
     }
   }
 

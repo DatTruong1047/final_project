@@ -53,6 +53,7 @@ export default async function cartRoutes(app: FastifyInstance): Promise<void> {
         200: SuccessResWithoutDataSchema,
         400: ErrorResponseSchema,
         401: ErrorResponseSchema,
+        403: ErrorResponseSchema,
         500: ErrorResponseSchema,
       },
     },
