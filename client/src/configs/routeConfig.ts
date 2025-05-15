@@ -12,7 +12,7 @@ export enum userRoute {
 export enum productRoute {
   productDetail = 'product-detail',
 }
-export enum userRoute {
-  profile = 'profile',
 
+export enum cartRoute {
+  cart = 'cart',
 }

@@ -12,7 +12,7 @@
 <script setup>
 import LoadingComponent from '@/components/atoms/_utils/LoadingComponent.vue'
 import FormComponent from '@/components/user/profile/FormComponent.vue'
-import { useAuthStore } from '@/stores'
+import { useAuthStore } from '@/stores/authStore'
 
 const authStore = useAuthStore()
 </script>

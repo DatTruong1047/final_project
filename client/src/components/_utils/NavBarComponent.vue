@@ -30,11 +30,11 @@
           </RouterLink>
 
           <RouterLink
-            to="/about"
+            :to="{ name: cartRoute.cart }"
             class="px-3 py-2 text-2xl text-gray-700 hover:text-red-600 relative group dark:text-gray-300 dark:hover:text-white transition-colors duration-200"
             active-class="text-red-600 dark:text-red-400"
           >
-            About
+            Cart
             <span
               class="absolute bottom-0 left-0 w-full h-0.5 bg-red-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
             ></span>
@@ -147,12 +147,12 @@
           </RouterLink>
 
           <RouterLink
-            to="/about"
+            :to="{ name: cartRoute.cart }"
             class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-500 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700 transition-colors duration-200"
             active-class="text-red-500 bg-gray-50 dark:bg-gray-700 dark:text-red-400"
             @click="isMobileMenuOpen = false"
           >
-            About
+            Cart
           </RouterLink>
 
           <RouterLink
@@ -227,7 +227,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import router from '@/router'
-import { authRoute, userRoute } from '@/configs'
+import { authRoute, cartRoute, userRoute } from '@/configs'
 import { useAuthStore } from '@/stores/authStore'
 
 const authStore = useAuthStore()

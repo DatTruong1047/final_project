@@ -73,7 +73,35 @@ export const en = {
     confirmPasswordRequired: 'Please confirm your password',
 
     resetTokenRequired: 'Reset token is required',
-
     refreshTokenRequired: 'Refresh token is required',
+
+    common: {
+      required: 'This field is required',
+      mustBeString: 'This field must be a string',
+      mustBeNumber: 'This field must be a number',
+      mustBeInteger: 'This field must be an integer',
+      mustBePositive: 'This field must be a positive number',
+      minOne: 'Value must be at least 1',
+    },
+
+    cart: {
+      productId: {
+        required: 'Product ID is required',
+      },
+      quantity: {
+        required: 'Quantity is required',
+        type: 'Quantity must be a number',
+        integer: 'Quantity must be an integer',
+        positive: 'Quantity must be greater than 0',
+        min: 'Quantity must be at least 1',
+      },
+      count: {
+        required: 'Count is required',
+        type: 'Count must be a number',
+        integer: 'Count must be an integer',
+        positive: 'Count must be greater than 0',
+        min: 'Count must be at least 1',
+      },
+    },
   },
 }
