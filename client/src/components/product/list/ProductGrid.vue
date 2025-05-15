@@ -138,9 +138,6 @@ onMounted(async () => {
         filter.value.categoryId = categoryStore.selectedCategory
       }
     }
-
-    // await productStore.getProducts(filter.value)
-    showToast(ToastEnum.Success, t('message.success.loadProductsSuccess'))
   } catch (error) {
     showToast(ToastEnum.Error, t('message.error.loadProductsFail'))
   } finally {

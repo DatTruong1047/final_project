@@ -39,8 +39,8 @@ export const en = {
       forgotPassword: 'Forgot password fail',
       resetPassword: 'Reset password fail',
 
-      loadProductsFail: 'Load products fail',
-      loadCategoriesFail: 'Load categories fail',
+      loadProductsFail: 'Load products fail. Please try again later',
+      loadCategoriesFail: 'Load categories fail. Please try again later',
 
       noCategoriesFound: 'Loading categories...',
       noProductsFound: 'No products found',
@@ -75,6 +75,5 @@ export const en = {
     resetTokenRequired: 'Reset token is required',
 
     refreshTokenRequired: 'Refresh token is required',
-
   },
 }

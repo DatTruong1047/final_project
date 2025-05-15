@@ -35,7 +35,7 @@ const { t } = useI18n()
 onMounted(async () => {
   try {
     await categoryStore.getCategories()
-  } catch (error) {
+  } catch {
     showToast(ToastEnum.Error, t('message.error.loadCategoriesFail'))
   }
 })

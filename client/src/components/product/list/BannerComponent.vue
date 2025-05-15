@@ -6,8 +6,9 @@
       <div
         v-for="(image, index) in imageConfig.bannerImage"
         :key="index"
-        class="hidden duration-700 ease-in-out w-full h-full"
+        class="duration-700 ease-in-out w-full h-full"
         :data-carousel-item="index === 0 ? 'active' : ''"
+        :class="{ hidden: index !== 0 }"
       >
         <img
           :src="image"
@@ -90,4 +91,18 @@
 
 <script setup lang="ts">
 import { imageConfig } from '@/configs'
+import { onMounted, onActivated } from 'vue'
+import { initCarousels } from 'flowbite'
+
+onMounted(() => {
+  initializeCarousel()
+})
+
+onActivated(() => {
+  initializeCarousel()
+})
+
+function initializeCarousel() {
+  initCarousels()
+}
 </script>
