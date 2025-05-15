@@ -23,6 +23,7 @@ declare module 'fastify' {
     verifyAdmin: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
     verifyRefreshToken: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
     verifyEmailToken: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+    handleErrorResponse: (error: Error, reply: FastifyReply) => FastifyReply;
   }
 }
 

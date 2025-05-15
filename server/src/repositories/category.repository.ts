@@ -1,6 +1,7 @@
-import prisma from '@app/lib/prisma';
 import { CategoryListType } from '@model';
 import { PrismaClient } from 'generated/prisma';
+
+import prisma from '@app/lib/prisma';
 
 export default class CategoryRepository {
   private readonly _prisma: PrismaClient;
