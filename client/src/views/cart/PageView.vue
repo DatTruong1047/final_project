@@ -40,10 +40,10 @@
   <ConfirmModal
     ref="confirmModal"
     @confirm="confirmDelete"
-    title="Xóa sản phẩm"
-    :message="`Bạn có chắc chắn muốn xóa sản phẩm '${productToDeleteName}' khỏi giỏ hàng?`"
-    confirmText="Xóa"
-    cancelText="Hủy"
+    :title="`Delete product '${productToDeleteName}' from cart?`"
+    :message="`Are you sure you want to delete product '${productToDeleteName}' from cart?`"
+    confirmText="Delete"
+    cancelText="Cancel"
   />
 </template>
 

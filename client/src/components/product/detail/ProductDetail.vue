@@ -93,7 +93,7 @@ const onAddToCart = (quantity: number) => {
         productId: productStore.productDetail.id,
         quantity: quantity,
       }
-      if (authStore.isAuthenticated) {
+      if (!authStore.isAuthenticated) {
         cartStore.addToCart(cartRequest)
         showToast(ToastEnum.Success, t('message.success.addToCartSuccess'))
       } else {

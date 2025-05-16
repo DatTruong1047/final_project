@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { vndFormat } from '@/helpers/processPrice'
 import { imageConfig } from '@/configs'
-import { useCartStore } from '@/stores/cartStore'
 import type { CartBaseType, CartDetailType } from '@/types/cartType'
 
 defineProps<{
@@ -10,8 +9,6 @@ defineProps<{
   onDecreaseQuantity: (id: string) => void
   onRemoveItem: (id: string) => void
 }>()
-
-const cartStore = useCartStore()
 </script>
 
 <template>
@@ -76,12 +73,9 @@ const cartStore = useCartStore()
         <span class="w-12 text-center">{{ cart.quantity }}</span>
 
         <button
-          class="bg-gray-200 text-gray-700 px-2 py-1 rounded hover:bg-gray-300"
+          class="bg-gray-200 text-gray-700 px-2 py-1 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
           @click="onIncreaseQuantity(cart.id)"
           :disabled="cart.quantity >= cart.product.quantity"
-          :class="{
-            'opacity-50 cursor-not-allowed': cart.quantity >= cart.product.quantity,
-          }"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

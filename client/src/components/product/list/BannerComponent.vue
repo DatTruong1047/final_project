@@ -94,14 +94,6 @@ import { onMounted, onActivated } from 'vue'
 import { initCarousels } from 'flowbite'
 
 onMounted(() => {
-  initializeCarousel()
-})
-
-onActivated(() => {
-  initializeCarousel()
-})
-
-function initializeCarousel() {
   initCarousels()
-}
+})
 </script>

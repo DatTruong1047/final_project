@@ -70,7 +70,7 @@
 import { defineProps, defineEmits, defineExpose } from 'vue'
 import { ref } from 'vue'
 
-const props = defineProps({
+defineProps({
   title: {
     type: String,
     default: 'Are you sure?',
@@ -117,5 +117,5 @@ defineExpose({
 </script>
 
 <style scoped lang="scss">
-@import '@/css/atoms/_utils/_confirm-modal.scss';
+@use '@/css/atoms/_utils/_confirm-modal.scss';
 </style>

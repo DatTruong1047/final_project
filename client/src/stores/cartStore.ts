@@ -25,9 +25,9 @@ export const useCartStore = defineStore('cart', {
         this.loading.cart = true
         const response = await getCarts()
         this.cart = response.data
-      } catch (error) {
-        console.error('Error getting cart:', error)
-        throw error
+      } catch (error: any) {
+        console.error('Error getting cart:', error.message)
+        return Promise.reject(error)
       } finally {
         this.loading.cart = false
       }
@@ -39,9 +39,9 @@ export const useCartStore = defineStore('cart', {
         const response = await addToCart(data)
 
         await this.getCarts()
-      } catch (error) {
-        console.error('Error adding to cart:', error)
-        throw error
+      } catch (error: any) {
+        console.error('Error adding to cart:', error.message)
+        return Promise.reject(error)
       } finally {
         this.loading.cart = false
       }
@@ -54,9 +54,9 @@ export const useCartStore = defineStore('cart', {
         await updateCart(data)
 
         await this.getCarts()
-      } catch (error) {
-        console.error('Error updating cart:', error)
-        throw error
+      } catch (error: any) {
+        console.error('Error updating cart:', error.message)
+        return Promise.reject(error)
       } finally {
         this.loading.cart = false
       }
@@ -68,9 +68,9 @@ export const useCartStore = defineStore('cart', {
         const response = await removeFromCart(id)
 
         await this.getCarts()
-      } catch (error) {
-        console.error('Error removing from cart:', error)
-        throw error
+      } catch (error: any) {
+        console.error('Error removing from cart:', error.message)
+        return Promise.reject(error)
       } finally {
         this.loading.cart = false
       }
