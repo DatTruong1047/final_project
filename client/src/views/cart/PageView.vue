@@ -90,13 +90,13 @@ const updateChangedList = (id: string, quantity: number) => {
   changedList.value[id] = quantity
 }
 
-const onIncreaseQuantity = (id: string) => {
+const onIncreaseQuantity = async (id: string) => {
   try {
     if (!data.value.carts) return
 
     const cart = data.value.carts.find((cart) => cart.id === id)
     if (cart) {
-      cartStore.updateCart({
+      await cartStore.updateCart({
         id: cart.id,
         count: cart.quantity + 1,
       })
@@ -108,14 +108,14 @@ const onIncreaseQuantity = (id: string) => {
   }
 }
 
-const onDecreaseQuantity = (id: string) => {
+const onDecreaseQuantity = async (id: string) => {
   try {
     if (!data.value.carts) return
 
     const cart = data.value.carts.find((cart) => cart.id === id)
     if (cart) {
       if (cart.quantity > 1) {
-        cartStore.updateCart({
+        await cartStore.updateCart({
           id: cart.id,
           count: cart.quantity - 1,
         })
@@ -143,14 +143,14 @@ const onRemoveItem = (id: string) => {
   }
 }
 
-const confirmDelete = () => {
+const confirmDelete = async () => {
   try {
     if (!data.value.carts) return
 
     const id = productToDelete.value
     if (!id) return
 
-    cartStore.removeFromCart(id)
+    await cartStore.removeFromCart(id)
     data.value.carts = data.value.carts.filter((cart) => cart.id !== id)
     showToast(ToastEnum.Success, t('message.success.removeCartSuccess'))
   } catch (error) {
@@ -159,9 +159,9 @@ const confirmDelete = () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (authStore.isAuthenticated) {
-    cartStore.getCarts()
+    await cartStore.getCarts()
   }
 })
 </script>
