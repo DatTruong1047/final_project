@@ -25,7 +25,6 @@ export const useCartStore = defineStore('cart', {
         this.loading.cart = true
         const response = await getCarts()
         this.cart = response.data
-        this.loading.cart = false
       } catch (error) {
         console.error('Error getting cart:', error)
         throw error
@@ -38,7 +37,8 @@ export const useCartStore = defineStore('cart', {
       try {
         this.loading.cart = true
         const response = await addToCart(data)
-        this.cart = response.data
+
+        await this.getCarts()
       } catch (error) {
         console.error('Error adding to cart:', error)
         throw error
@@ -50,8 +50,10 @@ export const useCartStore = defineStore('cart', {
     async updateCart(data: CartUpdateRequestType) {
       try {
         this.loading.cart = true
-        const response = await updateCart(data)
-        this.cart = response.data
+
+        await updateCart(data)
+
+        await this.getCarts()
       } catch (error) {
         console.error('Error updating cart:', error)
         throw error
@@ -64,7 +66,8 @@ export const useCartStore = defineStore('cart', {
       try {
         this.loading.cart = true
         const response = await removeFromCart(id)
-        this.cart = response.data
+
+        await this.getCarts()
       } catch (error) {
         console.error('Error removing from cart:', error)
         throw error

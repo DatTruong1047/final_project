@@ -8,7 +8,6 @@
         :key="index"
         class="duration-700 ease-in-out w-full h-full"
         :data-carousel-item="index === 0 ? 'active' : ''"
-        :class="{ hidden: index !== 0 }"
       >
         <img
           :src="image"
@@ -80,7 +79,7 @@
         v-for="(_, index) in imageConfig.bannerImage"
         :key="index"
         type="button"
-        class="w-3 h-3 md:w-4 md:h-4 rounded-full"
+        class="w-3 h-3 md:w-4 md:h-4 rounded-full mb-2"
         :aria-current="index === 0 ? 'true' : 'false'"
         :aria-label="`Slide ${index + 1}`"
         :data-carousel-slide-to="index"

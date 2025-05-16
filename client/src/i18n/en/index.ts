@@ -38,6 +38,7 @@ export const en = {
       register: 'Register fail',
       forgotPassword: 'Forgot password fail',
       resetPassword: 'Reset password fail',
+      unauthenticated: 'You need to login first',
 
       loadProductsFail: 'Load products fail. Please try again later',
       loadCategoriesFail: 'Load categories fail. Please try again later',
@@ -45,6 +46,10 @@ export const en = {
       noCategoriesFound: 'Loading categories...',
       noProductsFound: 'No products found',
       productNotFound: 'Product not found',
+
+      addToCartFail: 'Add to cart fail. Please try again later',
+      updateCartFail: 'Update cart fail. Please try again later',
+      removeCartFail: 'Remove cart fail. Please try again later',
     },
     success: {
       login: 'Login successfull',
@@ -54,6 +59,10 @@ export const en = {
 
       loadProductsSuccess: 'Load products successfully',
       loadCategoriesSuccess: 'Load categories successfully',
+
+      addToCartSuccess: 'Add to cart successfully',
+      updateCartSuccess: 'Update cart successfully',
+      removeCartSuccess: 'Remove cart successfully',
     },
   },
   validation: {

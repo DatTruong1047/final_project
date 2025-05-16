@@ -65,9 +65,17 @@ import ProductInfo from './ProductInfo.vue'
 import ProductAttributes from './ProductAttributes.vue'
 import ProductDescription from './ProductDescription.vue'
 import RelatedProducts from './RelatedProducts.vue'
+import { useCartStore } from '@/stores/cartStore'
+import type { CartUpsertRequestType } from '@/types/cartType'
+import { useI18n } from 'vue-i18n'
+import { useAuthStore } from '@/stores/authStore'
 
+const cartStore = useCartStore()
 const productStore = useProductStore()
+const authStore = useAuthStore()
+
 const { showToast } = useToast()
+const { t } = useI18n()
 
 // Only include related products from same category
 const relatedProducts = computed(() => {
@@ -79,18 +87,27 @@ const relatedProducts = computed(() => {
 })
 
 const onAddToCart = (quantity: number) => {
-  if (productStore.productDetail) {
-    console.log(
-      `Đã thêm sản phẩm ${productStore.productDetail.id} vào giỏ hàng với số lượng ${quantity}`,
-    )
-
-    showToast(ToastEnum.Success, 'Đã thêm sản phẩm vào giỏ hàng')
+  try {
+    if (productStore.productDetail) {
+      const cartRequest: CartUpsertRequestType = {
+        productId: productStore.productDetail.id,
+        quantity: quantity,
+      }
+      if (authStore.isAuthenticated) {
+        cartStore.addToCart(cartRequest)
+        showToast(ToastEnum.Success, t('message.success.addToCartSuccess'))
+      } else {
+        showToast(ToastEnum.Error, t('message.error.unauthenticated'))
+      }
+    }
+  } catch (error) {
+    console.error('Error adding to cart:', error)
+    showToast(ToastEnum.Error, t('message.error.addToCartFail'))
   }
 }
 
 const onBuyNow = (quantity: number) => {
   if (productStore.productDetail) {
-    console.log(`Mua ngay sản phẩm ${productStore.productDetail.id} với số lượng ${quantity}`)
     showToast(ToastEnum.Success, 'Đã mua sản phẩm')
   }
 }

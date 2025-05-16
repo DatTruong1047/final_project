@@ -57,11 +57,5 @@ export const CartUpsertRequestSchema = yup.object({
 
 export const CartUpdateRequestSchema = yup.object({
   id: yup.string().required(),
-  count: yup
-    .number()
-    .required(t('message.validation.cart.count.required'))
-    .typeError(t('message.validation.cart.count.type'))
-    .integer(t('message.validation.cart.count.integer'))
-    .positive(t('message.validation.cart.count.positive'))
-    .min(1, t('message.validation.cart.count.min')),
+  count: yup.number().required(t('message.validation.cart.count.required')),
 })
