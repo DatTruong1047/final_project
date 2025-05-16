@@ -4,7 +4,7 @@
     :validation-schema="RegisterRequestSchema"
     v-slot="{ errors }"
     v-if="userData"
-    class="flex-auto flex w-1/2 md:flex-none grid grid-cols lg:gap-4 mx-auto lg:col-span items-center space-y-4"
+    class="flex-auto w-1/2 md:flex-none grid grid-cols lg:gap-4 mx-auto lg:col-span items-center space-y-4"
   >
     <p class="flex lg:text-5xl text-3xl font-normal antialiased pb-4">Create an account</p>
     <span class="flex text-gray-500 mb-6 lg:text-xl text-xl font-normal antialiased pb-4"

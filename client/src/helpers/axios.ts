@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { authRoute, axiosConfig } from '../configs'
-import { useAuthStore } from '../stores'
+import { useAuthStore } from '../stores/authStore'
 import { refreshToken } from '@/api'
 import { useRouter } from 'vue-router'
 import { ErrorCodes } from '@/configs/errorConfig'
@@ -29,7 +29,7 @@ axiosInstance.interceptors.request.use(
 )
 
 axiosInstance.interceptors.response.use(
-  (response) => response.data,
+  (response) => response.data || response,
   async (error) => {
     const originalRequest = error.config
     let errorCode = 5001

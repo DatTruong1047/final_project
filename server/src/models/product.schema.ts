@@ -45,11 +45,13 @@ export const ProductListSchema = z.object({
     }).extend({
       thumbnail: z.object({
         id: z.string(),
-        media: z.object({
-          id: z.string(),
-          url: z.string(),
-          description: z.string().optional().nullable(),
-        }).nullable(),
+        media: z
+          .object({
+            id: z.string(),
+            url: z.string(),
+            description: z.string().optional().nullable(),
+          })
+          .nullable(),
       }),
     })
   ),

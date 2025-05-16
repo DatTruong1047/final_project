@@ -45,7 +45,7 @@ async function seedProducts(): Promise<void> {
   // Lấy danh sách categories và brands từ DB
   const categories = await prisma.category.findMany();
   const brands = await prisma.brand.findMany();
-  
+
   // Đọc file categories.json và brands.json để lấy thông tin mapping
   const categoriesPath = path.join(__dirname, '../data/categories.json');
   const brandsPath = path.join(__dirname, '../data/brands.json');
@@ -56,11 +56,11 @@ async function seedProducts(): Promise<void> {
     // Map category_id và brand_id từ JSON sang ID trong DB
     const categoryName = categoriesJson[product.category_id - 1]?.name;
     const brandName = brandsJson[product.brand_id - 1]?.name;
-    
+
     // Tìm category và brand trong DB dựa trên tên
-    const category = categories.find(c => c.name === categoryName);
-    const brand = brands.find(b => b.name === brandName);
-    
+    const category = categories.find((c) => c.name === categoryName);
+    const brand = brands.find((b) => b.name === brandName);
+
     if (!category || !brand) {
       console.log(`Không tìm thấy category hoặc brand cho sản phẩm ${product.name}`);
       continue;

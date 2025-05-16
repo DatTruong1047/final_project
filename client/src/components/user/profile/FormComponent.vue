@@ -82,7 +82,7 @@ import {
   PhoneIcon,
   UserIcon,
 } from '@heroicons/vue/24/outline'
-import { useAuthStore } from '@/stores'
+import { useAuthStore } from '@/stores/authStore'
 import AvatarComponent from '@/components/atoms/user/AvatarComponent.vue'
 
 const authStore = useAuthStore()

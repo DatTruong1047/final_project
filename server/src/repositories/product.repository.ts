@@ -1,6 +1,7 @@
-import prisma from '@app/lib/prisma';
 import { ProductDetailType, ProductFilterType, ProductListType } from '@model';
 import { Prisma, PrismaClient } from 'generated/prisma';
+
+import prisma from '@app/lib/prisma';
 
 export default class ProductRepository {
   private readonly _prisma: PrismaClient;
@@ -108,7 +109,19 @@ export default class ProductRepository {
     };
   }
 
-  private _textSearchQuery(searchText: string) {
+  async updateQuantity(id: string, quantity: number): Promise<boolean> {
+    try {
+      await this._prisma.product.update({
+        where: { id },
+        data: { quantity },
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private _textSearchQuery(searchText: string): Prisma.ProductWhereInput {
     if (!searchText || searchText.trim() === '') {
       return {};
     }

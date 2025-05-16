@@ -23,6 +23,7 @@ import MailService from '@services/mail.service';
 import UserService from '@services/user.service';
 
 import { binding } from '@decorators/binding.decorator';
+import app from '@app/app';
 
 export default class AuthController {
   constructor(
@@ -70,11 +71,7 @@ export default class AuthController {
 
       return reply.Created(res);
     } catch (error) {
-      const errorResponse: ErrorResponseType = {
-        code: ErrorCodes.SERVER_ERROR,
-        message: 'Internal server error',
-      };
-      return reply.InternalServer(errorResponse);
+      return app.handleErrorResponse(error, reply);
     }
   }
 
@@ -100,11 +97,7 @@ export default class AuthController {
       };
       return reply.OK(res);
     } catch (error) {
-      const errorResponse: ErrorResponseType = {
-        code: ErrorCodes.SERVER_ERROR,
-        message: 'Internal server error',
-      };
-      return reply.InternalServer(errorResponse);
+      return app.handleErrorResponse(error, reply);
     }
   }
 
@@ -146,11 +139,7 @@ export default class AuthController {
       };
       return reply.OK(res);
     } catch (error) {
-      const errorResponse: ErrorResponseType = {
-        code: ErrorCodes.SERVER_ERROR,
-        message: 'Internal server error',
-      };
-      return reply.InternalServer(errorResponse);
+      return app.handleErrorResponse(error, reply);
     }
   }
 
@@ -187,11 +176,7 @@ export default class AuthController {
       };
       return reply.OK(res);
     } catch (error) {
-      const errorResponse: ErrorResponseType = {
-        code: ErrorCodes.SERVER_ERROR,
-        message: 'Internal server error',
-      };
-      return reply.InternalServer(errorResponse);
+      return app.handleErrorResponse(error, reply);
     }
   }
 
@@ -226,11 +211,7 @@ export default class AuthController {
       };
       return reply.OK(res);
     } catch (error) {
-      const errorResponse: ErrorResponseType = {
-        code: ErrorCodes.SERVER_ERROR,
-        message: 'Internal server error',
-      };
-      return reply.InternalServer(errorResponse);
+      return app.handleErrorResponse(error, reply);
     }
   }
 
@@ -258,7 +239,7 @@ export default class AuthController {
       };
       return reply.OK(res);
     } catch (error) {
-      return reply.InternalServer(error);
+      return app.handleErrorResponse(error, reply);
     }
   }
 }
