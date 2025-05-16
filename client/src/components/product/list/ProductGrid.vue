@@ -65,10 +65,6 @@ watch(
   },
 )
 
-const onAddToCart = (productId: string) => {
-  console.log(`Added product ${productId} to cart`)
-}
-
 const onLoadMore = async () => {
   try {
     const newFilter = { ...filter.value, page: filter.value.page + 1 }
@@ -138,9 +134,6 @@ onMounted(async () => {
         filter.value.categoryId = categoryStore.selectedCategory
       }
     }
-
-    // await productStore.getProducts(filter.value)
-    showToast(ToastEnum.Success, t('message.success.loadProductsSuccess'))
   } catch (error) {
     showToast(ToastEnum.Error, t('message.error.loadProductsFail'))
   } finally {
@@ -239,7 +232,6 @@ onMounted(async () => {
             <!-- Action Buttons -->
             <div class="flex items-center space-x-3 mt-auto">
               <button
-                @click.prevent="onAddToCart(product.id)"
                 class="flex-1 font-bold text-2xl bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-colors duration-300"
               >
                 See More

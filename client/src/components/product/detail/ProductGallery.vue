@@ -9,7 +9,7 @@
         @click="selectedImageIndex = index"
       >
         <img
-          :src="image.media.url"
+          :src="image.media.url || imageConfig.productDefault"
           :alt="`Product Image ${image.id}`"
           class="w-full h-full object-contain p-2"
         />
@@ -20,7 +20,7 @@
     <div class="flex-1 bg-gray-50 md:max-h-[48rem] rounded-lg order-1 md:order-2">
       <div class="relative w-full h-full">
         <img
-          :src="productMedias[selectedImageIndex].media.url"
+          :src="productMedias[selectedImageIndex].media.url || imageConfig.productDefault"
           :alt="`Product Image ${productMedias[selectedImageIndex].id}`"
           class="w-full h-full object-contain"
         />
@@ -30,7 +30,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps } from 'vue'
+import { ref } from 'vue'
+import { imageConfig } from '@/configs'
 
 interface ProductMedia {
   id: number | string

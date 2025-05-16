@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { authRoute, axiosConfig } from '../configs'
-import { useAuthStore } from '../stores'
+import { useAuthStore } from '../stores/authStore'
 import { refreshToken } from '@/api'
 import { useRouter } from 'vue-router'
 import { ErrorCodes } from '@/configs/errorConfig'

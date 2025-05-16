@@ -20,7 +20,7 @@ import { ref } from 'vue'
 import router from '@/router'
 import { login, getProfile } from '@/api'
 
-import { useAuthStore, type User } from '@/stores'
+import { useAuthStore, type User } from '@/stores/authStore'
 import { useToast } from '@/hooks/useToast'
 import { useI18n } from 'vue-i18n'
 

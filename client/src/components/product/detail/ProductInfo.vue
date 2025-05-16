@@ -43,20 +43,27 @@
         <input
           type="number"
           v-model="quantity"
-          class="w-18 h-18 text-center text-xl sm:text-2xl font-medium focus:ring-0 border border-gray-300 rounded-md"
+          class="w-20 h-12 text-center text-xl sm:text-2xl font-bold focus:ring-0 border border-gray-300 rounded-md"
           min="1"
+          :disabled="!authStore.isAuthenticated"
+          :class="{ 'opacity-50 cursor-not-allowed': !authStore.isAuthenticated }"
+          :max="product.quantity || 0"
         />
       </div>
 
       <button
         class="flex bg-green-600 text-lg md:text-2xl font-bold text-white px-2 py-2 sm:px-4 sm:py-5 hover:bg-green-500 transition-colors duration-300 rounded-md cursor-pointer"
         @click="$emit('add-to-cart', quantity)"
+        :disabled="!authStore.isAuthenticated"
+        :class="{ 'opacity-50 cursor-not-allowed': !authStore.isAuthenticated }"
       >
         Add to cart
       </button>
       <button
         class="flex bg-red-500 text-lg md:text-2xl font-bold text-white px-2 py-2 sm:px-4 sm:py-5 hover:bg-red-600 transition-colors duration-300 rounded-md cursor-pointer"
         @click="$emit('buy-now', quantity)"
+        :disabled="!authStore.isAuthenticated"
+        :class="{ 'opacity-50 cursor-not-allowed': !authStore.isAuthenticated }"
       >
         Buy now
       </button>
@@ -120,14 +127,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, defineEmits, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { vndFormat } from '@/helpers/processPrice'
+import { useAuthStore } from '@/stores/authStore'
+
+const authStore = useAuthStore()
 
 interface Product {
   id?: string | number
   name?: string
   price?: number
   code?: string
+  quantity?: number
   shortDescription?: string | null
   brand?: {
     name?: string
