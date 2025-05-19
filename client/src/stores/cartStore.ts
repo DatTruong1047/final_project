@@ -1,9 +1,15 @@
 import { addToCart, getCarts, removeFromCart, updateCart } from '@/api/cart'
-import type { CartListType, CartUpdateRequestType, CartUpsertRequestType } from '@/types/cartType'
+import type {
+  CartBaseType,
+  CartListType,
+  CartUpdateRequestType,
+  CartUpsertRequestType,
+} from '@/types/cartType'
 import { defineStore } from 'pinia'
 
 interface State {
   cart: CartListType
+  selectedCartIds: string[]
   loading: {
     cart: boolean
   }
@@ -16,9 +22,24 @@ export const useCartStore = defineStore('cart', {
       total: 0,
       totalPrice: 0,
     },
+    selectedCartIds: [],
     loading: { cart: false },
   }),
 
+  getters: {
+    getSelectedCartItems(state: State): CartListType['carts'] {
+      return state.cart.carts.filter((item) => state.selectedCartIds.includes(item.id))
+    },
+
+    getCartTotalPrice(state: State): number {
+      return state.cart.carts.reduce((total, item) => {
+        if (state.selectedCartIds.includes(item.id)) {
+          return total + item.quantity * item.product.price
+        }
+        return total
+      }, 0)
+    },
+  },
   actions: {
     async getCarts() {
       try {
@@ -68,11 +89,23 @@ export const useCartStore = defineStore('cart', {
         const response = await removeFromCart(id)
 
         await this.getCarts()
+
+        this.selectedCartIds = this.selectedCartIds.filter((item) => item !== id)
       } catch (error: any) {
         console.error('Error removing from cart:', error.message)
         return Promise.reject(error)
       } finally {
         this.loading.cart = false
+      }
+    },
+
+    toggleSelectedCart(id: string, checked: boolean) {
+      if (checked) {
+        if (!this.selectedCartIds.includes(id)) {
+          this.selectedCartIds.push(id)
+        }
+      } else {
+        this.selectedCartIds = this.selectedCartIds.filter((item) => item !== id)
       }
     },
   },
