@@ -9,3 +9,5 @@ export * from './product.schema';
 export * from './category.schema';
 export * from './brand.schema';
 export * from './cart.schema';
+export * from './order.schema';
+export * from './payment.schema';

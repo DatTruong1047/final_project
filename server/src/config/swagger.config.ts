@@ -33,6 +33,8 @@ export const swaggerConfig: SwaggerOptions = {
       { name: 'User', description: 'Endpoints related to Users' },
       { name: 'Media', description: 'Endpoints related to Media' },
       { name: 'Review', description: 'Endpoints related to Comment' },
+      { name: 'Order', description: 'Endpoints related to Order' },
+      { name: 'Payment', description: 'Endpoints related to Payment' },
       { name: 'Admin', description: 'Endpoints related to Admin' },
     ],
   },
