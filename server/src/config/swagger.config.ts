@@ -29,6 +29,7 @@ export const swaggerConfig: SwaggerOptions = {
       { name: 'Auth', description: 'Endpoints related to Authenticate' },
       { name: 'Category', description: 'Endpoints related to Categories' },
       { name: 'Cart', description: 'Endpoints related to Cart' },
+      { name: 'Chat', description: 'Endpoints related to Chat' },
       { name: 'Product', description: 'Endpoints related to Products' },
       { name: 'User', description: 'Endpoints related to Users' },
       { name: 'Media', description: 'Endpoints related to Media' },

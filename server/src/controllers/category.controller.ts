@@ -1,9 +1,8 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { ErrorResponseType, CategoryListType, SuccessResponseType } from '@model';
+import { CategoryListType, SuccessResponseType } from '@model';
 
 import CategoryService from '@services/category.service';
-
 import { binding } from '@decorators/binding.decorator';
 import app from '@app/app';
 

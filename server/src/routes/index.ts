@@ -5,7 +5,7 @@ import cartRoutes from './cart.route';
 import categoryRoutes from './category.route';
 import productRoutes from './product.route';
 import userRoutes from './user.route';
-
+import chatRoutes from './chat.route';
 export default async function registerRoutes(): Promise<void> {
   app.register(
     async () => {
@@ -14,6 +14,7 @@ export default async function registerRoutes(): Promise<void> {
       await app.register(productRoutes, { prefix: '/products' });
       await app.register(categoryRoutes, { prefix: '/categories' });
       await app.register(cartRoutes, { prefix: '/cart' });
+      await app.register(chatRoutes, { prefix: '/chat' });
     },
     { prefix: '/api' }
   );
