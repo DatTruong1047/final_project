@@ -24,6 +24,10 @@ const replyPlugin: FastifyPluginAsync = async (app: FastifyInstance) => {
     return this.status(409).send(err);
   });
 
+  app.decorateReply('TooManyRequests', function (this: FastifyReply, err: ErrorResponseType) {
+    return this.status(429).send(err);
+  });
+
   app.decorateReply('OK', function <T>(this: FastifyReply, res: SuccessResponseType<T>) {
     return this.status(200).send(res);
   });

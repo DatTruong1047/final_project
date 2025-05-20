@@ -2,9 +2,11 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { CategoryListType, SuccessResponseType } from '@model';
 
-import CategoryService from '@services/category.service';
-import { binding } from '@decorators/binding.decorator';
 import app from '@app/app';
+
+import CategoryService from '@services/category.service';
+
+import { binding } from '@decorators/binding.decorator';
 
 export default class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}

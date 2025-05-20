@@ -22,4 +22,3 @@ export const POSTGRES_PASSWORD = process.env.POSTGRES_PASSWORD;
 export const POSTGRES_DB = process.env.POSTGRES_DB;
 export const POSTGRES_HOST = 'localhost';
 export const POSTGRES_PORT = parseInt(process.env.POSTGRES_PORT, 10);
-

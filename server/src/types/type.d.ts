@@ -19,3 +19,17 @@ export type ProductDocument = {
   pageContent: string;
   metadata: Record<string, any>;
 };
+
+
+type CategoryJSONType = {
+  id: string;
+  name: string;
+  description?: string;
+};
+
+type BrandJSONType = {
+  id: string;
+  name: string;
+  originCountry?: string;
+  description?: string;
+};

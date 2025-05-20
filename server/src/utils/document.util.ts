@@ -1,15 +1,22 @@
-import { Product, ProductDocument } from '@app/types/type';
 import fs from 'fs/promises';
 import path from 'path';
+
 import { Document } from '@langchain/core/documents';
 import { v4 as uuidv4 } from 'uuid';
+
+import { Product, CategoryJSONType, BrandJSONType } from '@app/types/type';
 
 export const createProductDocument = async (
   product: Product,
   brand_name: string,
   category_name: string
 ): Promise<Document[]> => {
-  const baseInfo = [`Danh mục: ${category_name}`, `Tên sản phẩm: ${product.name}`, `Thương hiệu: ${brand_name} `,`${product.summary} ${product.short_description}`]
+  const baseInfo = [
+    `Danh mục: ${category_name}`,
+    `Tên sản phẩm: ${product.name}`,
+    `Thương hiệu: ${brand_name} `,
+    `${product.summary} ${product.short_description}`,
+  ]
     .filter(Boolean)
     .join(' ');
 
@@ -48,14 +55,14 @@ export const createProductEmbedding = async (): Promise<Document[]> => {
     const brandsPath = path.join(__dirname, '../../data/brands.json');
 
     const products = JSON.parse(await fs.readFile(productPath, 'utf-8'));
-    const categories = JSON.parse(await fs.readFile(categoriesPath, 'utf-8'));
-    const brands = JSON.parse(await fs.readFile(brandsPath, 'utf-8'));
+    const categories = JSON.parse(await fs.readFile(categoriesPath, 'utf-8')) as CategoryJSONType[];
+    const brands = JSON.parse(await fs.readFile(brandsPath, 'utf-8')) as BrandJSONType[];
 
     const productDocuments: Document[] = [];
 
     for (const p of products) {
-      const category = categories.find((c: any) => c.id === p.category_id);
-      const brand = brands.find((b: any) => b.id == p.brand_id);
+      const category = categories.find((c) => c.id === p.category_id);
+      const brand = brands.find((b) => b.id === p.brand_id);
 
       const product: Product = {
         ...p,

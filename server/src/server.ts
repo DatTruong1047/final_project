@@ -62,7 +62,7 @@ const startServer = async (): Promise<void> => {
     app.register(authPlugin);
     app.register(emailPlugin);
     app.register(errorHandlerPlugin);
-    
+
     // Static
     app.register(fastifyStatic, {
       root: path.join(__dirname, '..', 'public', 'media'),

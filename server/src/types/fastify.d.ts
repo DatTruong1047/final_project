@@ -34,6 +34,7 @@ declare module 'fastify' {
     Unauthorized(err: ErrorResponseType): FastifyReply;
     Forbidden(err: ErrorResponseType): FastifyReply;
     Conflict(err: ErrorResponseType): FastifyReply;
+    TooManyRequests(err: ErrorResponseType): FastifyReply;
 
     OK<T>(res: T | SuccessResponseType<T> | SuccessResWithoutDataType): FastifyReply;
     Created<T>(res: SuccessResponseType<T> | SuccessResWithoutDataType): FastifyReply;

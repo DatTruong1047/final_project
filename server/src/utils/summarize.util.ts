@@ -1,12 +1,14 @@
 import fs from 'fs/promises';
 import path from 'path';
+
 import { GoogleGenerativeAI } from '@google/generative-ai';
+
 import { GEMINI_API_KEY } from '@app/config/env.config';
 import { geminiModel, promptSummarize, systemInstructionSummarize } from '@app/config/llm.config';
 
 const googleGenerativeAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
-export const summarize = async (inputText: string) => {
+export const summarize = async (inputText: string): Promise<string> => {
   try {
     const prompt = promptSummarize(inputText);
     const model = googleGenerativeAI.getGenerativeModel({ model: geminiModel });
@@ -36,12 +38,12 @@ export const summarize = async (inputText: string) => {
   }
 };
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function processProductJSON(inputPath: string, outputPath: string) {
+async function processProductJSON(inputPath: string, outputPath: string): Promise<void> {
   const data = await fs.readFile(inputPath, 'utf-8');
   const products = JSON.parse(data);
-  let i = 1;    
+  let i = 1;
 
   for (const product of products) {
     const description = product.long_description;

@@ -1,18 +1,20 @@
 import { PGVectorStore } from '@langchain/community/vectorstores/pgvector';
-import { GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
 import { Document } from '@langchain/core/documents';
+import { GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
 import pg from 'pg';
+
+import { vectorStore } from '@app/config/vector-store.config';
+
 import {
   embeddingModel,
   taskTypeEmbedding,
-  apiKeyEmbedding,
+  geminiApiKey,
   POSTGRES_USER,
   POSTGRES_PASSWORD,
   POSTGRES_HOST,
   POSTGRES_PORT,
   POSTGRES_DB,
 } from '../config';
-import { vectorStore } from '@app/config/vector-store.config';
 
 export default class VectorStore {
   private static _instance: VectorStore;
@@ -22,14 +24,14 @@ export default class VectorStore {
   private _vectorStore: PGVectorStore | null = null;
 
   private constructor() {
-    if (!apiKeyEmbedding) {
+    if (!geminiApiKey) {
       throw new Error('Google AI API key is required');
     }
 
     this._embeddingModel = new GoogleGenerativeAIEmbeddings({
       model: embeddingModel,
       taskType: taskTypeEmbedding,
-      apiKey: apiKeyEmbedding,
+      apiKey: geminiApiKey,
     });
 
     this._pool = new pg.Pool({
@@ -90,7 +92,7 @@ export default class VectorStore {
     }
   }
 
-  public async similaritySearch(query: string, k: number = 10): Promise<Document[]> {
+  public async similaritySearch(query: string, k = 10): Promise<Document[]> {
     try {
       await this._initVectorStore();
       if (!this._vectorStore) {
@@ -100,13 +102,6 @@ export default class VectorStore {
       const embeddingQuery = await this._embeddingModel.embedQuery(query);
 
       const result = await this._vectorStore.similaritySearchVectorWithScore(embeddingQuery, k);
-      console.log('Search results:');
-      result.forEach((item, index) => {
-        console.log(`Result ${index + 1}:`);
-        console.log('Document:', item[0].metadata.product_name);
-        console.log('Score:', item[1]);
-        console.log('Content:', item[0].pageContent.substring(0, 300) + '...');
-      });
 
       return result.map((item) => item[0]);
     } catch (error) {
