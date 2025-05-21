@@ -15,6 +15,7 @@ import {
   POSTGRES_PORT,
   POSTGRES_DB,
 } from '../config';
+import app from '@app/app';
 
 export default class VectorStore {
   private static _instance: VectorStore;
@@ -43,8 +44,7 @@ export default class VectorStore {
     });
 
     this._pool.on('error', (err) => {
-      console.error('Unexpected error on idle client', err);
-      process.exit(-1);
+      app.log.error('Unexpected error on idle client', err);
     });
   }
 

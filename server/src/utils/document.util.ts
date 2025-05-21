@@ -80,7 +80,7 @@ export const createProductEmbedding = async (): Promise<Document[]> => {
 
     return productDocuments;
   } catch (error) {
-    console.error(error instanceof Error ? error.message : 'Unknown error');
+    console.error('Error creating product embedding:', error);
     throw error;
   }
 };

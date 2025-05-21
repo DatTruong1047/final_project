@@ -37,7 +37,9 @@ export default class ChatController {
           short_description: item.metadata.product_short_description || '',
           price:
             typeof item.metadata.product_price === 'string'
-              ? parseFloat(item.metadata.product_price)
+              ? isNaN(parseFloat(item.metadata.product_price))
+                ? 0
+                : parseFloat(item.metadata.product_price)
               : item.metadata.product_price || 0,
           category_name: item.metadata.category_name || '',
           brand_name: item.metadata.brand_name || '',

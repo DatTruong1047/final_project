@@ -1,6 +1,7 @@
 import { createProductEmbedding } from '@app/utils/document.util';
 
 import VectorStore from './init';
+import app from '@app/app';
 
 async function seedData(): Promise<void> {
   const vectorStore = await VectorStore.getInstance();
@@ -10,7 +11,7 @@ async function seedData(): Promise<void> {
     await vectorStore.addDocuments(documents);
   }
 
-  console.log('Documents added to vector store');
+  app.log.info('Documents added to vector store');
   process.exit(0);
 }
 
