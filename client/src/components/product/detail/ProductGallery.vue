@@ -5,19 +5,19 @@
         v-for="(image, index) in productMedias.slice(0, 5)"
         :key="index"
         class="w-16 h-16 sm:w-28 sm:h-28 border-gray-200 rouded"
-        :class="{ 'border-2 border-red-500': selectedImageIndex === index }"
+        :class="{ 'border-2 border-red-300 rounded-lg scale-120': selectedImageIndex === index }"
         @click="selectedImageIndex = index"
       >
         <img
           :src="image.media.url || imageConfig.productDefault"
           :alt="`Product Image ${image.id}`"
-          class="w-full h-full object-contain p-2"
+          class="w-full h-full object-contain p-2 "
         />
       </div>
     </div>
 
     <!-- Main image -->
-    <div class="flex-1 bg-gray-50 md:max-h-[48rem] rounded-lg order-1 md:order-2">
+    <div class="flex-1 bg-white md:max-h-[48rem] rounded-lg order-1 md:order-2">
       <div class="relative w-full h-full">
         <img
           :src="productMedias[selectedImageIndex].media.url || imageConfig.productDefault"

@@ -3,13 +3,22 @@ import { RouterView } from 'vue-router'
 import ChatPageView from './views/chat/PageView.vue'
 import NavBarComponent from './components/_utils/NavBarComponent.vue'
 import ToastComponent from './components/molecules/_utils/ToastComponent.vue'
+import { useChatStore } from './stores/chatStore'
+import { computed } from 'vue'
+import BotComponent from './components/chat/BotComponent.vue'
+const chatStore = useChatStore()
 </script>
 
 <template>
   <div class="flex flex-col min-h-screen">
     <NavBarComponent />
     <main class="pt-[6rem]">
-      <ChatPageView />
+      <template v-if="chatStore.isShowChat">
+        <ChatPageView />
+      </template>
+      <template v-else>
+        <BotComponent />
+      </template>
       <RouterView />
     </main>
   </div>

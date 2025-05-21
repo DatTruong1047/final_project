@@ -12,7 +12,7 @@
         <ArrowPathIcon class="h-8 w-8 text-white" />
       </button>
       <button class="flex px-4 py-4 rounded-full hover:bg-white/20">
-        <ArrowsPointingInIcon class="h-8 w-8 text-white" />
+        <ArrowsPointingInIcon class="h-8 w-8 text-white" @click="toggleChat" />
       </button>
     </div>
 </template>
@@ -20,6 +20,12 @@
 <script setup lang="ts">
 import { ArrowPathIcon, ArrowsPointingInIcon } from '@heroicons/vue/16/solid'
 import { imageConfig } from '@/configs/image.config'
+import { useChatStore } from '@/stores/chatStore'
 
 const botImage = imageConfig.botImage
+const chatStore = useChatStore()
+
+const toggleChat = () => {
+  chatStore.toggleChat()
+}
 </script>

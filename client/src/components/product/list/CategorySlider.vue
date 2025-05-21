@@ -211,7 +211,7 @@ const getCategoryIcon = () => {
           "
         >
           <div class="mb-2" v-html="getCategoryIcon()"></div>
-          <span class="text-sm font-medium">{{ category.name }}</span>
+          <span class="text-xl mt-2 font-medium">{{ category.name }}</span>
         </div>
       </div>
 
