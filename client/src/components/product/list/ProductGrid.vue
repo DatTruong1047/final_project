@@ -173,7 +173,7 @@ onMounted(async () => {
         </p>
       </div>
 
-      <div v-else class="bg-[#e1f4fc] grid py-8 grid-cols-1 sm:grid-cols-3 lg:grid-cols-4  gap-y-8">
+      <div v-else class="bg-[#e1f4fc] grid py-8 grid-cols-1 sm:grid-cols-3 xl:grid-cols-4  gap-y-8">
         <RouterLink
           v-for="product in products"
           :key="product.id"

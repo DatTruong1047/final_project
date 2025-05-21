@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-[#1572d6] h-fit p-4 flex items-center justify-between text-white">
+    <div class="bg-[#15508f] h-fit p-4 flex items-center justify-between text-white">
       <div class="flex items-center gap-2 px-2 w-full h-20">
         <div class="rounded-full p-1 w-16 sm:w-20 flex items-center justify-center">
           <img :src="botImage" class="rounded-full" alt="bot" />
