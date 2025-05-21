@@ -1,5 +1,13 @@
+import app from '@app/app';
 import { ErrorCodes } from '@app/config';
-import { ProductDetailType, ProductFilterType, ProductListType, ResultType } from '@app/models';
+import {
+  FullTextQueryType,
+  ProductDetailType,
+  ProductFilterType,
+  ProductListType,
+  ProductMetadataType,
+  ResultType,
+} from '@app/models';
 import ProductRepository from '@app/repositories/product.repository';
 
 export default class ProductService {
@@ -37,5 +45,25 @@ export default class ProductService {
       success: true,
       data: productList,
     };
+  }
+
+  async fullTextSearch(params: FullTextQueryType): Promise<ResultType<ProductMetadataType[]>> {
+    try {
+      const productList = await this._productRepository.fullTextSearch(params);
+
+      return {
+        code: 200,
+        message: 'Product list found',
+        success: true,
+        data: productList,
+      };  
+    } catch (error) {
+      app.log.error('Error in fullTextSearch:', error);
+      return {
+        code: ErrorCodes.SERVER_ERROR,
+        message: 'Internal server error',
+        success: false,
+      };
+    }
   }
 }

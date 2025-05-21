@@ -6,6 +6,9 @@ import {
   ChatQuerySchema,
   ChatResponseSchema,
   ChatMessageResponseSchema,
+  ProductSearchQuerySchema,
+  ProductListSchema,
+  ProductMetadataSchema,
 } from '@model';
 
 import ChatService from '@services/chat.service';
@@ -42,5 +45,19 @@ export default async function chatRoutes(app: FastifyInstance): Promise<void> {
       },
     },
     handler: chatController.sendMessage,
+  });
+
+  app.post('/product-search', {
+    schema: {
+      tags: ['Chat'],
+      summary: 'Search for products',
+      body: ProductSearchQuerySchema,
+      response: {
+        // 200: SuccessResponseSchema(ProductMetadataSchema),
+        400: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+    handler: chatController.productSearch,
   });
 }

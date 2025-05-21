@@ -2,22 +2,65 @@ import { Document } from '@langchain/core/documents';
 import { MessageContent } from '@langchain/core/messages';
 
 import app from '@app/app';
-import { ResultType } from '@app/models';
+import {
+  ChatQueryType,
+  ProductFilterType,
+  ProductListType,
+  ProductMetadataType,
+  ProductSearchQueryType,
+  ResultType,
+} from '@app/models';
 import VectorStore from '@app/vector-store/init';
 
 import GeminiService from '@services/gemini.service';
+import ProductService from './product.service';
+import { mapProductDocumentToMetadata } from '@app/utils/mapper/product.mapper';
 
 export default class ChatService {
   private readonly _geminiService: GeminiService;
+  private readonly _productService: ProductService;
 
   constructor() {
     this._geminiService = new GeminiService();
+    this._productService = new ProductService();
   }
 
   async search(query: string): Promise<Document[]> {
     const vectorStore = await VectorStore.getInstance();
     const result = await vectorStore.similaritySearch(query);
     return result;
+  }
+
+  async productSearch(query: ProductSearchQueryType): Promise<ResultType<ProductListType>> {
+    try {
+      const { query: searchText, ...fullTextQuery } = query;
+
+      let fullTextData: ProductMetadataType[] = [];
+      let similarityData: ProductMetadataType[] = [];
+
+      let fullTextResult = await this._productService.fullTextSearch(fullTextQuery);
+
+      fullTextData = fullTextResult.data || [];
+
+      const similarityResult = await this.search(searchText);
+
+      if (similarityResult.length > 0) {
+        similarityData = similarityResult.map((item) => mapProductDocumentToMetadata(item));
+      }
+
+      return {
+        code: 200,
+        message: 'Product search successful',
+        success: true,
+        data: {
+          products: [...fullTextData, ...similarityData],
+          total: fullTextData.length + similarityData.length,
+        },
+      };
+    } catch (error) {
+      app.log.error('Error in productSearch:', error);
+      throw new Error('Server error');
+    }
   }
 
   async sendMessage(query: string): Promise<ResultType<MessageContent>> {
