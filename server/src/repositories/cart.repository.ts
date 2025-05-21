@@ -95,6 +95,51 @@ export default class CartRepository {
     };
   }
 
+  async getCartsByIds(cartIds: string[], userId: string): Promise<CartListType> {
+    const [carts, totalCount] = await this._prisma.$transaction([
+      this._prisma.cart.findMany({
+        where: { id: { in: cartIds }, userId },
+        select: {
+          id: true,
+          quantity: true,
+          product: {
+            select: {
+              id: true,
+              price: true,
+              quantity: true,
+              name: true,
+            },
+          },
+        },
+      }),
+      this._prisma.cart.count({
+        where: { id: { in: cartIds }, userId },
+      }),
+    ]);
+
+    const cartsWithTotalPrice = carts.map((cart) => {
+      const productPrice = Number(cart.product.price);
+      const itemTotalPrice = cart.quantity * productPrice;
+
+      return {
+        ...cart,
+        product: {
+          ...cart.product,
+          price: productPrice,
+        },
+        totalPrice: itemTotalPrice,
+      };
+    });
+
+    const cartTotalPrice = cartsWithTotalPrice.reduce((sum, cart) => sum + cart.totalPrice, 0);
+
+    return {
+      carts: cartsWithTotalPrice,
+      total: totalCount,
+      totalPrice: cartTotalPrice,
+    };
+  }
+
   async getCartWithProductIdAndUserId(productId: string, userId: string): Promise<CartCheckType | null> {
     const cart = await this._prisma.cart.findFirst({
       where: { productId, userId },
@@ -150,6 +195,17 @@ export default class CartRepository {
       return true;
     } catch (error) {
       throw new Error(`Failed to update cart: ${error.message}`);
+    }
+  }
+
+  async deleteManyCart(cartIds: string[]): Promise<boolean> {
+    try {
+      await this._prisma.cart.deleteMany({
+        where: { id: { in: cartIds } },
+      });
+      return true;
+    } catch (error) {
+      throw new Error(`Failed to delete carts: ${error.message}`);
     }
   }
 

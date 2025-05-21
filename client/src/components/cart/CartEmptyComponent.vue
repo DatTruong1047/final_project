@@ -1,5 +1,5 @@
 <template>
-  <div class="text-center py-16">
+  <div class="text-center py-16 flex flex-col items-center justify-center h-[70vh]">
     <svg
       class="mx-auto h-24 w-24 text-gray-400"
       fill="none"
@@ -17,12 +17,12 @@
     <h3 class="mt-4 text-3xl font-bold text-gray-900">Your cart is empty</h3>
     <p class="mt-2 text-xl text-gray-500">Explore our products and add to your cart</p>
     <div class="mt-8">
-      <router-link
-        to="/"
-        class="inline-flex items-center rounded-md bg-red-600 px-5 py-3 text-xl font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+      <RouterLink
+        :to="{ name: 'home' }"
+        class="inline-flex items-center rounded-md bg-red-600 px-5 py-3 text-3xl font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
       >
         <svg
-          class="-ml-1 mr-3 h-5 w-5"
+          class="-ml-1 mr-3 h-8 w-8"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
           fill="currentColor"
@@ -33,7 +33,7 @@
           />
         </svg>
         Shop now
-      </router-link>
+      </RouterLink>
     </div>
   </div>
 </template>

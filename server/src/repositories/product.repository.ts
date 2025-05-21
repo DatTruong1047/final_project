@@ -109,15 +109,20 @@ export default class ProductRepository {
     };
   }
 
-  async updateQuantity(id: string, quantity: number): Promise<boolean> {
+  async updateQuantity(
+    tx: Prisma.TransactionClient,
+    id: string,
+    quantity: number,
+    method: 'increment' | 'decrement'
+  ): Promise<boolean> {
     try {
-      await this._prisma.product.update({
+      await tx.product.update({
         where: { id },
-        data: { quantity },
+        data: { quantity: { [method]: quantity } },
       });
       return true;
-    } catch {
-      return false;
+    } catch (error) {
+      throw new Error(`Failed to update quantity: ${error.message}`);
     }
   }
 
