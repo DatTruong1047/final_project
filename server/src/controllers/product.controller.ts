@@ -2,11 +2,11 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { ErrorResponseType, ProductDetailType, ProductFilterType, ProductListType, SuccessResponseType } from '@model';
 
+import app from '@app/app';
+
 import ProductService from '@services/product.service';
 
 import { binding } from '@decorators/binding.decorator';
-import { ErrorCodes } from '@app/config/error.config';
-import app from '@app/app';
 
 export default class ProductController {
   constructor(private readonly productService: ProductService) {}

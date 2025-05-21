@@ -4,13 +4,12 @@ import path, { dirname, extname, join } from 'path';
 
 import { MultipartFile } from '@fastify/multipart';
 
+import app from '@app/app';
 import { ErrorCodes, uploadFileConfig } from '@app/config';
 import { FileType, ResultType } from '@app/models';
 
-// Get file from request
 export async function getFile(part: MultipartFile): Promise<ResultType<FileType>> {
   try {
-    // No files provided
     if (!(part.file || part.filename)) {
       return {
         success: false,
@@ -29,7 +28,6 @@ export async function getFile(part: MultipartFile): Promise<ResultType<FileType>
       buffer: Buffer.concat(chunks),
     };
 
-    // Validate file
     const validationError = validateFile(file);
     if (validationError) {
       return {
@@ -53,11 +51,10 @@ export async function getFile(part: MultipartFile): Promise<ResultType<FileType>
   }
 }
 
-// Delete static file
 export async function deleteFile(fileName: string): Promise<void> {
   try {
     const filePath = path.join('./public/', fileName);
-    console.log(filePath);
+    app.log.info(filePath);
 
     await fs.unlink(filePath);
   } catch (error) {

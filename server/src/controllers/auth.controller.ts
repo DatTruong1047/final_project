@@ -18,12 +18,13 @@ import {
   VerifyEmailTokenType,
 } from '@model';
 
+import app from '@app/app';
+
 import AuthService from '@services/auth.service';
 import MailService from '@services/mail.service';
 import UserService from '@services/user.service';
 
 import { binding } from '@decorators/binding.decorator';
-import app from '@app/app';
 
 export default class AuthController {
   constructor(

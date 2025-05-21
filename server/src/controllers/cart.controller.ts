@@ -10,10 +10,11 @@ import {
   SuccessResWithoutDataType,
 } from '@model';
 
+import app from '@app/app';
+
 import CartService from '@services/cart.service';
 
 import { binding } from '@decorators/binding.decorator';
-import app from '@app/app';
 
 export default class CartController {
   constructor(private readonly _cartService: CartService) {}

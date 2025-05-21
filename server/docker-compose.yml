@@ -1,7 +1,8 @@
 version: '3.8'
+
 services:
   ecommerce-app:
-    container_name: ecommerce-app
+    container_name: ecommerce-app-v2
     build: .
     volumes:
       - .:/src
@@ -14,21 +15,22 @@ services:
     networks:
       - app-networks
   postgres:
-    image: postgres:15
+    image: ankane/pgvector:latest
     restart: always
     ports:
-      - '5433:5432'
+      - '5432:5432'
     env_file: .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     networks:
       - app-networks
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"] 
-      interval: 10s        
-      timeout: 5s          
-      retries: 5           
-      start_period: 30s    
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s  
 networks:
   app-networks:
     driver: bridge
