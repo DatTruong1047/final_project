@@ -8,7 +8,7 @@ import fastifyStatic from '@fastify/static';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUI from '@fastify/swagger-ui';
 import { FastifySchemaValidationError } from 'fastify/types/schema';
-
+import fastifyRawBody from 'fastify-raw-body';
 import * as config from '@config';
 import registerRoutes from '@routes';
 
@@ -43,6 +43,12 @@ const startServer = async (): Promise<void> => {
         docExpansion: 'full',
         deepLinking: false,
       },
+    });
+
+    app.register(fastifyRawBody, {
+      field: 'rawBody',
+      runFirst: true,
+      encoding: 'utf8',
     });
 
     // JWT
@@ -91,11 +97,10 @@ const startServer = async (): Promise<void> => {
     registerRoutes();
 
     await app.listen({ port: PORT, host: '0.0.0.0' });
-
-    console.log(`Server is running on http://0.0.0.0:${PORT}`);
-    console.log(`Swagger UI available at http://localhost:${PORT}/api/docs`);
+    app.log.info(`Server is running on http://0.0.0.0:${PORT}`);
+    app.log.info(`Swagger UI available at http://localhost:${PORT}/api/docs`);
   } catch (error) {
-    console.error(error);
+    app.log.error(error);
     process.exit(1);
   }
 };

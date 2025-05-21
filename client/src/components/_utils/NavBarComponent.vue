@@ -1,7 +1,5 @@
 <template>
-  <nav
-    class="bg-white border-b border-gray-200 shadow-sm dark:bg-gray-900 dark:border-gray-700 fixed top-0 left-0 right-0 z-40 h-[6rem]"
-  >
+  <nav class="bg-white border-b border-gray-200 shadow-sm fixed top-0 left-0 right-0 z-40 h-[6rem]">
     <div class="max-w-screen-3xl px-4 sm:px-6 lg:px-8 mx-auto h-full">
       <div class="flex justify-between items-center h-full">
         <RouterLink to="/" class="flex items-center gap-2">
@@ -20,7 +18,7 @@
         <div class="hidden md:flex items-center space-x-8">
           <RouterLink
             to="/"
-            class="px-3 py-2 text-2xl text-gray-700 hover:text-red-600 relative group dark:text-gray-300 dark:hover:text-white transition-colors duration-200"
+            class="px-3 py-2 text-2xl text-gray-700 hover:text-red-600 relative group transition-colors duration-200"
             active-class="text-red-600 dark:text-red-400"
           >
             Home
@@ -31,7 +29,7 @@
 
           <RouterLink
             :to="{ name: cartRoute.cart }"
-            class="px-3 py-2 text-2xl text-gray-700 hover:text-red-600 relative group dark:text-gray-300 dark:hover:text-white transition-colors duration-200"
+            class="px-3 py-2 text-2xl text-gray-700 hover:text-red-600 relative group transition-colors duration-200"
             active-class="text-red-600 dark:text-red-400"
           >
             Cart
@@ -41,8 +39,8 @@
           </RouterLink>
 
           <RouterLink
-            to="/contact"
-            class="px-3 py-2 text-2xl text-gray-700 hover:text-red-600 relative group dark:text-gray-300 dark:hover:text-white transition-colors duration-200"
+            to="/"
+            class="px-3 py-2 text-2xl text-gray-700 hover:text-red-600 relative group transition-colors duration-200"
             active-class="text-red-600 dark:text-red-400"
           >
             Contact
@@ -51,50 +49,7 @@
             ></span>
           </RouterLink>
 
-          <div v-if="!isAuthenticated" class="flex items-center ml-4 space-x-4">
-            <RouterLink
-              :to="{ name: authRoute.register }"
-              class="px-3 py-2 text-xl border-2 border-red-500 text-red-500 rounded-md hover:bg-red-500 hover:text-white transition-colors duration-300 dark:border-red-400 dark:text-red-400 dark:hover:bg-red-400 dark:hover:text-gray-900"
-            >
-              Sign Up
-            </RouterLink>
-
-            <RouterLink
-              :to="{ name: authRoute.login }"
-              class="px-2 py-3 text-xl bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-300 shadow-md hover:shadow-lg dark:bg-red-600 dark:hover:bg-red-700"
-            >
-              Sign In
-            </RouterLink>
-          </div>
-
-          <div v-else class="flex items-center ml-4 space-x-4">
-            <RouterLink
-              :to="{ name: userRoute.profile }"
-              class="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-red-600 dark:text-gray-300 dark:hover:text-white transition-colors duration-200"
-            >
-              <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
-                <template v-if="authStore.user?.media?.url">
-                  <img
-                    :src="authStore.user.media.url"
-                    alt="Profile"
-                    class="w-full h-full rounded-full object-cover"
-                  />
-                </template>
-                <template v-else>
-                  <span class="text-4xl font-bold text-gray-600">
-                    {{ authStore.user?.fullName?.charAt(0) || authStore.user?.email?.charAt(0) }}
-                  </span>
-                </template>
-              </div>
-            </RouterLink>
-
-            <button
-              @click="onLogout"
-              class="px-3 py-2 text-xl border-2 border-red-500 text-red-500 rounded-md hover:bg-red-500 hover:text-white transition-colors duration-300 dark:border-red-400 dark:text-red-400 dark:hover:bg-red-400 dark:hover:text-gray-900"
-            >
-              Logout
-            </button>
-          </div>
+          <UserMenuComponent />
         </div>
 
         <div class="-mr-2 flex md:hidden">
@@ -134,13 +89,13 @@
     >
       <div
         v-if="isMobileMenuOpen"
-        class="md:hidden fixed top-[8rem] left-0 right-0 bg-white shadow-lg dark:bg-gray-800 z-50"
+        class="md:hidden fixed top-[6rem] left-0 right-0 bg-gray-50 shadow-lg hover:bg-red-50 cursor-pointer text-xl z-50"
       >
-        <div class="px-4 pt-2 pb-3 space-y-2">
+        <div class="px-4 pb-3 space-y-2">
           <RouterLink
             to="/"
-            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-500 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700 transition-colors duration-200"
-            active-class="text-red-500 bg-gray-50 dark:bg-gray-700 dark:text-red-400"
+            class="block px-3 py-2 rounded-md text-xl font-medium text-gray-700 hover:text-red-500 hover:bg-gray-50 dark:text-gray-300 transition-colors duration-200"
+            active-class="text-red-500 bg-gray-50 "
             @click="isMobileMenuOpen = false"
           >
             Home
@@ -148,7 +103,7 @@
 
           <RouterLink
             :to="{ name: cartRoute.cart }"
-            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-500 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700 transition-colors duration-200"
+            class="block px-3 py-2 rounded-md text-xl font-medium text-gray-700 hover:text-red-500 hover:bg-gray-50 dark:text-gray-300 transition-colors duration-200"
             active-class="text-red-500 bg-gray-50 dark:bg-gray-700 dark:text-red-400"
             @click="isMobileMenuOpen = false"
           >
@@ -156,8 +111,8 @@
           </RouterLink>
 
           <RouterLink
-            to="/contact"
-            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-500 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700 transition-colors duration-200"
+            to="/"
+            class="block px-3 py-2 rounded-md text-xl font-medium text-gray-700 hover:text-red-500 hover:bg-gray-50 dark:text-gray-300 transition-colors duration-200"
             active-class="text-red-500 bg-gray-50 dark:bg-gray-700 dark:text-red-400"
             @click="isMobileMenuOpen = false"
           >
@@ -165,22 +120,20 @@
           </RouterLink>
 
           <!-- Mobile Menu Auth Buttons -->
-          <div
-            v-if="!isAuthenticated"
-            class="pt-4 pb-2 border-t border-gray-200 dark:border-gray-700"
-          >
-            <div class="flex items-center space-x-3 px-3">
+          <div v-if="!isAuthenticated" class="pt-4 pb-2 border-t border-gray-200">
+            <div class="px-4 pt-2 pb-3 space-y-2">
               <RouterLink
                 :to="{ name: authRoute.register }"
-                class="flex-1 px-3 py-2 text-xl text-center border border-red-500 text-red-500 rounded-md hover:bg-red-500 hover:text-white transition-colors duration-300 dark:border-red-400 dark:text-red-400 dark:hover:bg-red-400 dark:hover:text-gray-900"
+                class="block px-3 py-2 rounded-md text-xl font-medium text-gray-700 hover:text-red-500 hover:bg-gray-50 dark:text-gray-300 transition-colors duration-200"
+                active-class="text-red-500 bg-gray-50 dark:bg-gray-700 dark:text-red-400"
                 @click="isMobileMenuOpen = false"
               >
                 Sign Up
               </RouterLink>
-
               <RouterLink
                 :to="{ name: authRoute.login }"
-                class="flex-1 px-3 py-2 text-xl text-center bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-300 shadow-md dark:bg-red-600 dark:hover:bg-red-700"
+                class="block px-3 py-2 rounded-md text-xl font-medium text-gray-700 hover:text-red-500 hover:bg-gray-50 dark:text-gray-300 transition-colors duration-200"
+                active-class="text-red-500 bg-gray-50 dark:bg-gray-700 dark:text-red-400"
                 @click="isMobileMenuOpen = false"
               >
                 Sign In
@@ -192,23 +145,19 @@
           <div v-else class="pt-4 pb-2 border-t border-gray-200 dark:border-gray-700">
             <RouterLink
               :to="{ name: userRoute.profile }"
-              class="flex items-center space-x-3 px-3 py-2 text-gray-700 hover:text-red-500 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700 transition-colors duration-200"
+              class="block px-3 py-2 rounded-md text-xl font-medium text-gray-700 hover:text-red-500 hover:bg-gray-50 dark:text-gray-300 transition-colors duration-200"
+              active-class="text-red-500 bg-gray-50 dark:bg-gray-700 dark:text-red-400"
               @click="isMobileMenuOpen = false"
             >
-              <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                <template v-if="authStore.user?.media?.url">
-                  <img
-                    :src="authStore.user.media.url"
-                    alt="Profile"
-                    class="w-full h-full rounded-full object-cover"
-                  />
-                </template>
-                <template v-else>
-                  <span class="text-xl font-bold text-gray-600">
-                    {{ authStore.user?.fullName?.charAt(0) || authStore.user?.email?.charAt(0) }}
-                  </span>
-                </template>
-              </div>
+              Profile
+            </RouterLink>
+            <RouterLink
+              to="/order"
+              class="block px-3 py-2 rounded-md text-xl font-medium text-gray-700 hover:text-red-500 hover:bg-gray-50 dark:text-gray-300 transition-colors duration-200"
+              active-class="text-red-500 bg-gray-50 dark:bg-gray-700 dark:text-red-400"
+              @click="isMobileMenuOpen = false"
+            >
+              Orders
             </RouterLink>
 
             <button
@@ -229,6 +178,7 @@ import { ref, computed } from 'vue'
 import router from '@/router'
 import { authRoute, cartRoute, userRoute } from '@/configs'
 import { useAuthStore } from '@/stores/authStore'
+import UserMenuComponent from '../user/profile/UserMenuComponent.vue'
 
 const authStore = useAuthStore()
 const isAuthenticated = computed(() => authStore.isAuthenticated)

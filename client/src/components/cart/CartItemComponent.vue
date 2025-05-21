@@ -2,18 +2,21 @@
 import { vndFormat } from '@/helpers/processPrice'
 import { imageConfig } from '@/configs'
 import type { CartBaseType, CartDetailType } from '@/types/cartType'
+import { useCartStore } from '@/stores/cartStore'
 
+const cartStore = useCartStore()
 defineProps<{
   cart: CartBaseType
   onIncreaseQuantity: (id: string) => void
   onDecreaseQuantity: (id: string) => void
   onRemoveItem: (id: string) => void
+  onSelectItem: (id: string, event: Event) => void
 }>()
 </script>
 
 <template>
   <div class="border-b border-gray-200 last:border-b-0">
-    <div class="grid grid-cols-1 sm:grid-cols-4 p-4 gap-4 items-center">
+    <div class="grid grid-cols-1 sm:grid-cols-5 p-4 gap-4 items-center">
       <div class="flex items-center gap-3">
         <div class="relative">
           <div class="absolute -top-3 -left-3 flex items-center justify-center">
@@ -99,6 +102,17 @@ defineProps<{
         <span class="text-red-500 font-bold">{{
           vndFormat(cart.product.price * cart.quantity)
         }}</span>
+      </div>
+
+      <div class="md:text-left text-xl">
+        <input
+          :checked="cartStore.selectedCartIds.includes(cart.id)"
+          id="link-checkbox"
+          type="checkbox"
+          value=""
+          class="w-6 h-6 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+          @change="onSelectItem(cart.id, $event)"
+        />
       </div>
     </div>
   </div>
