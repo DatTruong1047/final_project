@@ -1,5 +1,8 @@
 <template>
-  <div class="flex h-[100vh] justify-center items-center" v-if="cartStore.loading.cart">
+  <div
+    class="flex h-[100vh] justify-center items-center"
+    v-if="cartStore.loading.cart || orderStore.isLoading"
+  >
     <LoadingComponent />
   </div>
 
@@ -19,6 +22,7 @@
             :on-increase-quantity="onIncreaseQuantity"
             :on-decrease-quantity="onDecreaseQuantity"
             :on-remove-item="onRemoveItem"
+            :on-select-item="onSelectItem"
           />
 
           <div class="flex justify-between mb-8">
@@ -31,8 +35,8 @@
           </div>
         </div>
 
-        <!-- Cart Summary  -->
-        <CartSummaryComponent :cart-total="cartTotal" v-if="data.carts && data.carts.length > 0" />
+        <!-- Cart Summary -->
+        <CartSummaryComponent v-if="data.carts && data.carts.length > 0" />
       </div>
     </template>
   </div>
@@ -48,13 +52,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { ToastEnum } from '@/types/enum'
-import { useToast } from '@/hooks/useToast'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useToast } from '@/hooks/useToast'
 
 import { useCartStore } from '@/stores/cartStore'
 import { useAuthStore } from '@/stores/authStore'
+import { useOrderStore } from '@/stores/orderStore'
 import { cartRoute } from '@/configs'
 
 import ConfirmModal from '@/components/atoms/_utils/ConfirmModal.vue'
@@ -65,42 +69,30 @@ import CartListComponent from '@/components/cart/CartListComponent.vue'
 import CartSummaryComponent from '@/components/cart/CartSummaryComponent.vue'
 import UnAuthenComponent from '@/components/_utils/UnAuthenComponent.vue'
 
+import { ToastEnum } from '@/types/enum'
+
 const cartStore = useCartStore()
 const authStore = useAuthStore()
+const orderStore = useOrderStore()
 const { showToast } = useToast()
 const { t } = useI18n()
 
 const breadcrumbs = computed(() => [{ label: 'Cart', to: cartRoute.cart }])
-
 const confirmModal = ref<any>(null)
 const productToDelete = ref<string | null>(null)
 const productToDeleteName = ref<string>('')
 
-const changedList = ref<Record<string, number>>({})
-
 const data = computed(() => cartStore.cart)
+const selectedCartItems = computed(() => cartStore.getSelectedCartItems)
 
-const cartTotal = computed(() => {
-  return (data.value.carts || []).reduce((total, item) => {
-    return total + item.product.price * item.quantity
-  }, 0)
-})
-
-const updateChangedList = (id: string, quantity: number) => {
-  changedList.value[id] = quantity
-}
+console.log(selectedCartItems.value)
 
 const onIncreaseQuantity = async (id: string) => {
   try {
-    if (!data.value.carts) return
+    const cart = data.value.carts?.find((cart) => cart.id === id)
 
-    const cart = data.value.carts.find((cart) => cart.id === id)
     if (cart) {
-      await cartStore.updateCart({
-        id: cart.id,
-        count: cart.quantity + 1,
-      })
-      updateChangedList(cart.id, cart.quantity + 1)
+      await cartStore.updateCart({ id: cart.id, count: cart.quantity + 1 })
     }
   } catch (error) {
     console.error('Error increasing quantity:', error)
@@ -110,16 +102,10 @@ const onIncreaseQuantity = async (id: string) => {
 
 const onDecreaseQuantity = async (id: string) => {
   try {
-    if (!data.value.carts) return
-
-    const cart = data.value.carts.find((cart) => cart.id === id)
+    const cart = data.value.carts?.find((cart) => cart.id === id)
     if (cart) {
       if (cart.quantity > 1) {
-        await cartStore.updateCart({
-          id: cart.id,
-          count: cart.quantity - 1,
-        })
-        updateChangedList(cart.id, cart.quantity - 1)
+        await cartStore.updateCart({ id: cart.id, count: cart.quantity - 1 })
       } else {
         productToDelete.value = id
         productToDeleteName.value = cart.product.name
@@ -133,9 +119,7 @@ const onDecreaseQuantity = async (id: string) => {
 }
 
 const onRemoveItem = (id: string) => {
-  if (!data.value.carts) return
-
-  const cart = data.value.carts.find((item) => item.id === id)
+  const cart = data.value.carts?.find((item) => item.id === id)
   if (cart) {
     productToDelete.value = id
     productToDeleteName.value = cart.product.name
@@ -143,16 +127,21 @@ const onRemoveItem = (id: string) => {
   }
 }
 
+const onSelectItem = (id: string, event: Event) => {
+  const checked = (event.target as HTMLInputElement).checked
+  cartStore.toggleSelectedCart(id, checked)
+}
+
 const confirmDelete = async () => {
   try {
-    if (!data.value.carts) return
-
     const id = productToDelete.value
-    if (!id) return
+    if (id) {
+      await cartStore.removeFromCart(id)
 
-    await cartStore.removeFromCart(id)
-    data.value.carts = data.value.carts.filter((cart) => cart.id !== id)
-    showToast(ToastEnum.Success, t('message.success.removeCartSuccess'))
+      data.value.carts = data.value.carts?.filter((cart) => cart.id !== id)
+
+      showToast(ToastEnum.Success, t('message.success.removeCartSuccess'))
+    }
   } catch (error) {
     console.error('Error removing item:', error)
     showToast(ToastEnum.Error, t('message.error.removeCartFail'))

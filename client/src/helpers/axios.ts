@@ -2,10 +2,8 @@ import axios from 'axios'
 import { authRoute, axiosConfig } from '../configs'
 import { useAuthStore } from '../stores/authStore'
 import { refreshToken } from '@/api'
-import { useRouter } from 'vue-router'
 import { ErrorCodes } from '@/configs/errorConfig'
 
-const router = useRouter()
 const axiosInstance = axios.create({
   baseURL: axiosConfig.baseURL,
   timeout: axiosConfig.timeout,
@@ -34,7 +32,7 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config
     let errorCode = 5001
     const code = error.response && Number(error.response.status)
-
+    console.log('Error response', error)
     switch (code) {
       case 400:
         errorCode = error.response.data.code
@@ -56,8 +54,6 @@ axiosInstance.interceptors.response.use(
             return axiosInstance(originalRequest)
           } catch (refreshError: any) {
             authStore.logout()
-            router.push({ name: authRoute.login })
-
             return Promise.reject(ErrorCodes.UNAUTHORIZED)
           }
         }
