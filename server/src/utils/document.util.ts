@@ -5,6 +5,7 @@ import { Document } from '@langchain/core/documents';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Product, CategoryJSONType, BrandJSONType } from '@app/types/type';
+import app from '@app/app';
 
 export const createProductDocument = async (
   product: Product,
@@ -80,7 +81,7 @@ export const createProductEmbedding = async (): Promise<Document[]> => {
 
     return productDocuments;
   } catch (error) {
-    console.error('Error creating product embedding:', error);
+    app.log.error('Error creating product embedding:', error);
     throw error;
   }
 };

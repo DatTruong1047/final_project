@@ -64,7 +64,7 @@ export default class VectorStore {
         columns: vectorStore.columns,
       });
     } catch (error) {
-      console.error('Error initializing vector store:', error);
+      app.log.error('Error initializing vector store:', error);
       throw new Error(`Failed to initialize vector store: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -87,7 +87,7 @@ export default class VectorStore {
 
       await this._vectorStore?.addDocuments(documents);
     } catch (error) {
-      console.error('Error adding documents:', error);
+      app.log.error('Error adding documents:', error);
       throw new Error(`Failed to add documents: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -105,7 +105,7 @@ export default class VectorStore {
 
       return result.map((item) => item[0]);
     } catch (error) {
-      console.error('Error performing similarity search:', error);
+      app.log.error('Error performing similarity search:', error);
       throw new Error(
         `Failed to perform similarity search: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
