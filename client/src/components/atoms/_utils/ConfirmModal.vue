@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, defineExpose } from 'vue'
+import { defineProps, defineEmits } from 'vue'
 import { ref } from 'vue'
 
 defineProps({

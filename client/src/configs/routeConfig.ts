@@ -16,6 +16,10 @@ export enum productRoute {
 export enum cartRoute {
   cart = 'cart',
 }
+export enum orderRoute {
+  order = 'order',
+  checkoutInfo = 'checkout-info',
+}
 
 export enum paymentRoute {
   payment = 'payment',
