@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-
+import ChatPageView from './views/chat/PageView.vue'
 import NavBarComponent from './components/_utils/NavBarComponent.vue'
 import ToastComponent from './components/molecules/_utils/ToastComponent.vue'
 </script>
@@ -9,7 +9,7 @@ import ToastComponent from './components/molecules/_utils/ToastComponent.vue'
   <div class="flex flex-col min-h-screen">
     <NavBarComponent />
     <main class="pt-[6rem]">
-
+      <ChatPageView />
       <RouterView />
     </main>
   </div>
