@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import { authRoute, userRoute, productRoute, cartRoute } from '@/configs'
+import { authRoute, userRoute, productRoute, cartRoute, paymentRoute } from '@/configs'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -60,8 +60,13 @@ const router = createRouter({
     },
     {
       path: '/cart/',
-      name: 'cart',
+      name: cartRoute.cart,
       component: () => import('../views/cart/PageView.vue'),
+    },
+    {
+      path: '/payment/',
+      name: paymentRoute.payment,
+      component: () => import('../views/payment/PageView.vue'),
     },
   ],
 })

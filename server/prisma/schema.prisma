@@ -22,10 +22,11 @@ enum RoleEnum {
 }
 
 enum OrderStatusEnum {
-  PENDING
+  CREATED
   PROCESSING
   COMPLETED
-  CANCELED
+  FAILED
+  REFUNDED
 }
 
 model Category {
@@ -205,18 +206,20 @@ model Conversation {
 }
 
 model Order {
-  id           String          @id @default(uuid()) @map("id")
-  userId       String          @map("user_id")
-  user         User            @relation(fields: [userId], references: [id])
-  phoneNumber  String          @map("phone_number")
-  note         String?         @map("note")
-  totalAmount  Decimal         @map("total_amount")
-  orderDate    DateTime        @map("order_date")
-  orderStatus  OrderStatusEnum @default(PENDING) @map("order_status")
-  orderDetails OrderDetail[]
-  payments     Payment[]
-  createdAt    DateTime        @default(now()) @map("created_at")
-  updatedAt    DateTime        @updatedAt @map("updated_at")
+  id              String          @id @default(uuid()) @map("id")
+  userId          String          @map("user_id")
+  user            User            @relation(fields: [userId], references: [id])
+  phoneNumber     String          @map("phone_number")
+  note            String?         @map("note")
+  totalAmount     Decimal         @map("total_amount")
+  orderDate       DateTime        @map("order_date")
+  orderStatus     OrderStatusEnum @default(CREATED) @map("order_status")
+  orderDetails    OrderDetail[]
+  payments        Payment[]
+  stripeSessionId String?         @map("stripe_session_id")
+  paymentIntentId String?         @map("payment_intent_id")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
 
   @@index([userId])
   @@index([orderStatus])

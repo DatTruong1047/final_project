@@ -10,3 +10,5 @@ export * from './category.schema';
 export * from './brand.schema';
 export * from './cart.schema';
 export * from './chat.schema';
+export * from './order.schema';
+export * from './payment.schema';
