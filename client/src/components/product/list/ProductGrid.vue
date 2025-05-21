@@ -173,12 +173,12 @@ onMounted(async () => {
         </p>
       </div>
 
-      <div v-else class="grid mt-8 grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-8">
+      <div v-else class="bg-gray-50 grid pt-8 grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-8">
         <RouterLink
           v-for="product in products"
           :key="product.id"
           :to="{ name: productRoute.productDetail, params: { id: product.id } }"
-          class="bg-white rounded-lg md:h-[60rem] overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col"
+          class="bg-white rounded-lg md:h-[60rem] overflow-hidden shadow-xl hover:shadow-lg transition-shadow duration-300 flex flex-col"
         >
           <!-- Product image -->
           <div class="relative bg-white flex items-center justify-center p-4 w-full h-full">

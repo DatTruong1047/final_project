@@ -1,10 +1,11 @@
 <template>
   <div class="bg-white h-full rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6">
-    <div class="hidden md:grid md:grid-cols-4 text-left p-4 border-b border-gray-200">
+    <div class="hidden md:grid md:grid-cols-5 text-left p-4 border-b border-gray-200">
       <h2 class="text-xl font-bold text-gray-900">Product</h2>
       <h2 class="text-xl font-bold text-gray-900 ml-2">Price</h2>
       <h2 class="text-xl font-bold text-gray-900 ml-2">Quantity</h2>
       <h2 class="text-xl font-bold text-gray-900 ml-2">Total</h2>
+      <h2 class="text-xl font-bold text-gray-900 ml-2">Select</h2>
     </div>
 
     <CartItemComponent
@@ -14,6 +15,7 @@
       :on-increase-quantity="onIncreaseQuantity"
       :on-decrease-quantity="onDecreaseQuantity"
       :on-remove-item="onRemoveItem"
+      :on-select-item="onSelectItem"
     />
   </div>
 </template>
@@ -26,5 +28,6 @@ defineProps<{
   onIncreaseQuantity: (id: string) => void
   onDecreaseQuantity: (id: string) => void
   onRemoveItem: (id: string) => void
+  onSelectItem: (id: string, event: Event) => void
 }>()
 </script>
