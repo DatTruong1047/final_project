@@ -14,3 +14,5 @@ export const HOST = process.env.HOST;
 export const CLIENT_HOST = process.env.CLIENT_HOST || 'http://localhost:5137/';
 export const CLIENT_RESET_PASS_URL = process.env.CLIENT_FORGOT_PASS_URL || 'auth/reset-password';
 export const CLIENT_VERIFICATION_URL = process.env.CLIENT_VERIFICATION_URL || 'auth/verify-email';
+
+export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
