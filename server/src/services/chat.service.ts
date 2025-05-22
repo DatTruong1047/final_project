@@ -2,12 +2,7 @@ import { Document } from '@langchain/core/documents';
 import { MessageContent } from '@langchain/core/messages';
 
 import app from '@app/app';
-import {
-  ProductListType,
-  ProductMetadataType,
-  ProductSearchQueryType,
-  ResultType,
-} from '@app/models';
+import { ProductListType, ProductMetadataType, ProductSearchQueryType, ResultType } from '@app/models';
 import VectorStore from '@app/vector-store/init';
 
 import GeminiService from '@services/gemini.service';
@@ -46,9 +41,14 @@ export default class ChatService {
         similarityData = similarityResult.map((item) => mapProductDocumentToMetadata(item));
       }
 
-      const products = [...fullTextData, ...similarityData];
-      const total = fullTextData.length + similarityData.length;
+      // Remove duplicate products based on a unique SKU 
+      const uniqueProducts = new Map<string, ProductMetadataType>();
+      [...fullTextData, ...similarityData].forEach((product) => {
+        uniqueProducts.set(product.sku, product);
+      });
 
+      const products = Array.from(uniqueProducts.values());
+      const total = products.length;
       return {
         code: 200,
         message: 'Product search successful',
