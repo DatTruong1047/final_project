@@ -51,13 +51,25 @@ export const createProductDocument = async (
 
 export const createProductEmbedding = async (): Promise<Document[]> => {
   try {
-    const productPath = path.join(__dirname, '../../data/summarized_products.json');
+    const productPath = path.join(__dirname, '../ ../../data/summarized_products.json');
     const categoriesPath = path.join(__dirname, '../../data/categories.json');
     const brandsPath = path.join(__dirname, '../../data/brands.json');
 
     const products = JSON.parse(await fs.readFile(productPath, 'utf-8'));
     const categories = JSON.parse(await fs.readFile(categoriesPath, 'utf-8')) as CategoryJSONType[];
     const brands = JSON.parse(await fs.readFile(brandsPath, 'utf-8')) as BrandJSONType[];
+
+    // app.log.info('Creating product embedding...', {
+    //   products: products.length,
+    //   categories: categories.length,
+    //   brands: brands.length,
+    // });
+
+    if (products.length === 0) {
+      app.log.info('No products found');
+    } else {
+      app.log.info('Products found');
+    }
 
     const productDocuments: Document[] = [];
 
@@ -81,7 +93,8 @@ export const createProductEmbedding = async (): Promise<Document[]> => {
 
     return productDocuments;
   } catch (error) {
-    app.log.error('Error creating product embedding:', error);
+    const err = error as Error;
+    app.log.error('Error creating product embedding:', err.message);
     throw error;
   }
 };

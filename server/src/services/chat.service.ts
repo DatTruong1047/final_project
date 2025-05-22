@@ -3,8 +3,6 @@ import { MessageContent } from '@langchain/core/messages';
 
 import app from '@app/app';
 import {
-  ChatQueryType,
-  ProductFilterType,
   ProductListType,
   ProductMetadataType,
   ProductSearchQueryType,
@@ -20,9 +18,9 @@ export default class ChatService {
   private readonly _geminiService: GeminiService;
   private readonly _productService: ProductService;
 
-  constructor() {
-    this._geminiService = new GeminiService();
-    this._productService = new ProductService();
+  constructor(geminiService: GeminiService, productService: ProductService) {
+    this._geminiService = geminiService;
+    this._productService = productService;
   }
 
   async search(query: string): Promise<Document[]> {
@@ -48,18 +46,21 @@ export default class ChatService {
         similarityData = similarityResult.map((item) => mapProductDocumentToMetadata(item));
       }
 
+      const products = [...fullTextData, ...similarityData];
+      const total = fullTextData.length + similarityData.length;
+
       return {
         code: 200,
         message: 'Product search successful',
         success: true,
         data: {
-          products: [...fullTextData, ...similarityData],
-          total: fullTextData.length + similarityData.length,
+          products,
+          total,
         },
       };
     } catch (error) {
       app.log.error('Error in productSearch:', error);
-      throw new Error('Server error');
+      throw error;
     }
   }
 
