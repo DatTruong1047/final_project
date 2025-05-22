@@ -1,4 +1,13 @@
-import { CreateOrderRequestType, CartDetailType, CreateOrderResultType, OrderResponseType } from '@model';
+import {
+  CreateOrderRequestType,
+  CartDetailType,
+  CreateOrderResultType,
+  OrderResponseType,
+  ProductDetailType,
+  CreateOrderWithChatType,
+  ProductBaseType,
+  ProductForCreateOrderType,
+} from '@model';
 import { OrderStatusEnum, Prisma, PrismaClient, Order, OrderDetail } from 'generated/prisma';
 
 import prisma from '@app/lib/prisma';
@@ -10,9 +19,9 @@ export default class OrderRepository {
     this._prisma = prisma;
   }
 
-  async createOrder(
+  async createOrderWithCartItems(
     tx: Prisma.TransactionClient,
-    carts: CartDetailType[],
+    cartItems: CartDetailType[],
     req: CreateOrderRequestType,
     totalAmount: number,
     userId: string
@@ -26,17 +35,59 @@ export default class OrderRepository {
         orderDate: new Date(),
         orderStatus: OrderStatusEnum.CREATED,
         orderDetails: {
-          create: carts.map((item) => ({
+          create: cartItems.map((c) => ({
             product: {
               connect: {
-                id: item.product.id,
+                id: c.product.id,
               },
             },
-            productName: item.product.name,
-            quantity: item.quantity,
-            unitPrice: item.product.price,
-            subtotal: (item.product.price * item.quantity).toString(),
+            productName: c.product.name,
+            quantity: c.quantity,
+            unitPrice: c.product.price,
+            subtotal: (c.product.price * c.quantity).toString(),
           })),
+        },
+      },
+      select: this._createOrderSelectBase,
+    });
+
+    return {
+      ...result,
+      totalAmount: result.totalAmount.toString(),
+      orderDate: result.orderDate.toISOString(),
+      orderStatus: result.orderStatus as OrderStatusEnum,
+      orderDetails: result.orderDetails.map((detail) => ({
+        ...detail,
+        unitPrice: Number(detail.unitPrice),
+        subTotal: Number(detail.subtotal),
+      })),
+    };
+  }
+
+  async createOrder(
+    tx: Prisma.TransactionClient,
+    product: ProductForCreateOrderType,
+    req: CreateOrderWithChatType,
+    totalAmount: number
+  ): Promise<CreateOrderResultType> {
+    const result = await tx.order.create({
+      data: {
+        userId: req.userId,
+        phoneNumber: req.phoneNumber,
+        note: req.note,
+        totalAmount: Number(totalAmount),
+        orderDate: new Date(),
+        orderStatus: OrderStatusEnum.CREATED,
+        orderDetails: {
+          create: {
+            product: {
+              connect: { id: product.id },
+            },
+            productName: product.name,
+            quantity: req.count,
+            unitPrice: Number(product.price),
+            subtotal: Number(product.price * req.count),
+          },
         },
       },
       select: this._createOrderSelectBase,
@@ -103,10 +154,12 @@ export default class OrderRepository {
         unitPrice: Number(detail.unitPrice),
         subTotal: Number(detail.subtotal),
       })),
-      paymentIntent: order.paymentIntentId ? {
-        id: order.paymentIntentId,
-        clientSecret: '',
-      } : undefined,
+      paymentIntent: order.paymentIntentId
+        ? {
+            id: order.paymentIntentId,
+            clientSecret: '',
+          }
+        : undefined,
     }));
   }
 

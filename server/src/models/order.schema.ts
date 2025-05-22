@@ -30,8 +30,16 @@ export const OrderBaseSchema = z.object({
 
 export const CreateOrderRequestSchema = z.object({
   cartIds: z.array(z.string()),
-  note: z.string().optional(),
+  // address: z.string({
+  //   required_error: 'Address is required',
+  //   invalid_type_error: 'Address must be a string',
+  // }),
+  // fullname: z.string({
+  //   required_error: 'Fullname is required',
+  //   invalid_type_error: 'Fullname must be a string',
+  // }),
   phoneNumber: z.string().min(10).max(15),
+  note: z.string().nullish(),
 });
 
 export const CreateOrderResultSchema = z.object({

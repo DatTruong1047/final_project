@@ -1,4 +1,10 @@
-import { CreateOrderRequestType, CreateOrderResultType, OrderResponseType, ResultType } from '@model';
+import {
+  CreateOrderRequestType,
+  CreateOrderResultType,
+  CreateOrderWithChatType,
+  OrderResponseType,
+  ResultType,
+} from '@model';
 
 import { ErrorCodes } from '@app/config';
 import ProductRepository from '@app/repositories/product.repository';
@@ -21,7 +27,10 @@ export default class OrderService {
     this._orderRepository = new OrderRepository();
   }
 
-  async createOrder(req: CreateOrderRequestType, userId: string): Promise<ResultType<CreateOrderResultType>> {
+  async createOrderWithCardItems(
+    req: CreateOrderRequestType,
+    userId: string
+  ): Promise<ResultType<CreateOrderResultType>> {
     try {
       return await prisma.$transaction(
         async (tx: Prisma.TransactionClient) => {
@@ -45,7 +54,7 @@ export default class OrderService {
             }
           }
 
-          const order = await this._orderRepository.createOrder(
+          const order = await this._orderRepository.createOrderWithCartItems(
             tx,
             cartResult.carts,
             req,
@@ -75,6 +84,50 @@ export default class OrderService {
     }
   }
 
+  async createOrderWithChat(req: CreateOrderWithChatType): Promise<ResultType<CreateOrderResultType>> {
+    try {
+      return await prisma.$transaction(
+        async (tx: Prisma.TransactionClient) => {
+          const product = await this._productRepository.getProductForCreateOrder(req.productName);
+          if (!product) {
+            return {
+              success: false,
+              code: ErrorCodes.PRODUCT_NOT_FOUND,
+              message: 'Product not found',
+            };
+          }
+
+          if (product.quantity < req.count) {
+            return {
+              success: false,
+              code: ErrorCodes.QUANTITY_IS_NOT_ENOUGH,
+              message: 'Product quantity is not enough',
+            };
+          }
+
+          const totalAmount = Number(product.price * req.count);
+          const order = await this._orderRepository.createOrder(tx, product, req, totalAmount);
+
+          return {
+            success: true,
+            message: 'Order created successfully',
+            data: order,
+          };
+        },
+        {
+          maxWait: 10000,
+          timeout: 100000,
+        }
+      );
+    } catch (error) {
+      app.log.error(`Create order failed: ${error}`);
+      return {
+        success: false,
+        code: ErrorCodes.CREATE_ORDER_FAILED,
+        message: 'Create order failed',
+      };
+    }
+  }
   async updateOrderStatus(orderId: string, orderStatus: OrderStatusEnum) {
     return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const currentOrder = await this.getOrderById(orderId);
