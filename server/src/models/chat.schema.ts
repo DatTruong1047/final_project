@@ -22,11 +22,16 @@ export const ProductMetadataSchema = z.object({
   summary: z.string().nullish(),
 });
 
+export const ProductComparisonInputSchema = z.object({
+  productNames: z.array(z.string()),
+  comparisonCriteria: z.string().optional(),
+});
+
 export const ChatResponseSchema = z.object({
   query: z.string().min(1),
   response: z.array(
     z.object({
-      metadata: ProductMetadataSchema
+      metadata: ProductMetadataSchema,
     })
   ),
 });
@@ -37,23 +42,23 @@ export const ChatMessageResponseSchema = z.object({
 });
 
 export const FullTextQuerySchema = z.object({
-  product_name: z.string().min(1).nullish(),
-  category_name: z.string().min(1).nullish(),
-  brand_name: z.string().min(1).nullish(),
-  price_min: z.number().nullish().default(0),
-  price_max: z.number().nullish().default(1000000000),
-  attributes_values: z.array(z.string()).nullish(),
+  productName: z.string().min(1).nullish(),
+  categoryName: z.string().min(1).nullish(),
+  brandName: z.string().min(1).nullish(),
+  priceMin: z.number().nullish().default(0),
+  priceMax: z.number().nullish().default(1000000000),
+  attributesValues: z.array(z.string()).nullish(),
   limit: z.number().nullish().default(10),
 });
 
 export const ProductSearchQuerySchema = FullTextQuerySchema.extend({
-  query: z.string({
-    required_error: 'Query is required',
-    invalid_type_error: 'Query must be a string',
-  }).min(1),
+  query: z
+    .string({
+      required_error: 'Query is required',
+      invalid_type_error: 'Query must be a string',
+    })
+    .min(1),
 });
-
-
 
 export type ChatQueryType = z.infer<typeof ChatQuerySchema>;
 export type ChatResponseType = z.infer<typeof ChatResponseSchema>;
@@ -63,3 +68,4 @@ export type ProductMetadataType = z.infer<typeof ProductMetadataSchema>;
 export type ProductSearchQueryType = z.infer<typeof ProductSearchQuerySchema>;
 
 export type FullTextQueryType = z.infer<typeof FullTextQuerySchema>;
+export type ProductComparisonInputType = z.infer<typeof ProductComparisonInputSchema>;

@@ -10,6 +10,7 @@ import {
   ErrorResponseType,
   ProductSearchQueryType,
   ProductListType,
+  ProductComparisonInputType,
 } from '@app/models';
 
 import ChatService from '@services/chat.service';
@@ -89,7 +90,10 @@ export default class ChatController {
   }
 
   @binding
-  async productSearch(request: FastifyRequest<{ Body: ProductSearchQueryType }>, reply: FastifyReply): Promise<FastifyReply> {
+  async productSearch(
+    request: FastifyRequest<{ Body: ProductSearchQueryType }>,
+    reply: FastifyReply
+  ): Promise<FastifyReply> {
     try {
       const result = await this.chatService.productSearch(request.body);
 
@@ -100,6 +104,53 @@ export default class ChatController {
       };
 
       return reply.OK(response);
+    } catch (error) {
+      return app.handleErrorResponse(error, reply);
+    }
+  }
+
+  /**
+   * Compare products
+   * @param request.body.productNames list of product names
+   * @param request.body.comparisonCriteria comparison criteria, nullable
+   * @returns comparison result
+   */
+  @binding
+  async productComparison(
+    request: FastifyRequest<{ Body: ProductComparisonInputType }>,
+    reply: FastifyReply
+  ): Promise<FastifyReply> {
+    try {
+      const productComparisonData = await this.chatService.getDataForProductComparison(request.body);
+
+      if(!productComparisonData.success) {
+        const error: ErrorResponseType = {  
+          code: productComparisonData.code,
+          message: productComparisonData.message,
+        };
+
+        return reply.BadRequest(error);
+      }
+
+      // Temporary prompt for product comparison
+      const prompt = `
+      Hãy so sánh các sản phẩm sau:
+      ${productComparisonData.data.productNames.join(', ')}
+      Với các tiêu chí chung sau:
+      ${productComparisonData.data.attributes.map((attr) => `${attr.name}: ${attr.values.join(', ')}`).join('\n')}
+      Và tiêu chí riêng sau:
+      ${productComparisonData.data.comparisonCriteria}
+      `;
+
+      const result = await this.chatService.sendMessage(prompt);
+
+      const res: SuccessResponseType<string> = {
+        code: 200,
+        data: result.data?.toString() || '',
+        status: 'success',
+      };
+
+      return reply.OK(res);
     } catch (error) {
       return app.handleErrorResponse(error, reply);
     }
