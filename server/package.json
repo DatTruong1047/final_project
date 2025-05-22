@@ -17,7 +17,6 @@
     "seed": "tsx src/seed.ts",
     "test": "tsx src/utils/document.util.ts",
     "seed-vector": "tsx src/vector-store/seed-data.ts"
-    "seed": "tsx src/seed.ts"
   },
   "keywords": [],
   "author": "",

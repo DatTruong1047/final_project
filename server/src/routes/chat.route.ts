@@ -6,14 +6,19 @@ import {
   ChatQuerySchema,
   ChatResponseSchema,
   ChatMessageResponseSchema,
+  ProductSearchQuerySchema,
+  ProductListSchema,
+  ProductMetadataSchema,
 } from '@model';
 
 import ChatService from '@services/chat.service';
 
 import ChatController from '@controller/chat.controller';
+import GeminiService from '@app/services/gemini.service';
+import ProductService from '@app/services/product.service';
 
 export default async function chatRoutes(app: FastifyInstance): Promise<void> {
-  const chatService = new ChatService();
+  const chatService = new ChatService(new GeminiService(), new ProductService());
   const chatController = new ChatController(chatService);
 
   app.post('/', {
@@ -42,5 +47,19 @@ export default async function chatRoutes(app: FastifyInstance): Promise<void> {
       },
     },
     handler: chatController.sendMessage,
+  });
+
+  app.post('/product-search', {
+    schema: {
+      tags: ['Chat'],
+      summary: 'Search for products',
+      body: ProductSearchQuerySchema,
+      response: {
+        // 200: SuccessResponseSchema(ProductMetadataSchema),
+        400: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+    handler: chatController.productSearch,
   });
 }

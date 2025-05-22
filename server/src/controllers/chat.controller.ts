@@ -8,11 +8,14 @@ import {
   ChatResponseType,
   ChatMessageResponseType,
   ErrorResponseType,
+  ProductSearchQueryType,
+  ProductListType,
 } from '@app/models';
 
 import ChatService from '@services/chat.service';
 
 import { binding } from '@decorators/binding.decorator';
+import { mapProductDocumentToMetadata } from '@app/utils/mapper/product.mapper';
 
 export default class ChatController {
   constructor(private readonly chatService: ChatService) {}
@@ -29,21 +32,7 @@ export default class ChatController {
       };
 
       for (const item of result) {
-        const metadata = {
-          name: item.metadata.product_name || '',
-          slug: item.metadata.product_slug || '',
-          sku: item.metadata.product_sku || '',
-          image: item.metadata.product_image || [],
-          short_description: item.metadata.product_short_description || '',
-          price:
-            typeof item.metadata.product_price === 'string'
-            ? parseFloat(item.metadata.product_price) || 0
-            : item.metadata.product_price ?? 0,
-          category_name: item.metadata.category_name || '',
-          brand_name: item.metadata.brand_name || '',
-          attributes: item.metadata.product_attributes || {},
-          summary: item.metadata.product_summary || '',
-        };
+        const metadata = mapProductDocumentToMetadata(item);
 
         res.response.push({
           metadata,
@@ -94,6 +83,23 @@ export default class ChatController {
       };
 
       return reply.OK(res);
+    } catch (error) {
+      return app.handleErrorResponse(error, reply);
+    }
+  }
+
+  @binding
+  async productSearch(request: FastifyRequest<{ Body: ProductSearchQueryType }>, reply: FastifyReply): Promise<FastifyReply> {
+    try {
+      const result = await this.chatService.productSearch(request.body);
+
+      const response: SuccessResponseType<ProductListType> = {
+        code: 200,
+        data: result.data,
+        status: 'success',
+      };
+
+      return reply.OK(response);
     } catch (error) {
       return app.handleErrorResponse(error, reply);
     }
