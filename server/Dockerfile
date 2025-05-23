@@ -1,32 +1,23 @@
-FROM node:23-slim AS builder
+FROM node:23
 
-# Thu muc lam viec
+# Đặt thư mục làm việc trong container
 WORKDIR /src
 
-# Copy file package
+# Cài đặt gói cần thiết cho môi trường
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends openssl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Sao chép và cài đặt dependencies trước (giúp cache tốt hơn)
 COPY package*.json ./
+RUN npm install --force
 
-RUN apt-get update -y && apt-get install -y openssl
-# Cai dat dependencies
-RUN npm install 
-
-# Copy source
+# Sao chép toàn bộ mã nguồn còn lại
 COPY . .
 
-# Stage 2: Runtime Stage
-FROM node:23-slim AS production
-
-# Thu muc lam viec
-WORKDIR /src
-
-# Copy file package
-COPY package*.json ./
-
-ENV NODE_ENV=production
-
-# Cai dac dependencies 
-RUN npm install --omit=dev
-
+# Mở cổng ứng dụng
 EXPOSE 3000
 
-CMD ["npm", "run" ,"dev"]
+# Lệnh chạy ứng dụng
+CMD ["npm", "run", "dev"]

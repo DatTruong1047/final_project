@@ -1,18 +1,18 @@
 version: '3.8'
 services:
-  ecommerce-app:
-    container_name: ecommerce-app
-    build: .
-    volumes:
-      - .:/src
-    ports:
-      - '3000:3000'
-    depends_on:
-      postgres:
-        condition: service_healthy
-    env_file: .env
-    networks:
-      - app-networks
+  # ecommerce-app:
+  #   container_name: ecommerce-app
+  #   build: .
+  #   volumes:
+  #     - .:/src
+  #   ports:
+  #     - '3000:3000'
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   env_file: .env
+  #   networks:
+  #     - app-networks
   postgres:
     image: postgres:15
     restart: always
@@ -24,11 +24,11 @@ services:
     networks:
       - app-networks
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"] 
-      interval: 10s        
-      timeout: 5s          
-      retries: 5           
-      start_period: 30s    
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s  
 networks:
   app-networks:
     driver: bridge
