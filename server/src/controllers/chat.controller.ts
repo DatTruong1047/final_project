@@ -11,6 +11,7 @@ import {
   ProductSearchQueryType,
   ProductListType,
   ProductComparisonInputType,
+  CreateOrderWithChatType,
 } from '@app/models';
 
 import ChatService from '@services/chat.service';
@@ -153,6 +154,26 @@ export default class ChatController {
       return reply.OK(res);
     } catch (error) {
       return app.handleErrorResponse(error, reply);
+    }
+   }
+
+  @binding
+  async createOrder(request: FastifyRequest<{ Body: CreateOrderWithChatType }>, reply: FastifyReply): Promise<FastifyReply> {
+    try {
+      const result = await this.chatService.createOrderWithChat(request.body);
+
+      if (!result.success) {
+        const err: ErrorResponseType = {
+          code: result.code,
+          message: result.message,
+        };
+
+        return reply.BadRequest(err);
+      }
+
+      return reply.OK(result);
+    } catch (error) {
+      return app.handleErrorResponse(error, reply); 
     }
   }
 }

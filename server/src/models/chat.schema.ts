@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { CreateOrderRequestSchema } from './order.schema';
 
 export const ChatQuerySchema = z.object({
   query: z
@@ -59,6 +60,27 @@ export const ProductSearchQuerySchema = FullTextQuerySchema.extend({
     })
     .min(1),
 });
+
+
+export const CreateOrderWithChatSchema = CreateOrderRequestSchema.omit({
+  cartIds: true,
+})
+.extend({
+  productName: z.string({
+    required_error: 'Product name is required',
+    invalid_type_error: 'Product name must be a string',
+  }).min(1),
+  userId: z.string({
+    required_error: 'User ID is required',
+    invalid_type_error: 'User ID must be a string',
+  }),
+  count: z.number({
+    required_error: 'Count is required',
+    invalid_type_error: 'Count must be a number',
+  }).min(1),
+});
+
+export type CreateOrderWithChatType = z.infer<typeof CreateOrderWithChatSchema>;
 
 export type ChatQueryType = z.infer<typeof ChatQuerySchema>;
 export type ChatResponseType = z.infer<typeof ChatResponseSchema>;

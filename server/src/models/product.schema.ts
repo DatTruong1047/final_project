@@ -60,6 +60,18 @@ export const ProductListSchema = z.object({
   limit: z.number().default(8),
 });
 
+export const ProductForCreateOrderSchema = ProductBaseSchema.omit({
+  category: true,
+  brand: true,
+  attributes: true,
+  productMedias: true,
+  brandId: true,
+  categoryId: true,
+  longDescription: true,
+  shortDescription: true,
+
+});
+
 export const ProductDetailSchema = ProductBaseSchema.extend({
   reviews: z
     .array(
@@ -111,3 +123,4 @@ export type ProductFilterType = z.infer<typeof ProductFilterSchema>;
 export type ProductBaseType = z.infer<typeof ProductBaseSchema>;
 export type ProductListType = z.infer<typeof ProductListSchema>;
 export type ProductDetailType = z.infer<typeof ProductDetailSchema>;
+export type ProductForCreateOrderType = z.infer<typeof ProductForCreateOrderSchema>;

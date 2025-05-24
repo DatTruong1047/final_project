@@ -3,6 +3,7 @@ import {
   ProductBaseType,
   ProductDetailType,
   ProductFilterType,
+  ProductForCreateOrderType,
   ProductListType,
   ProductMetadataType,
   ProductSearchQueryType,
@@ -20,47 +21,32 @@ export default class ProductRepository {
     this._prisma = prisma;
   }
 
+  async getProductForCreateOrder(name: string): Promise<ProductForCreateOrderType > {
+    const product = await this._prisma.product.findUnique({
+      where: { name },
+      select: {
+        id: true,
+        name: true,
+        code: true,
+        price: true,
+        quantity: true,
+      }
+    });
+
+    if (!product) {
+      throw new Error('PRODUCT_NOT_FOUND');
+    }
+
+    return {
+      ...product,
+      price: product.price.toNumber(),
+    };
+  }
+
   async getProductById(id: string): Promise<ProductDetailType> {
     const product = await this._prisma.product.findUnique({
       where: { id },
-      select: {
-        ...this._productSelectBase,
-        longDescription: true,
-        quantity: true,
-        categoryId: true,
-        category: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        attributes: {
-          select: {
-            attributeKey: true,
-            attributeValue: true,
-          },
-        },
-        productMedias: {
-          select: {
-            id: true,
-            media: {
-              select: {
-                id: true,
-                url: true,
-              },
-            },
-          },
-        },
-        reviews: {
-          select: {
-            id: true,
-            rating: true,
-            comment: true,
-            createdAt: true,
-            updatedAt: true,
-          },
-        },
-      },
+      select: this._productSelectDetail,
     });
 
     if (!product) {
@@ -311,6 +297,38 @@ export default class ProductRepository {
             description: true,
           },
         },
+      },
+    },
+  };
+
+  private readonly _productSelectDetail = {
+    ...this._productSelectBase,
+    longDescription: true,
+    quantity: true,
+    attributes: {
+      select: {
+        attributeKey: true,
+        attributeValue: true,
+      },
+    },
+    productMedias: {
+      select: {
+        id: true,
+        media: {
+          select: {
+            id: true,
+            url: true,
+          },
+        },
+      },
+    },
+    reviews: {
+      select: {
+        id: true,
+        rating: true,
+        comment: true,
+        createdAt: true,
+        updatedAt: true,
       },
     },
   };
