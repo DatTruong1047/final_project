@@ -22,8 +22,17 @@ Run the test cases.
 
 To learn Fastify, check out the [Fastify documentation](https://fastify.dev/docs/latest/).
 
-
+-------------
 ## Sử dụng Docker
-# Lưu ý: Cấu hình port trong connect string là 5432
+# Lưu ý: Su dung cấu hình port trong connect string là 5432
 npx prisma generate 
 npx prisma migrate deploy
+
+## Seed data
+npm run seed
+
+## Ngrok
+ngrok http 3000
+
+## Cấu hình webhook Stripe
+stripe listen --forward-to localhost:3000/webhook

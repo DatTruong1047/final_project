@@ -14,3 +14,14 @@ export const HOST = process.env.HOST;
 export const CLIENT_HOST = process.env.CLIENT_HOST || 'http://localhost:5137/';
 export const CLIENT_RESET_PASS_URL = process.env.CLIENT_FORGOT_PASS_URL || 'auth/reset-password';
 export const CLIENT_VERIFICATION_URL = process.env.CLIENT_VERIFICATION_URL || 'auth/verify-email';
+
+
+export const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+export const POSTGRES_USER = process.env.POSTGRES_USER || 'postgres';
+export const POSTGRES_PASSWORD = process.env.POSTGRES_PASSWORD || 'postgres';
+export const POSTGRES_DB = process.env.POSTGRES_DB || 'mydb';
+export const POSTGRES_HOST = process.env.POSTGRES_HOST || 'localhost';
+export const POSTGRES_PORT = parseInt(process.env.POSTGRES_PORT || '5432', 10);
+
+export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+

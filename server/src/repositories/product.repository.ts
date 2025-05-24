@@ -1,7 +1,16 @@
-import { ProductDetailType, ProductFilterType, ProductListType } from '@model';
+import {
+  FullTextQueryType,
+  ProductBaseType,
+  ProductDetailType,
+  ProductFilterType,
+  ProductListType,
+  ProductMetadataType,
+  ProductSearchQueryType,
+} from '@model';
 import { Prisma, PrismaClient } from 'generated/prisma';
 
 import prisma from '@app/lib/prisma';
+import app from '@app/app';
 
 export default class ProductRepository {
   private readonly _prisma: PrismaClient;
@@ -109,15 +118,51 @@ export default class ProductRepository {
     };
   }
 
-  async updateQuantity(id: string, quantity: number): Promise<boolean> {
+  async updateQuantity(
+    tx: Prisma.TransactionClient,
+    id: string,
+    quantity: number,
+    method: 'increment' | 'decrement'
+  ): Promise<boolean> {
     try {
-      await this._prisma.product.update({
+      await tx.product.update({
         where: { id },
-        data: { quantity },
+        data: { quantity: { [method]: quantity } },
       });
       return true;
-    } catch {
-      return false;
+    } catch (error) {
+      throw new Error(`Failed to update quantity: ${error.message}`);
+    }
+  }
+
+  async fullTextSearch(params: FullTextQueryType): Promise<ProductMetadataType[]> {
+    try {
+      const { limit, ...fullTextQuery } = params;
+      const products = await this._prisma.product.findMany({
+        where: {
+          ...this._fullTextSearchQuery(fullTextQuery),
+        },
+        select: this._productSelectMetadata,
+        take: limit,
+        orderBy: {
+          price: 'asc',
+        },
+      });
+
+      return products.map((product) => ({
+        ...product,
+        slug: product.name,
+        sku: product.code,
+        summary: product.shortDescription,
+        price: product.price.toNumber(),
+        attributes: product.attributes.reduce((acc, attribute) => {
+          acc[attribute.attributeKey] = attribute.attributeValue;
+          return acc;
+        }, {} as Record<string, string>),
+      }));
+    } catch (error) {
+      app.log.error('Error in fullTextSearch:', error);
+      throw new Error(`Failed to fullTextSearch: ${error.message}`);
     }
   }
 
@@ -152,6 +197,49 @@ export default class ProductRepository {
       ],
     };
   }
+
+  private _fullTextSearchQuery(params: FullTextQueryType): Prisma.ProductWhereInput {
+    const andConditions: Prisma.ProductWhereInput[] = [];
+
+    if (params.category_name) {
+      andConditions.push({
+        category: { name: { equals: params.category_name } },
+      });
+    }
+
+    if (params.brand_name) {
+      andConditions.push({ brand: { name: { equals: params.brand_name } } });
+    }
+
+    if (params.price_min != undefined) {
+      andConditions.push({ price: { gte: params.price_min } });
+    }
+
+    if (params.price_max != undefined) {
+      andConditions.push({ price: { lte: params.price_max } });
+    }
+
+    const orConditions: Prisma.ProductWhereInput[] = [];
+
+    if (params.product_name) {
+      orConditions.push({ name: { contains: params.product_name, mode: Prisma.QueryMode.insensitive } });
+    }
+
+    if (params.attributes_values) {
+      orConditions.push({
+        attributes: { some: { attributeValue: { in: params.attributes_values, mode: Prisma.QueryMode.insensitive } } },
+      });
+    }
+
+    if (orConditions.length > 0) {
+      andConditions.push({ OR: orConditions });
+    }
+
+    return {
+      AND: andConditions.filter(Boolean),
+    };
+  }
+
   private readonly _productSelectBase = {
     id: true,
     name: true,
@@ -185,5 +273,23 @@ export default class ProductRepository {
         },
       },
     },
+  };
+
+  private readonly _productSelectMetadata = {
+    id: true,
+    name: true,
+    code: true,
+    price: true,
+    shortDescription: true,
+    productMedias: {
+      take: 1,
+      select: {
+        id: true,
+        media: { select: { url: true } },
+      },
+    },
+    category: { select: { name: true } },
+    brand: { select: { name: true } },
+    attributes: { select: { attributeKey: true, attributeValue: true } },
   };
 }
