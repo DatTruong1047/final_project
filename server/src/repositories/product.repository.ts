@@ -81,19 +81,19 @@ export default class ProductRepository {
   async findProductByApproxName(name: string, limit: number = 1): Promise<ProductMetadataType | null> {
     const normalizedName = removeAccents(name.trim().toLowerCase());
 
-    const rawResults: ({id: string} & { sim: number })[] = await this._prisma.$queryRawUnsafe(
-      `
-      SELECT id, similarity(lower(unaccent(name)), $1) AS sim
+    const rawResults: ({ id: string } & { sim: number })[] = await this._prisma.$queryRaw<
+      { id: string; sim: number }[]
+    >(
+      Prisma.sql`
+      SELECT id, similarity(lower(unaccent(name)), ${normalizedName}) AS sim
       FROM products
-      WHERE lower(unaccent(name)) % $1
+      WHERE lower(unaccent(name)) % ${normalizedName}
       ORDER BY sim DESC
-      LIMIT $2
-      `,
-      normalizedName,
-      limit
+      LIMIT ${limit}
+      `
     );
 
-    if(rawResults.length === 0) {
+    if (rawResults.length === 0) {
       return null;
     }
 
@@ -104,9 +104,11 @@ export default class ProductRepository {
       select: this._productSelectMetadata,
     });
 
+    if (!product) return null;
+
     const metadata: ProductMetadataType = {
       ...product,
-      price: product.price.toNumber(),
+      price: product.price.toNumber() ?? 0,
       attributes: product.attributes.reduce((acc, attribute) => {
         acc[attribute.attributeKey] = attribute.attributeValue;
         return acc;

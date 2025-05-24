@@ -88,7 +88,7 @@ export default class ChatService {
       const findResult = await this._productService.findProductByApproxName(query.productNames);
       const { found, notFound } = findResult.data;
 
-      if(found.length < 2) {
+      if(!found || found.length < 2) {
         return {
           code: 400,
           message: 'At least 2 products are required for comparison',
@@ -96,7 +96,7 @@ export default class ChatService {
         };
       }
 
-      const attrSharedResult = this._productService.getAttrShared(found);
+      const attrSharedResult = found && found.length > 0 ? this._productService.getAttrShared(found) : null;
 
       if (attrSharedResult === null || attrSharedResult.attributes.length === 0) {
         return {
