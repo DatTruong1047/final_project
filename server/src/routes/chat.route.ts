@@ -9,6 +9,7 @@ import {
   ProductSearchQuerySchema,
   ProductListSchema,
   ProductMetadataSchema,
+  ProductComparisonInputSchema,
   CreateOrderWithChatSchema,
   OrderResponseSchema,
 } from '@model';
@@ -67,6 +68,17 @@ export default async function chatRoutes(app: FastifyInstance): Promise<void> {
     handler: chatController.productSearch,
   });
 
+  app.post('/product-comparison', {
+    schema: {
+      tags: ['Chat'],
+      summary: 'Compare products',
+      body: ProductComparisonInputSchema,
+      response: {
+        // 200: SuccessResponseSchema(ChatResponseSchema),
+      },
+    },
+     handler: chatController.productComparison,
+  });
   app.post('/order', {
     schema: {
       tags: ['Chat'],
