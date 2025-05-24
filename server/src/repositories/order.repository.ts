@@ -86,7 +86,7 @@ export default class OrderRepository {
             productName: product.name,
             quantity: req.count,
             unitPrice: Number(product.price),
-            subtotal: Number(product.price * req.count),
+            subtotal: Number(product.price * req.count).toFixed(2),
           },
         },
       },
