@@ -17,7 +17,7 @@ export default class OrderController {
     try {
       const { userId } = request.decodedAccessToken;
 
-      const result = await this._orderService.createOrder( request.body, userId );
+      const result = await this._orderService.createOrderWithCardItems( request.body, userId );
 
       if (!result.success) {
         const errorResponse: ErrorResponseType = {

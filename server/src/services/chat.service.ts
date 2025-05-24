@@ -2,20 +2,43 @@ import { Document } from '@langchain/core/documents';
 import { MessageContent } from '@langchain/core/messages';
 
 import app from '@app/app';
-import { ProductListType, ProductMetadataType, ProductSearchQueryType, ResultType } from '@app/models';
+import {
+  CreateOrderResultType,
+  CreateOrderWithChatSchema,
+  CreateOrderWithChatType,
+  OrderResponseType,
+  ProductListType,
+  ProductMetadataType,
+  ProductSearchQueryType,
+  ResultType,
+  SuccessResponseType,
+} from '@app/models';
 import VectorStore from '@app/vector-store/init';
 
 import GeminiService from '@services/gemini.service';
 import ProductService from './product.service';
 import { mapProductDocumentToMetadata } from '@app/utils/mapper/product.mapper';
+import OrderService from './order.service';
+import UserService from './user.service';
+import { createPaymentIntent } from '@app/utils/stripe';
+import { OrderStatusEnum } from 'generated/prisma';
 
 export default class ChatService {
   private readonly _geminiService: GeminiService;
   private readonly _productService: ProductService;
+  private readonly _orderService: OrderService;
+  private readonly _userService: UserService;
 
-  constructor(geminiService: GeminiService, productService: ProductService) {
+  constructor(
+    geminiService: GeminiService,
+    productService: ProductService,
+    orderService: OrderService,
+    userService: UserService
+  ) {
     this._geminiService = geminiService;
     this._productService = productService;
+    this._orderService = orderService;
+    this._userService = userService;
   }
 
   async search(query: string): Promise<Document[]> {
@@ -41,7 +64,7 @@ export default class ChatService {
         similarityData = similarityResult.map((item) => mapProductDocumentToMetadata(item));
       }
 
-      // Remove duplicate products based on a unique SKU 
+      // Remove duplicate products based on a unique SKU
       const uniqueProducts = new Map<string, ProductMetadataType>();
       [...fullTextData, ...similarityData].forEach((product) => {
         uniqueProducts.set(product.sku, product);
@@ -71,6 +94,55 @@ export default class ChatService {
     } catch (error) {
       app.log.error('Error in sendMessage:', error);
       throw new Error('Server error');
+    }
+  }
+
+  async createOrderWithChat(query: CreateOrderWithChatType): Promise<ResultType<OrderResponseType>> {
+    try {
+      const user = await this._userService.getUserById(query.userId);
+      if (!user) {
+        return {
+          code: 401,
+          message: 'User not found',
+          success: false,
+        };
+      }
+
+      const createOrderResult = await this._orderService.createOrderWithChat(query);
+
+      if (!createOrderResult.success) {
+        return {
+          code: createOrderResult.code,
+          message: createOrderResult.message,
+          success: false,
+        };
+      }
+
+      const paymentIntent = await createPaymentIntent(
+        Number(createOrderResult.data.totalAmount),
+        createOrderResult.data.id,
+        user.id
+      );
+      await this._orderService.updateOrderStatus(createOrderResult.data.id, OrderStatusEnum.PROCESSING);
+      await this._orderService.addPaymentIntentId(createOrderResult.data.id, paymentIntent.id);
+
+      const responseData: OrderResponseType = {
+        ...createOrderResult.data,
+        paymentIntent: {
+          id: paymentIntent.id,
+          clientSecret: paymentIntent.client_secret as string,
+        },
+      };
+
+      return {
+        code: 200,
+        message: 'Order created successfully',
+        success: true,
+        data: responseData,
+      };
+    } catch (error) {
+      app.log.error('Error in createOrder:', error);
+      throw error;
     }
   }
 }
