@@ -44,6 +44,15 @@ export default class OrderService {
             };
           }
 
+          // Maximum order amount is 99,999,999 VND
+          if(cartResult.totalPrice > 99999999 ) {
+            return {
+              success: false,
+              code: ErrorCodes.TOTAL_PRICE_IS_TOO_HIGH,
+              message: 'Total price is too high',
+            };
+          }
+
           for (const item of cartResult.carts) {
             if (item.quantity > item.product.quantity) {
               return {
@@ -53,6 +62,8 @@ export default class OrderService {
               };
             }
           }
+
+          
 
           const order = await this._orderRepository.createOrderWithCartItems(
             tx,
@@ -106,6 +117,16 @@ export default class OrderService {
           }
 
           const totalAmount = Number(product.price * req.count);
+
+          // Maximum order amount is 99,999,999 VND
+          if(totalAmount > 99999999) {
+            return {
+              success: false,
+              code: ErrorCodes.TOTAL_PRICE_IS_TOO_HIGH,
+              message: 'Total price is too high',
+            };
+          }
+
           const order = await this._orderRepository.createOrder(tx, product, req, totalAmount);
 
           return {
@@ -162,12 +183,9 @@ export default class OrderService {
     });
   }
 
-  async addStripeSession(orderId: string, stripeSessionId: string) {
-    return await this._orderRepository.addStripeSession(orderId, stripeSessionId);
-  }
 
-  async addPaymentIntentId(orderId: string, paymentIntentId: string) {
-    return await this._orderRepository.addPaymentIntentId(orderId, paymentIntentId);
+  async addPaymentIntent(orderId: string, paymentIntentId: string, clientSecret: string) {
+    return await this._orderRepository.addPaymentIntent(orderId, paymentIntentId, clientSecret);
   }
 
   async getOrderById(orderId: string): Promise<Order> {

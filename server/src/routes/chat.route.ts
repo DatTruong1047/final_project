@@ -4,92 +4,92 @@ import {
   SuccessResponseSchema,
   ErrorResponseSchema,
   ChatQuerySchema,
-  ChatResponseSchema,
   ChatMessageResponseSchema,
-  ProductSearchQuerySchema,
-  ProductListSchema,
-  ProductMetadataSchema,
-  ProductComparisonInputSchema,
-  CreateOrderWithChatSchema,
-  OrderResponseSchema,
+  MergeChatSessionSchema,
+  CreateChatSessionSchema,
 } from '@model';
 
 import ChatService from '@services/chat.service';
 
 import ChatController from '@controller/chat.controller';
 import GeminiService from '@app/services/gemini.service';
-import ProductService from '@app/services/product.service';
-import OrderService from '@app/services/order.service';
-import UserService from '@app/services/user.service';
+import { ToolRegistry } from '@app/tools/registry/tool.registry';
+import ChatRepository from '@app/repositories/chat.repository';
+import { initializeTools } from '@app/tools/init';
+import ProductService from '@services/product.service';
+import OrderService from '@services/order.service';
+import UserService from '@services/user.service';
 
 export default async function chatRoutes(app: FastifyInstance): Promise<void> {
-  const chatService = new ChatService(new GeminiService(), new ProductService(), new OrderService(), new UserService());
+  const toolRegistry = await initializeTools(new ProductService(), new OrderService(), new UserService());
+
+  const chatService = new ChatService(new GeminiService(), toolRegistry, new ChatRepository());
   const chatController = new ChatController(chatService);
 
-  app.post('/', {
-    schema: {
-      tags: ['Chat'],
-      summary: 'Vector search for products',
-      body: ChatQuerySchema,
-      response: {
-        200: SuccessResponseSchema(ChatResponseSchema),
-        400: ErrorResponseSchema,
-        500: ErrorResponseSchema,
-      },
-    },
-    handler: chatController.search,
-  });
   app.post('/message', {
     schema: {
       tags: ['Chat'],
       summary: 'Send message to chatbot',
       body: ChatQuerySchema,
       response: {
-        200: SuccessResponseSchema(ChatMessageResponseSchema),
+        // 200: SuccessResponseSchema(ChatMessageResponseSchema),
         400: ErrorResponseSchema,
-        429: ErrorResponseSchema,
         500: ErrorResponseSchema,
       },
     },
     handler: chatController.sendMessage,
   });
 
-  app.post('/product-search', {
+  app.put('/merge-chat-session', {
     schema: {
       tags: ['Chat'],
-      summary: 'Search for products',
-      body: ProductSearchQuerySchema,
+      summary: 'Merge chat session',
+      body: MergeChatSessionSchema,
+      response: {
+        // 200: SuccessResponseSchema,
+        400: ErrorResponseSchema,
+        429: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+    handler: chatController.mergeChatSession,
+  });
+
+  app.post('/session', {
+    schema: {
+      tags: ['Chat'],
+      summary: 'Create chat session',
+      body: CreateChatSessionSchema,
       response: {
         // 200: SuccessResponseSchema(ProductMetadataSchema),
         400: ErrorResponseSchema,
         500: ErrorResponseSchema,
       },
     },
-    handler: chatController.productSearch,
+    handler: chatController.createChatSession,
   });
 
-  app.post('/product-comparison', {
+  app.delete('/session/:id', {
     schema: {
       tags: ['Chat'],
-      summary: 'Compare products',
-      body: ProductComparisonInputSchema,
+      summary: 'End chat session',
       response: {
         // 200: SuccessResponseSchema(ChatResponseSchema),
       },
     },
-     handler: chatController.productComparison,
+    handler: chatController.endChatSession,
   });
-  app.post('/order', {
+
+  app.get('/session/:id/messages', {
     schema: {
       tags: ['Chat'],
-      summary: 'Create order',
-      body: CreateOrderWithChatSchema,
+      summary: 'Get chat messages',
       response: {
-        200: SuccessResponseSchema(OrderResponseSchema),
+        // 200: SuccessResponseSchema(ChatMessageResponseSchema),
         400: ErrorResponseSchema,
         500: ErrorResponseSchema,
       },
     },
-    handler: chatController.createOrder,
+    handler: chatController.getChatMessages,
   });
 }

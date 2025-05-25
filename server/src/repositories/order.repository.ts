@@ -113,17 +113,10 @@ export default class OrderRepository {
     });
   }
 
-  async addStripeSession(orderId: string, stripeSessionId: string): Promise<Order> {
+  async addPaymentIntent(orderId: string, paymentIntentId: string, clientSecret: string): Promise<Order> {
     return this._prisma.order.update({
       where: { id: orderId },
-      data: { stripeSessionId: stripeSessionId },
-    });
-  }
-
-  async addPaymentIntentId(orderId: string, paymentIntentId: string): Promise<Order> {
-    return this._prisma.order.update({
-      where: { id: orderId },
-      data: { paymentIntentId: paymentIntentId },
+      data: { paymentIntentId: paymentIntentId, clientSecret: clientSecret },
     });
   }
 

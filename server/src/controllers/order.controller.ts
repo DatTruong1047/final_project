@@ -4,7 +4,13 @@ import OrderService from '@app/services/order.service';
 
 import { binding } from '@decorators/binding.decorator';
 import app from '@app/app';
-import { CreateOrderRequestType, ErrorResponseType, OrderResponseType, SuccessResponseType, SuccessResWithoutDataType } from '@app/models';
+import {
+  CreateOrderRequestType,
+  ErrorResponseType,
+  OrderResponseType,
+  SuccessResponseType,
+  SuccessResWithoutDataType,
+} from '@app/models';
 import { ErrorCodes } from '@app/config';
 import { createPaymentIntent } from '@app/utils/stripe';
 import { OrderStatusEnum } from 'generated/prisma';
@@ -13,11 +19,14 @@ export default class OrderController {
   constructor(private readonly _orderService: OrderService) {}
 
   @binding
-  async createOrder(request: FastifyRequest<{ Body: CreateOrderRequestType }>, reply: FastifyReply): Promise<FastifyReply> {
+  async createOrder(
+    request: FastifyRequest<{ Body: CreateOrderRequestType }>,
+    reply: FastifyReply
+  ): Promise<FastifyReply> {
     try {
       const { userId } = request.decodedAccessToken;
 
-      const result = await this._orderService.createOrderWithCardItems( request.body, userId );
+      const result = await this._orderService.createOrderWithCardItems(request.body, userId);
 
       if (!result.success) {
         const errorResponse: ErrorResponseType = {
@@ -33,15 +42,18 @@ export default class OrderController {
       }
 
       const paymentIntent = await createPaymentIntent(Number(result.data.totalAmount), result.data.id, userId);
+
+      const paymentIntentData = {
+        id: paymentIntent.id,
+        clientSecret: paymentIntent.client_secret as string,
+      };
+
       await this._orderService.updateOrderStatus(result.data.id, OrderStatusEnum.PROCESSING);
-      await this._orderService.addPaymentIntentId(result.data.id, paymentIntent.id);
-      
+      await this._orderService.addPaymentIntent(result.data.id, paymentIntentData.id, paymentIntentData.clientSecret);
+
       const responseData: OrderResponseType = {
         ...result.data,
-        paymentIntent: {
-          id: paymentIntent.id,
-          clientSecret: paymentIntent.client_secret as string,
-        },
+        paymentIntent: paymentIntentData,
       };
 
       const response: SuccessResponseType<OrderResponseType> = {
@@ -56,7 +68,7 @@ export default class OrderController {
   }
 
   @binding
-  async getOrdersByUserId (request: FastifyRequest, reply: FastifyReply): Promise<FastifyReply> {
+  async getOrdersByUserId(request: FastifyRequest, reply: FastifyReply): Promise<FastifyReply> {
     try {
       const { userId } = request.decodedAccessToken;
 

@@ -1,10 +1,9 @@
 import { MessageContent } from '@langchain/core/messages';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
-
 import { ErrorCodes, geminiApiKey, geminiModel } from '@config';
-
 import { ResultType } from '@app/models';
 import app from '@app/app';
+import { ToolRegistry } from '@app/tools/registry/tool.registry';
 
 export class GeminiServiceError extends Error {
   constructor(message: string, public readonly code: string) {
@@ -15,6 +14,7 @@ export class GeminiServiceError extends Error {
 
 export default class GeminiService {
   private readonly _genai: ChatGoogleGenerativeAI;
+  private readonly _toolRegistry: ToolRegistry;
 
   constructor() {
     if (!geminiApiKey) {
@@ -27,8 +27,10 @@ export default class GeminiService {
     });
   }
 
-  async generateResponse(query: string): Promise<ResultType<MessageContent>> {
+  async generateResponse(query: string, toolRegistry: ToolRegistry): Promise<ResultType<MessageContent>> {
     try {
+      this._genai.bindTools(toolRegistry.getAllTools());
+
       const response = await this._genai.invoke(query);
 
       if (!response || !response.content) {
@@ -47,7 +49,9 @@ export default class GeminiService {
         data: response.content,
       };
     } catch (error) {
-      if (error instanceof Error) {
+      if (error instanceof GeminiServiceError) {
+        app.log.error('Unexpected error from Gemini API:', error);
+
         if (error.message.includes('API key')) {
           return {
             code: ErrorCodes.INVALID_API_KEY,
@@ -72,10 +76,8 @@ export default class GeminiService {
             data: null,
           };
         }
-        app.log.error('Unexpected error from Gemini API:', error);
-
-      }
-      if (!(error instanceof GeminiServiceError)) {
+      } else {
+        app.log.error('Something went wrong when generating response from Gemini API:', error);
         throw error;
       }
     }

@@ -69,7 +69,6 @@ export const ProductForCreateOrderSchema = ProductBaseSchema.omit({
   categoryId: true,
   longDescription: true,
   shortDescription: true,
-
 });
 
 export const ProductDetailSchema = ProductBaseSchema.extend({
@@ -118,6 +117,20 @@ export const ProductFilterSchema = z.object({
   sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
 });
 
+export const ProductMetadataSchema = z.object({
+  name: z.string(),
+  slug: z.string(),
+  sku: z.string(),
+  image: z.array(z.string()).nullish(),
+  short_description: z.string().nullish(),
+  price: z.number().nullish(),
+  category_name: z.string().nullish(),
+  brand_name: z.string().nullish(),
+  attributes: z.record(z.string()).nullish(),
+  summary: z.string().nullish(),
+});
+
+export type ProductMetadataType = z.infer<typeof ProductMetadataSchema>;
 export type ProductFilterType = z.infer<typeof ProductFilterSchema>;
 
 export type ProductBaseType = z.infer<typeof ProductBaseSchema>;

@@ -12,4 +12,5 @@ export * from './cart.schema';
 export * from './chat.schema';
 export * from './order.schema';
 export * from './payment.schema';
+export * from './tool.schema';
 
