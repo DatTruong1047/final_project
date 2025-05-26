@@ -1,13 +1,13 @@
 <template>
-  <div class="mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mx-auto px-4 sm:px-6 lg:px-[16rem] py-8">
     <!-- Product content -->
 
     <div class="flex text-xl font-medium text-red-500 mb-8 items-center space-x-2">
-      <span class="hover:text-red-700 cursor-pointer">
+      <span class="hover:text-red-700 cursor-pointer font-bold text-xl uppercase">
         {{ productStore.productDetail?.brand?.name }}
       </span>
-      <span class="text-gray-400 font-bold flex-shrink-0">•</span>
-      <span class="hover:text-red-700 cursor-pointer">
+      <span class="text-red-400 font-bold flex-shrink-0 text-xl ">•</span>
+      <span class="hover:text-red-700 cursor-pointer font-bold text-xl uppercase">
         {{ productStore.productDetail?.category?.name }}
       </span>
     </div>
@@ -30,7 +30,7 @@
 
     <!-- Product Attributes -->
     <div
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 mb-16"
+      class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-12 gap-8 mb-16"
       v-if="productStore.productDetail?.attributes?.length"
     >
       <div class="lg:col-span-7">

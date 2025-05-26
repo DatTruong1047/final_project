@@ -20,25 +20,28 @@ interface State {
 export const useAuthStore = defineStore('auth', {
   state: (): State => {
     return {
-      accessToken: '',
-      refreshToken: '',
-      user: null,
-      isAuthenticated: false,
+      accessToken: localStorage.getItem('accessToken') || '',
+      refreshToken: localStorage.getItem('refreshToken') || '',
+      user: JSON.parse(localStorage.getItem('user') || '{}'),
+      isAuthenticated: localStorage.getItem('accessToken') !== null,
     }
   },
 
   actions: {
     setAccessToken(newToken: string) {
+      localStorage.setItem('accessToken', newToken)
       this.accessToken = newToken
     },
 
     setRefreshToken(newToken: string) {
+      localStorage.setItem('refreshToken', newToken)
       this.refreshToken = newToken
     },
 
     setUser(newUser: User) {
-      this.user = newUser
       this.isAuthenticated = true
+      localStorage.setItem('user', JSON.stringify(newUser))
+      this.user = newUser
     },
 
     logout() {
@@ -46,6 +49,9 @@ export const useAuthStore = defineStore('auth', {
       this.refreshToken = ''
       this.user = null
       this.isAuthenticated = false
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('user')
     },
   },
 })

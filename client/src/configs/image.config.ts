@@ -8,4 +8,6 @@ export const imageConfig = {
     '/images/sieu-tu-lanh-to_61_959.png.webp',
   ],
   productDefault: '/images/product-img-fallback.png',
+  botImage: '/images/bot-icon.png',
+  avatar: '/images/avatar-default.jpeg',
 }

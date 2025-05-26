@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { CreateOrderRequestSchema } from './order.schema';
 
+
 export const ChatQuerySchema = z.object({
   query: z
     .string({
@@ -10,23 +11,6 @@ export const ChatQuerySchema = z.object({
     .min(1),
 });
 
-export const ProductMetadataSchema = z.object({
-  name: z.string(),
-  slug: z.string(),
-  sku: z.string(),
-  image: z.array(z.string()).nullish(),
-  short_description: z.string().nullish(),
-  price: z.number().nullish(),
-  category_name: z.string().nullish(),
-  brand_name: z.string().nullish(),
-  attributes: z.record(z.string()).nullish(),
-  summary: z.string().nullish(),
-});
-
-export const ProductComparisonInputSchema = z.object({
-  productNames: z.array(z.string()),
-  comparisonCriteria: z.string().optional(),
-});
 
 export const ChatResponseSchema = z.object({
   query: z.string().min(1),
@@ -41,6 +25,7 @@ export const ChatMessageResponseSchema = z.object({
   query: z.string().min(1),
   response: z.string().min(1),
 });
+
 
 export const FullTextQuerySchema = z.object({
   productName: z.string().min(1).nullish(),
@@ -91,3 +76,4 @@ export type ProductSearchQueryType = z.infer<typeof ProductSearchQuerySchema>;
 
 export type FullTextQueryType = z.infer<typeof FullTextQuerySchema>;
 export type ProductComparisonInputType = z.infer<typeof ProductComparisonInputSchema>;
+
