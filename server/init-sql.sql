@@ -5,8 +5,6 @@
 -- \c ecommerce_db;
 SET SEARCH_PATH = "public";
 
-SELECT * FROM "media"
-
 CREATE EXTENSION IF NOT EXISTS vector;
 
 

@@ -8,6 +8,7 @@ import productRoutes from './product.route';
 import userRoutes from './user.route';
 import orderRoutes from './order.route';
 import paymentRoutes from './payment.route';
+
 export default async function registerRoutes(): Promise<void> {
   app.register(
     async () => {

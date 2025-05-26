@@ -1,7 +1,18 @@
-import { ProductDetailType, ProductFilterType, ProductListType } from '@model';
-import { Prisma, PrismaClient } from 'generated/prisma';
+import {
+  FullTextQueryType,
+  ProductBaseType,
+  ProductDetailType,
+  ProductFilterType,
+  ProductForCreateOrderType,
+  ProductListType,
+  ProductMetadataType,
+  ProductSearchQueryType,
+} from '@model';
+import { Prisma, PrismaClient, Product } from 'generated/prisma';
 
 import prisma from '@app/lib/prisma';
+import app from '@app/app';
+import removeAccents from 'remove-accents';
 
 export default class ProductRepository {
   private readonly _prisma: PrismaClient;
@@ -10,47 +21,32 @@ export default class ProductRepository {
     this._prisma = prisma;
   }
 
+  async getProductForCreateOrder(name: string): Promise<ProductForCreateOrderType > {
+    const product = await this._prisma.product.findUnique({
+      where: { name },
+      select: {
+        id: true,
+        name: true,
+        code: true,
+        price: true,
+        quantity: true,
+      }
+    });
+
+    if (!product) {
+      throw new Error('PRODUCT_NOT_FOUND');
+    }
+
+    return {
+      ...product,
+      price: product.price.toNumber(),
+    };
+  }
+
   async getProductById(id: string): Promise<ProductDetailType> {
     const product = await this._prisma.product.findUnique({
       where: { id },
-      select: {
-        ...this._productSelectBase,
-        longDescription: true,
-        quantity: true,
-        categoryId: true,
-        category: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        attributes: {
-          select: {
-            attributeKey: true,
-            attributeValue: true,
-          },
-        },
-        productMedias: {
-          select: {
-            id: true,
-            media: {
-              select: {
-                id: true,
-                url: true,
-              },
-            },
-          },
-        },
-        reviews: {
-          select: {
-            id: true,
-            rating: true,
-            comment: true,
-            createdAt: true,
-            updatedAt: true,
-          },
-        },
-      },
+      select: this._productSelectDetail,
     });
 
     if (!product) {
@@ -66,6 +62,45 @@ export default class ProductRepository {
         updatedAt: review.updatedAt.toISOString(),
       })),
     };
+  }
+
+  async findProductByApproxName(name: string, limit: number = 1): Promise<ProductMetadataType | null> {
+    const normalizedName = removeAccents(name.trim().toLowerCase());
+
+    const rawResults: ({ id: string } & { sim: number })[] = await this._prisma.$queryRaw<
+      { id: string; sim: number }[]
+    >(
+      Prisma.sql`
+      SELECT id, similarity(lower(unaccent(name)), ${normalizedName}) AS sim
+      FROM products
+      WHERE lower(unaccent(name)) % ${normalizedName}
+      ORDER BY sim DESC
+      LIMIT ${limit}
+      `
+    );
+
+    if (rawResults.length === 0) {
+      return null;
+    }
+
+    const product = await this._prisma.product.findUnique({
+      where: {
+        id: rawResults[0].id,
+      },
+      select: this._productSelectMetadata,
+    });
+
+    if (!product) return null;
+
+    const metadata: ProductMetadataType = {
+      ...product,
+      price: product.price.toNumber() ?? 0,
+      attributes: product.attributes.reduce((acc, attribute) => {
+        acc[attribute.attributeKey] = attribute.attributeValue;
+        return acc;
+      }, {} as Record<string, string>),
+    };
+    return metadata;
   }
 
   async getProductList(filter: ProductFilterType): Promise<ProductListType> {
@@ -126,6 +161,37 @@ export default class ProductRepository {
     }
   }
 
+  async fullTextSearch(params: FullTextQueryType): Promise<ProductMetadataType[]> {
+    try {
+      const { limit, ...fullTextQuery } = params;
+      const products = await this._prisma.product.findMany({
+        where: {
+          ...this._fullTextSearchQuery(fullTextQuery),
+        },
+        select: this._productSelectMetadata,
+        take: limit,
+        orderBy: {
+          price: 'asc',
+        },
+      });
+
+      return products.map((product) => ({
+        ...product,
+        slug: product.name,
+        sku: product.code,
+        summary: product.shortDescription,
+        price: product.price.toNumber(),
+        attributes: product.attributes.reduce((acc, attribute) => {
+          acc[attribute.attributeKey] = attribute.attributeValue;
+          return acc;
+        }, {} as Record<string, string>),
+      }));
+    } catch (error) {
+      app.log.error('Error in fullTextSearch:', error);
+      throw new Error(`Failed to fullTextSearch: ${error.message}`);
+    }
+  }
+
   private _textSearchQuery(searchText: string): Prisma.ProductWhereInput {
     if (!searchText || searchText.trim() === '') {
       return {};
@@ -157,6 +223,49 @@ export default class ProductRepository {
       ],
     };
   }
+
+  private _fullTextSearchQuery(params: FullTextQueryType): Prisma.ProductWhereInput {
+    const andConditions: Prisma.ProductWhereInput[] = [];
+
+    if (params.categoryName) {
+      andConditions.push({
+        category: { name: { equals: params.categoryName } },
+      });
+    }
+
+    if (params.brandName) {
+      andConditions.push({ brand: { name: { equals: params.brandName } } });
+    }
+
+    if (params.priceMin != undefined) {
+      andConditions.push({ price: { gte: params.priceMin } });
+    }
+
+    if (params.priceMax != undefined) {
+      andConditions.push({ price: { lte: params.priceMax } });
+    }
+
+    const orConditions: Prisma.ProductWhereInput[] = [];
+
+    if (params.productName) {
+      orConditions.push({ name: { contains: params.productName, mode: Prisma.QueryMode.insensitive } });
+    }
+
+    if (params.attributesValues) {
+      orConditions.push({
+        attributes: { some: { attributeValue: { in: params.attributesValues, mode: Prisma.QueryMode.insensitive } } },
+      });
+    }
+
+    if (orConditions.length > 0) {
+      andConditions.push({ OR: orConditions });
+    }
+
+    return {
+      AND: andConditions.filter(Boolean),
+    };
+  }
+
   private readonly _productSelectBase = {
     id: true,
     name: true,
@@ -190,5 +299,55 @@ export default class ProductRepository {
         },
       },
     },
+  };
+
+  private readonly _productSelectDetail = {
+    ...this._productSelectBase,
+    longDescription: true,
+    quantity: true,
+    attributes: {
+      select: {
+        attributeKey: true,
+        attributeValue: true,
+      },
+    },
+    productMedias: {
+      select: {
+        id: true,
+        media: {
+          select: {
+            id: true,
+            url: true,
+          },
+        },
+      },
+    },
+    reviews: {
+      select: {
+        id: true,
+        rating: true,
+        comment: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    },
+  };
+
+  private readonly _productSelectMetadata = {
+    id: true,
+    name: true,
+    code: true,
+    price: true,
+    shortDescription: true,
+    productMedias: {
+      take: 1,
+      select: {
+        id: true,
+        media: { select: { url: true } },
+      },
+    },
+    category: { select: { name: true } },
+    brand: { select: { name: true } },
+    attributes: { select: { attributeKey: true, attributeValue: true } },
   };
 }

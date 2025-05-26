@@ -1,5 +1,13 @@
+import app from '@app/app';
 import { ErrorCodes } from '@app/config';
-import { ProductDetailType, ProductFilterType, ProductListType, ResultType } from '@app/models';
+import {
+  FullTextQueryType,
+  ProductDetailType,
+  ProductFilterType,
+  ProductListType,
+  ProductMetadataType,
+  ResultType,
+} from '@app/models';
 import ProductRepository from '@app/repositories/product.repository';
 
 export default class ProductService {
@@ -36,6 +44,83 @@ export default class ProductService {
       message: 'Product list found',
       success: true,
       data: productList,
+    };
+  }
+
+  async fullTextSearch(params: FullTextQueryType): Promise<ResultType<ProductMetadataType[]>> {
+    try {
+      const productList = await this._productRepository.fullTextSearch(params);
+
+      return {
+        code: 200,
+        message: 'Product list found',
+        success: true,
+        data: productList,
+      };
+    } catch (error) {
+      app.log.error('Error in fullTextSearch:', error);
+      return {
+        code: ErrorCodes.SERVER_ERROR,
+        message: 'Internal server error',
+        success: false,
+      };
+    }
+  }
+
+  async findProductByApproxName(
+    names: string[]
+  ): Promise<ResultType<{ found: ProductMetadataType[]; notFound: string[] }>> {
+    try {
+      const found: ProductMetadataType[] = [];
+      const notFound: string[] = [];
+      for (const name of names) {
+        const product = await this._productRepository.findProductByApproxName(name);
+        if (product) {
+          found.push(product);
+        } else {
+          notFound.push(name);
+        }
+      }
+
+      return {
+        code: 200,
+        message: 'Product found',
+        success: true,
+        data: {
+          found,
+          notFound,
+        },
+      };
+    } catch (error) {
+      app.log.error('Error in findProductByApproxName:', error);
+      throw error;
+    }
+  }
+
+  getAttrShared(products: ProductMetadataType[]): {
+    productNames: string[];
+    attributes: { name: string; values: string[] }[];
+  } | null {
+    const attrCounts: Record<string, number> = {};
+
+    for (const product of products) {
+      for (const attr in product.attributes) {
+        attrCounts[attr] = (attrCounts[attr] || 0) + 1;
+      }
+    }
+
+    const sharedAttrs = Object.keys(attrCounts)
+      .filter((attr) => attrCounts[attr] === products.length)
+      .map((attr) => attr);
+
+    const attributes = sharedAttrs.map((attr) => ({
+      name: attr,
+      values: products.map((product) => product.attributes[attr]),
+    }));
+
+    return {
+      productNames: products.map((product) => product.name),
+      attributes,
     };
   }
 }

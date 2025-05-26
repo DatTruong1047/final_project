@@ -6,14 +6,27 @@ import {
   ChatQuerySchema,
   ChatResponseSchema,
   ChatMessageResponseSchema,
+
+  ProductSearchQuerySchema,
+  ProductListSchema,
+  ProductMetadataSchema,
+  ProductComparisonInputSchema,
+  CreateOrderWithChatSchema,
+  OrderResponseSchema,
+
 } from '@model';
 
 import ChatService from '@services/chat.service';
 
 import ChatController from '@controller/chat.controller';
+import GeminiService from '@app/services/gemini.service';
+import ProductService from '@app/services/product.service';
+import OrderService from '@app/services/order.service';
+import UserService from '@app/services/user.service';
 
 export default async function chatRoutes(app: FastifyInstance): Promise<void> {
-  const chatService = new ChatService();
+  const chatService = new ChatService(new GeminiService(), new ProductService(), new OrderService(), new UserService());
+
   const chatController = new ChatController(chatService);
 
   app.post('/', {

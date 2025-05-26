@@ -4,6 +4,8 @@ import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ErrorCodes, geminiApiKey, geminiModel } from '@config';
 
 import { ResultType } from '@app/models';
+import app from '@app/app';
+
 
 export class GeminiServiceError extends Error {
   constructor(message: string, public readonly code: string) {
@@ -71,6 +73,7 @@ export default class GeminiService {
             data: null,
           };
         }
+        app.log.error('Unexpected error from Gemini API:', error);
       }
       if (!(error instanceof GeminiServiceError)) {
         throw error;

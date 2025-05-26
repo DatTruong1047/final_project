@@ -8,11 +8,17 @@ import {
   ChatResponseType,
   ChatMessageResponseType,
   ErrorResponseType,
+  ProductSearchQueryType,
+  ProductListType,
+  ProductComparisonInputType,
+  CreateOrderWithChatType,
+
 } from '@app/models';
 
 import ChatService from '@services/chat.service';
 
 import { binding } from '@decorators/binding.decorator';
+
 
 export default class ChatController {
   constructor(private readonly chatService: ChatService) {}
@@ -29,21 +35,7 @@ export default class ChatController {
       };
 
       for (const item of result) {
-        const metadata = {
-          name: item.metadata.product_name || '',
-          slug: item.metadata.product_slug || '',
-          sku: item.metadata.product_sku || '',
-          image: item.metadata.product_image || [],
-          short_description: item.metadata.product_short_description || '',
-          price:
-            typeof item.metadata.product_price === 'string'
-              ? parseFloat(item.metadata.product_price)
-              : item.metadata.product_price || 0,
-          category_name: item.metadata.category_name || '',
-          brand_name: item.metadata.brand_name || '',
-          attributes: item.metadata.product_attributes || {},
-          summary: item.metadata.product_summary || '',
-        };
+        const metadata = mapProductDocumentToMetadata(item);
 
         res.response.push({
           metadata,

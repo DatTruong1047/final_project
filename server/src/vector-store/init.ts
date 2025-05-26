@@ -13,8 +13,9 @@ import {
   POSTGRES_PASSWORD,
   POSTGRES_HOST,
   POSTGRES_PORT,
-  POSTGRES_DB,
+  POSTGRES_VECTOR_DB,
 } from '../config';
+import app from '@app/app';
 
 export default class VectorStore {
   private static _instance: VectorStore;
@@ -39,12 +40,11 @@ export default class VectorStore {
       password: POSTGRES_PASSWORD,
       host: POSTGRES_HOST,
       port: POSTGRES_PORT,
-      database: POSTGRES_DB,
+      database: POSTGRES_VECTOR_DB,
     });
 
     this._pool.on('error', (err) => {
-      console.error('Unexpected error on idle client', err);
-      process.exit(-1);
+      app.log.error('Unexpected error on idle client', err);
     });
   }
 
@@ -56,7 +56,7 @@ export default class VectorStore {
         postgresConnectionOptions: {
           host: POSTGRES_HOST,
           port: POSTGRES_PORT,
-          database: POSTGRES_DB,
+          database: POSTGRES_VECTOR_DB,
           user: POSTGRES_USER,
           password: POSTGRES_PASSWORD,
         },
@@ -64,7 +64,7 @@ export default class VectorStore {
         columns: vectorStore.columns,
       });
     } catch (error) {
-      console.error('Error initializing vector store:', error);
+      app.log.error('Error initializing vector store:', error);
       throw new Error(`Failed to initialize vector store: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -87,7 +87,7 @@ export default class VectorStore {
 
       await this._vectorStore?.addDocuments(documents);
     } catch (error) {
-      console.error('Error adding documents:', error);
+      app.log.error('Error adding documents:', error);
       throw new Error(`Failed to add documents: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -105,7 +105,7 @@ export default class VectorStore {
 
       return result.map((item) => item[0]);
     } catch (error) {
-      console.error('Error performing similarity search:', error);
+      app.log.error('Error performing similarity search:', error);
       throw new Error(
         `Failed to perform similarity search: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
