@@ -1,59 +1,83 @@
 import { FastifyInstance } from 'fastify';
 
-import {
-  SuccessResponseSchema,
-  ErrorResponseSchema,
-  ChatQuerySchema,
-  ChatResponseSchema,
-  ChatMessageResponseSchema,
+import { ErrorResponseSchema, ChatQuerySchema, MergeChatSessionSchema, CreateChatSessionSchema } from '@model';
 
-  ProductSearchQuerySchema,
-  ProductListSchema,
-  ProductMetadataSchema,
-  ProductComparisonInputSchema,
-  CreateOrderWithChatSchema,
-  OrderResponseSchema,
-
-} from '@model';
+import ChatRepository from '@app/repositories/chat.repository';
+import GeminiService from '@app/services/gemini.service';
 
 import ChatService from '@services/chat.service';
 
 import ChatController from '@controller/chat.controller';
-import GeminiService from '@app/services/gemini.service';
-import ProductService from '@app/services/product.service';
-import OrderService from '@app/services/order.service';
-import UserService from '@app/services/user.service';
 
 export default async function chatRoutes(app: FastifyInstance): Promise<void> {
-  const chatService = new ChatService(new GeminiService(), new ProductService(), new OrderService(), new UserService());
+  const chatRepository = new ChatRepository();
+  const geminiService = new GeminiService(chatRepository);
 
+  const chatService = new ChatService(geminiService, chatRepository);
   const chatController = new ChatController(chatService);
 
-  app.post('/', {
-    schema: {
-      tags: ['Chat'],
-      summary: 'Vector search for products',
-      body: ChatQuerySchema,
-      response: {
-        200: SuccessResponseSchema(ChatResponseSchema),
-        400: ErrorResponseSchema,
-        500: ErrorResponseSchema,
-      },
-    },
-    handler: chatController.search,
-  });
   app.post('/message', {
     schema: {
       tags: ['Chat'],
-      summary: 'Send message to chatbot',
+      summary: 'Process chat message',
       body: ChatQuerySchema,
       response: {
-        200: SuccessResponseSchema(ChatMessageResponseSchema),
+        // 200: SuccessResponseSchema,
+      },
+    },
+    handler: chatController.sendMessage,
+  });
+
+  app.put('/merge-chat-session', {
+    schema: {
+      tags: ['Chat'],
+      summary: 'Merge chat session',
+      body: MergeChatSessionSchema,
+      response: {
+        // 200: SuccessResponseSchema,
         400: ErrorResponseSchema,
         429: ErrorResponseSchema,
         500: ErrorResponseSchema,
       },
     },
-    handler: chatController.sendMessage,
+    handler: chatController.mergeChatSession,
+  });
+
+  app.post('/session', {
+    schema: {
+      tags: ['Chat'],
+      summary: 'Create chat session',
+      body: CreateChatSessionSchema,
+      response: {
+        // 200: SuccessResponseSchema(ProductMetadataSchema),
+        400: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+    handler: chatController.createChatSession,
+  });
+
+  app.delete('/session/:id', {
+    schema: {
+      tags: ['Chat'],
+      summary: 'End chat session',
+      response: {
+        // 200: SuccessResponseSchema(ChatResponseSchema),
+      },
+    },
+    handler: chatController.endChatSession,
+  });
+
+  app.get('/session/:id/messages', {
+    schema: {
+      tags: ['Chat'],
+      summary: 'Get chat messages',
+      response: {
+        // 200: SuccessResponseSchema(ChatMessageResponseSchema),
+        400: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+    handler: chatController.getChatMessages,
   });
 }

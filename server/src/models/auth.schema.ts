@@ -15,6 +15,7 @@ export const LoginRequestSchema = z.object({
 export const LoginResponseSchema = z.object({
   accessToken: z.string(),
   refreshToken: z.string(),
+  userId: z.string(),
 });
 
 export const ForgotPasswordRequestSchema = z.object({

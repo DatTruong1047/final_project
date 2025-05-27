@@ -1,9 +1,12 @@
 import { createProductEmbedding } from '@app/utils/document.util';
 
+
 import fs from 'fs/promises';
 import path from 'path';
-import VectorStore from './init';
+
 import app from '@app/app';
+
+import VectorStore from './init';
 
 async function seedData(): Promise<void> {
   try {
@@ -14,7 +17,7 @@ async function seedData(): Promise<void> {
     if (documents.length > 0) {
       await vectorStore.addDocuments(JSON.parse(documents));
     }
-  
+
     app.log.info('Documents added to vector store');
   } catch (error) {
     app.log.error('Error seeding data:', error);

@@ -4,8 +4,8 @@ import path from 'path';
 import { Document } from '@langchain/core/documents';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Product, CategoryJSONType, BrandJSONType } from '@app/types/type';
 import app from '@app/app';
+import { Product, CategoryJSONType, BrandJSONType } from '@app/types/type';
 
 export const createProductDocument = async (
   product: Product,

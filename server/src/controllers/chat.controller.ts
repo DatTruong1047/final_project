@@ -1,55 +1,122 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
+import { ChatSession, RoleEnum } from 'generated/prisma';
+
 import app from '@app/app';
 import { ErrorCodes } from '@app/config';
 import {
   ChatQueryType,
   SuccessResponseType,
-  ChatResponseType,
   ChatMessageResponseType,
   ErrorResponseType,
-  ProductSearchQueryType,
-  ProductListType,
-  ProductComparisonInputType,
-  CreateOrderWithChatType,
-
+  ChatSessionResponseType,
+  CreateChatSessionType,
+  MergeChatSessionType
 } from '@app/models';
 
 import ChatService from '@services/chat.service';
 
 import { binding } from '@decorators/binding.decorator';
 
-
 export default class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
   @binding
-  async search(request: FastifyRequest<{ Body: ChatQueryType }>, reply: FastifyReply): Promise<FastifyReply> {
+  async createChatSession(
+    request: FastifyRequest<{ Body: CreateChatSessionType }>,
+    reply: FastifyReply
+  ): Promise<FastifyReply> {
     try {
-      const { query } = request.body;
-      const result = await this.chatService.search(query);
+      const { userId } = request.body;
+      const anonymousId = request.headers['x-anonymous-id'] as string;
 
-      const res: ChatResponseType = {
-        query,
-        response: [],
-      };
+      if (!anonymousId && !userId) {
+        const err: ErrorResponseType = {
+          code: 400,
+          message: 'User ID or anonymous ID is required',
+        };
 
-      for (const item of result) {
-        const metadata = mapProductDocumentToMetadata(item);
-
-        res.response.push({
-          metadata,
-        });
+        return reply.BadRequest(err);
       }
 
-      const response: SuccessResponseType<ChatResponseType> = {
+      let chatSession: ChatSession;
+
+      if (!userId) {
+        chatSession = await this.chatService.findOrCreateChatSessionWithAnonymousId(anonymousId);
+      } else {
+        chatSession = await this.chatService.findOrCreateChatSession(userId);
+      }
+
+      const response: ChatSessionResponseType = {
+        id: chatSession.id,
+        userId: chatSession.userId,
+        isActive: chatSession.isActive,
+        createdAt: chatSession.createdAt.toISOString(),
+        endedAt: chatSession.endedAt?.toISOString() || null,
+        anonymousId: chatSession.anonymousId,
+      };
+
+      const res: SuccessResponseType<ChatSessionResponseType> = {
         code: 200,
-        data: res,
+        data: response,
         status: 'success',
       };
-      return reply.OK(response);
+
+      return reply.OK(res);
     } catch (error) {
-      app.log.error('Error in chat search:', error);
+      return app.handleErrorResponse(error, reply);
+    }
+  }
+
+  @binding
+  async endChatSession(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+  ): Promise<FastifyReply> {
+    try {
+      const { id } = request.params;
+
+      await this.chatService.endChatSession(id);
+
+      const res: SuccessResponseType<void> = {
+        code: 200,
+        status: 'success',
+      };
+
+      return reply.OK(res);
+    } catch (error) {
+      return app.handleErrorResponse(error, reply);
+    }
+  }
+
+  @binding
+  async getChatMessages(
+    request: FastifyRequest<{ Params: { id: string }; Query: { take: number; skip: number; orderBy: 'asc' | 'desc' } }>,
+    reply: FastifyReply
+  ): Promise<FastifyReply> {
+    try {
+      const { id } = request.params;
+      const { take, skip, orderBy } = request.query as { take: number; skip: number; orderBy: 'asc' | 'desc' };
+      // Get by sessionId
+      const messages = await this.chatService.getChatMessagesBySessionId(id, take, skip, orderBy);
+
+      const response: ChatMessageResponseType = {
+        chatMessages: messages.map((message) => ({
+          id: message.id,
+          content: message.content,
+          role: message.role,
+          createdAt: message.createdAt.toISOString(),
+        })),
+      };
+
+      const res: SuccessResponseType<ChatMessageResponseType> = {
+        code: 200,
+        data: response,
+        status: 'success',
+      };
+
+      return reply.OK(res);
+    } catch (error) {
       return app.handleErrorResponse(error, reply);
     }
   }
@@ -57,9 +124,31 @@ export default class ChatController {
   @binding
   async sendMessage(request: FastifyRequest<{ Body: ChatQueryType }>, reply: FastifyReply): Promise<FastifyReply> {
     try {
-      const { query } = request.body;
+      const { content, sessionId } = request.body;
 
-      const response = await this.chatService.sendMessage(query);
+      if (!sessionId) {
+        const err: ErrorResponseType = {
+          code: 400,
+          message: 'Session ID is required',
+        };
+
+        return reply.BadRequest(err);
+      }
+
+      // Create user message
+      const createUserMessage = await this.chatService.createChatMessage(sessionId, content, RoleEnum.User);
+
+      if (!createUserMessage.success) {
+        const err: ErrorResponseType = {
+          code: createUserMessage.code,
+          message: createUserMessage.message,
+        };
+
+        return reply.BadRequest(err);
+      }
+
+      // Send message to Gemini and create assistant message
+      const response = await this.chatService.sendMessage(content, sessionId);
 
       if (!response.success) {
         const err: ErrorResponseType = {
@@ -79,8 +168,15 @@ export default class ChatController {
       const res: SuccessResponseType<ChatMessageResponseType> = {
         code: 200,
         data: {
-          query,
-          response: response.data?.toString() || '',
+          chatMessages: [
+            {
+              sessionId,
+              id: response.data.id,
+              content: response.data.content,
+              role: RoleEnum.Assistant,
+              createdAt: response.data.createdAt.toISOString(),
+            },
+          ],
         },
         status: 'success',
       };
@@ -90,4 +186,35 @@ export default class ChatController {
       return app.handleErrorResponse(error, reply);
     }
   }
+
+  @binding
+  async mergeChatSession(
+    request: FastifyRequest<{ Body: MergeChatSessionType }>,
+    reply: FastifyReply
+  ): Promise<FastifyReply> {
+    try {
+      const { userId, anonymousId } = request.body;
+
+      const result = await this.chatService.mergeChatSession(userId, anonymousId);
+
+      if (!result.success) {
+        const err: ErrorResponseType = {
+          code: result.code,
+          message: result.message,
+        };
+
+        return reply.BadRequest(err);
+      }
+
+      const res: SuccessResponseType<void> = {
+        code: 200,
+        status: 'success',
+      };
+
+      return reply.OK(res);
+    } catch (error) {
+      return app.handleErrorResponse(error, reply);
+    }
+  }
+
 }

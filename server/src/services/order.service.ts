@@ -2,19 +2,19 @@ import {
   CreateOrderRequestType,
   CreateOrderResultType,
   CreateOrderWithChatType,
-  OrderResponseType,
+  OrderFilterType,
+  ListOrderResponseType,
   ResultType,
 } from '@model';
+import { Order, OrderStatusEnum, Prisma } from 'generated/prisma';
 
+import app from '@app/app';
 import { ErrorCodes } from '@app/config';
+import prisma from '@app/lib/prisma';
+import OrderRepository from '@app/repositories/order.repository';
 import ProductRepository from '@app/repositories/product.repository';
 
 import CartRepository from '@repository/cart.repository';
-import OrderRepository from '@app/repositories/order.repository';
-
-import prisma from '@app/lib/prisma';
-import { Order, OrderStatusEnum, Prisma } from 'generated/prisma';
-import app from '@app/app';
 
 export default class OrderService {
   private readonly _cartRepository: CartRepository;
@@ -28,19 +28,28 @@ export default class OrderService {
   }
 
   async createOrderWithCardItems(
-    req: CreateOrderRequestType,
+    orderRequest: CreateOrderRequestType,
     userId: string
   ): Promise<ResultType<CreateOrderResultType>> {
     try {
       return await prisma.$transaction(
         async (tx: Prisma.TransactionClient) => {
-          const cartResult = await this._cartRepository.getCartsByIds(req.cartIds, userId);
+          const cartResult = await this._cartRepository.getCartsByIds(orderRequest.cartIds, userId);
 
-          if (cartResult.carts.length === 0 || cartResult.carts.length !== req.cartIds.length) {
+          if (cartResult.carts.length === 0 || cartResult.carts.length !== orderRequest.cartIds.length) {
             return {
               success: false,
               code: ErrorCodes.CART_NOT_FOUND,
               message: 'No carts found',
+            };
+          }
+
+          // Maximum order amount is 99,999,999 VND
+          if (cartResult.totalPrice > 99999999) {
+            return {
+              success: false,
+              code: ErrorCodes.TOTAL_PRICE_IS_TOO_HIGH,
+              message: 'Total price is too high',
             };
           }
 
@@ -57,11 +66,11 @@ export default class OrderService {
           const order = await this._orderRepository.createOrderWithCartItems(
             tx,
             cartResult.carts,
-            req,
+            orderRequest,
             cartResult.totalPrice,
             userId
           );
-          await this._cartRepository.deleteManyCart(req.cartIds);
+          await this._cartRepository.deleteManyCart(orderRequest.cartIds);
 
           return {
             success: true,
@@ -84,20 +93,13 @@ export default class OrderService {
     }
   }
 
-  async createOrderWithChat(req: CreateOrderWithChatType): Promise<ResultType<CreateOrderResultType>> {
+  async createOrderWithChat(orderRequest: CreateOrderWithChatType): Promise<ResultType<CreateOrderResultType>> {
     try {
       return await prisma.$transaction(
         async (tx: Prisma.TransactionClient) => {
-          const product = await this._productRepository.getProductForCreateOrder(req.productName);
-          if (!product) {
-            return {
-              success: false,
-              code: ErrorCodes.PRODUCT_NOT_FOUND,
-              message: 'Product not found',
-            };
-          }
+          const product = await this._productRepository.getProductForCreateOrder(orderRequest.productId);
 
-          if (product.quantity < req.count) {
+          if (product.quantity < orderRequest.count) {
             return {
               success: false,
               code: ErrorCodes.QUANTITY_IS_NOT_ENOUGH,
@@ -105,8 +107,18 @@ export default class OrderService {
             };
           }
 
-          const totalAmount = Number(product.price * req.count);
-          const order = await this._orderRepository.createOrder(tx, product, req, totalAmount);
+          const totalAmount = Number(product.price * orderRequest.count);
+
+          // Maximum order amount is 99,999,999 VND
+          if (totalAmount > 99999999) {
+            return {
+              success: false,
+              code: ErrorCodes.TOTAL_PRICE_IS_TOO_HIGH,
+              message: 'Total price is too high',
+            };
+          }
+
+          const order = await this._orderRepository.createOrder(tx, product, orderRequest, totalAmount);
 
           return {
             success: true,
@@ -128,7 +140,7 @@ export default class OrderService {
       };
     }
   }
-  async updateOrderStatus(orderId: string, orderStatus: OrderStatusEnum) {
+  async updateOrderStatus(orderId: string, orderStatus: OrderStatusEnum): Promise<ResultType<void>> {
     return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const currentOrder = await this.getOrderById(orderId);
 
@@ -162,43 +174,30 @@ export default class OrderService {
     });
   }
 
-  async addStripeSession(orderId: string, stripeSessionId: string) {
-    return await this._orderRepository.addStripeSession(orderId, stripeSessionId);
-  }
-
-  async addPaymentIntentId(orderId: string, paymentIntentId: string) {
-    return await this._orderRepository.addPaymentIntentId(orderId, paymentIntentId);
+  async addPaymentIntent(orderId: string, paymentIntentId: string, clientSecret: string): Promise<Order> {
+    return await this._orderRepository.addPaymentIntent(orderId, paymentIntentId, clientSecret);
   }
 
   async getOrderById(orderId: string): Promise<Order> {
     return await this._orderRepository.getOrderById(orderId);
   }
 
-  async getOrdersByUserId(userId: string): Promise<OrderResponseType[]> {
-    const orders = await this._orderRepository.getOrdersByUserId(userId);
+  async getOrdersByUserId(userId: string, filter: OrderFilterType): Promise<ResultType<ListOrderResponseType>> {
+    try {
+      const orders = await this._orderRepository.getOrdersByUserId(userId, filter);
 
-    return orders.map((order) => ({
-      id: order.id,
-      userId: order.userId,
-      phoneNumber: order.phoneNumber,
-      note: order.note,
-      orderStatus: order.orderStatus,
-      totalAmount: order.totalAmount.toString(),
-      orderDate: order.orderDate,
-      orderDetails: order.orderDetails.map((detail) => ({
-        id: detail.id,
-        productId: detail.productId,
-        productName: detail.productName,
-        quantity: detail.quantity,
-        unitPrice: detail.unitPrice,
-        subTotal: detail.subTotal,
-      })),
-      paymentIntent: order.paymentIntent
-        ? {
-            id: order.paymentIntent.id,
-            clientSecret: order.paymentIntent.clientSecret,
-          }
-        : undefined,
-    }));
+      return {
+        success: true,
+        message: 'Orders fetched successfully',
+        data: orders,
+      };
+    } catch (error) {
+      app.log.error(`Get orders by user id failed: ${error}`);
+      return {
+        success: false,
+        code: ErrorCodes.GET_ORDERS_BY_USER_ID_FAILED,
+        message: 'Get orders by user id failed',
+      };
+    }
   }
 }

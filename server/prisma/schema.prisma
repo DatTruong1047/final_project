@@ -8,7 +8,6 @@ generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearchPostgres"]
   output          = "../generated/prisma"
-  
 }
 
 datasource db {
@@ -23,7 +22,6 @@ enum RoleEnum {
 
 enum OrderStatusEnum {
   CREATED
-  PROCESSING
   COMPLETED
   FAILED
   REFUNDED
@@ -63,7 +61,7 @@ model Product {
   code             String         @unique @map("code")
   shortDescription String?        @map("short_description")
   longDescription  String?        @map("long_description")
-  price            Decimal        @map("price") @db.Decimal(15,2)
+  price            Decimal        @map("price") @db.Decimal(15, 2)
   quantity         Int            @map("quantity")
   createdAt        DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime       @updatedAt @map("updated_at")
@@ -175,6 +173,7 @@ model User {
   conversations   Conversation[]
   orders          Order[]
   tokens          Token[]
+  ChatSession     ChatSession[]
 
   @@index([forgotToken])
   @@map("users")
@@ -210,13 +209,15 @@ model Order {
   userId          String          @map("user_id")
   user            User            @relation(fields: [userId], references: [id])
   phoneNumber     String          @map("phone_number")
+  fullName        String          @map("full_name")
+  address         String          @map("address")
   note            String?         @map("note")
-  totalAmount     Decimal         @map("total_amount") @db.Decimal(15,2)
+  totalAmount     Decimal         @map("total_amount") @db.Decimal(15, 2)
   orderDate       DateTime        @map("order_date")
   orderStatus     OrderStatusEnum @default(CREATED) @map("order_status")
   orderDetails    OrderDetail[]
   payments        Payment[]
-  stripeSessionId String?         @map("stripe_session_id")
+  clientSecret    String?         @map("client_secret")
   paymentIntentId String?         @map("payment_intent_id")
   createdAt       DateTime        @default(now()) @map("created_at")
   updatedAt       DateTime        @updatedAt @map("updated_at")
@@ -235,8 +236,8 @@ model OrderDetail {
   product     Product  @relation(fields: [productId], references: [id])
   productName String   @map("product_name")
   quantity    Int      @map("quantity")
-  unitPrice   Decimal  @map("unit_price") @db.Decimal(15,2)
-  subtotal    Decimal  @map("subtotal") @db.Decimal(15,2)
+  unitPrice   Decimal  @map("unit_price") @db.Decimal(15, 2)
+  subtotal    Decimal  @map("subtotal") @db.Decimal(15, 2)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
@@ -249,7 +250,7 @@ model Payment {
   order           Order    @relation(fields: [orderId], references: [id])
   orderId         String   @map("order_id")
   stripeChargeId  String   @map("stripe_charge_id")
-  amount          Decimal  @map("amount") @db.Decimal(15,2)
+  amount          Decimal  @map("amount") @db.Decimal(15, 2)
   currency        String   @map("currency")
   paymentMethod   String   @map("payment_method")
   paymentIntentId String   @map("payment_intent_id")
@@ -263,4 +264,31 @@ model Payment {
   @@index([stripeChargeId])
   @@index([paymentIntentId])
   @@map("payments")
+}
+
+model ChatSession {
+  id          String        @id @default(uuid()) @map("id")
+  userId      String?       @map("user_id")
+  user        User?         @relation(fields: [userId], references: [id])
+  anonymousId String?       @map("anonymous_id")
+  isActive    Boolean       @default(true) @map("is_active")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  endedAt     DateTime?     @map("ended_at")
+  ChatMessage ChatMessage[]
+
+  @@index([userId])
+  @@index([anonymousId])
+  @@map("chat_sessions")
+}
+
+model ChatMessage {
+  id        String      @id @default(uuid()) @map("id")
+  sessionId String      @map("session_id")
+  session   ChatSession @relation(fields: [sessionId], references: [id])
+  role      RoleEnum    @map("role")
+  content   String      @map("content")
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  @@index([sessionId])
+  @@map("chat_messages")
 }

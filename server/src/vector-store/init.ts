@@ -3,6 +3,7 @@ import { Document } from '@langchain/core/documents';
 import { GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
 import pg from 'pg';
 
+import app from '@app/app';
 import { vectorStore } from '@app/config/vector-store.config';
 
 import {
@@ -15,7 +16,6 @@ import {
   POSTGRES_PORT,
   POSTGRES_VECTOR_DB,
 } from '../config';
-import app from '@app/app';
 
 export default class VectorStore {
   private static _instance: VectorStore;

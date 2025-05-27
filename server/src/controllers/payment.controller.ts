@@ -1,12 +1,11 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
+import app from '@app/app';
+import stripe from '@app/lib/stripe';
+import { SuccessResWithoutDataType } from '@app/models';
 import PaymentService from '@app/services/payment.service';
 
 import { binding } from '@decorators/binding.decorator';
-import app from '@app/app';
-import Stripe from 'stripe';
-import stripe from '@app/lib/stripe';
-import { SuccessResWithoutDataType } from '@app/models';
 
 export default class PaymentController {
   constructor(private readonly _paymentService: PaymentService) {}
@@ -23,11 +22,9 @@ export default class PaymentController {
         });
       }
 
-      let event: Stripe.Event;
-
       const rawBody = request.rawBody as string;
 
-      event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
+      const event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
 
       await this._paymentService.handleStripeEvent(event);
 

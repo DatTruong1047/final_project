@@ -1,7 +1,7 @@
-import stripe from '@app/lib/stripe';
+import { Payment, PrismaClient } from 'generated/prisma';
+
 import prisma from '@app/lib/prisma';
-import { PrismaClient } from 'generated/prisma';
-import { CreatePaymentRequestType, PaymentType } from '@app/models';
+import { CreatePaymentRequestType } from '@app/models';
 export default class PaymentRepository {
   private readonly _prisma: PrismaClient;
 
@@ -9,15 +9,20 @@ export default class PaymentRepository {
     this._prisma = prisma;
   }
 
-  async createPayment(payment: CreatePaymentRequestType) {
+  async createPayment(payment: CreatePaymentRequestType): Promise<Payment> {
     const { orderId, ...paymentData } = payment;
-    
-    if (!paymentData.stripeChargeId || !paymentData.paymentIntentId || 
-        !paymentData.amount || !paymentData.currency || 
-        !paymentData.paymentMethod || !paymentData.status) {
+
+    if (
+      !paymentData.stripeChargeId ||
+      !paymentData.paymentIntentId ||
+      !paymentData.amount ||
+      !paymentData.currency ||
+      !paymentData.paymentMethod ||
+      !paymentData.status
+    ) {
       throw new Error('Required payment fields are missing');
     }
-    
+
     return this._prisma.payment.create({
       data: {
         stripeChargeId: paymentData.stripeChargeId,
@@ -29,8 +34,8 @@ export default class PaymentRepository {
         metadata: paymentData.metadata || {},
         errorMessage: paymentData.errorMessage,
         order: {
-          connect: { id: orderId }
-        }
+          connect: { id: orderId },
+        },
       },
     });
   }

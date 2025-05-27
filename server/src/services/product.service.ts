@@ -59,17 +59,41 @@ export default class ProductService {
       };
     } catch (error) {
       app.log.error('Error in fullTextSearch:', error);
-      return {
-        code: ErrorCodes.SERVER_ERROR,
-        message: 'Internal server error',
-        success: false,
-      };
+      throw error;
     }
   }
 
-  async findProductByApproxName(
-    names: string[]
-  ): Promise<ResultType<{ found: ProductMetadataType[]; notFound: string[] }>> {
+  async findProductByApproxName(name: string): Promise<ResultType<ProductMetadataType>> {
+    const product = await this._productRepository.findProductByApproxName(name);
+    return {
+      code: 200,
+      message: 'Product found',
+      success: true,
+      data: product,
+    };
+  }
+
+  async findManyProductByApproxName(name: string): Promise<ResultType<ProductMetadataType[]>> {
+    const products = await this._productRepository.findManyProductByApproxName(name);
+    return {
+      code: 200,
+      message: 'Products found',
+      success: true,
+      data: products,
+    };
+  }
+
+  async findSimilarProductIds(name: string, limit = 1): Promise<ResultType<{ id: string; similarity: number }[]>> {
+    const productIds = await this._productRepository.findSimilarProductIds(name, limit);
+    return {
+      code: 200,
+      message: 'Product IDs found',
+      success: true,
+      data: productIds,
+    };
+  }
+
+  async getProductsByNames(names: string[]): Promise<ResultType<{ found: ProductMetadataType[]; notFound: string[] }>> {
     try {
       const found: ProductMetadataType[] = [];
       const notFound: string[] = [];

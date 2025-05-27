@@ -1,12 +1,11 @@
-import { OrderStatusEnum, Prisma } from 'generated/prisma';
-import stripe from '@app/lib/stripe';
-import prisma from '@app/lib/prisma';
-import PaymentRepository from '@app/repositories/payment.repository';
-import { CreatePaymentRequestType } from '@model';
 import Stripe from 'stripe';
-import OrderService from '@app/services/order.service';
+
+import { OrderStatusEnum } from 'generated/prisma';
+
 import app from '@app/app';
-import { binding } from '@app/decorator/binding.decorator';
+import stripe from '@app/lib/stripe';
+import PaymentRepository from '@app/repositories/payment.repository';
+import OrderService from '@app/services/order.service';
 export default class PaymentService {
   private readonly _paymentRepository: PaymentRepository;
   private readonly _orderService: OrderService;
@@ -35,8 +34,6 @@ export default class PaymentService {
         return;
       }
 
-      const userId = order.userId;
-
       switch (event.type) {
         case 'payment_intent.succeeded':
           try {
@@ -56,19 +53,19 @@ export default class PaymentService {
             }
           }
 
-          await this.createPayment(paymentIntent, orderId, userId);
+          await this.createPayment(paymentIntent, orderId);
           break;
 
         case 'payment_intent.payment_failed':
         case 'payment_intent.canceled':
           await this._orderService.updateOrderStatus(orderId, OrderStatusEnum.FAILED);
-          await this.createPayment(paymentIntent, orderId, userId);
+          await this.createPayment(paymentIntent, orderId);
           break;
       }
     }
   }
 
-  private async createPayment(paymentIntent: Stripe.PaymentIntent, orderId: string, userId: string) {
+  private async createPayment(paymentIntent: Stripe.PaymentIntent, orderId: string): Promise<void> {
     await this._paymentRepository.createPayment({
       orderId,
       stripeChargeId: paymentIntent.latest_charge as string,
