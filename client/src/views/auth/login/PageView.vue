@@ -49,6 +49,7 @@ const redirectToHome = () => {
 const saveTokens = (res: AxiosResponse) => {
   authStore.setAccessToken(res.data.accessToken)
   authStore.setRefreshToken(res.data.refreshToken)
+  authStore.setId(res.data.userId)
 }
 
 const onLogin = async () => {
@@ -66,6 +67,7 @@ const onLogin = async () => {
       media: {
         url: userInfo.data?.media?.url ?? '',
       },
+      id: userInfo.data.id,
     }
     authStore.setUser(profile)
 

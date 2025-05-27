@@ -9,7 +9,7 @@
         </div>
       </div>
       <button class="flex px-4 py-4 rounded-full hover:bg-white/20">
-        <ArrowPathIcon class="h-8 w-8 text-white" />
+        <ArrowPathIcon @click="onRefreshChat" class="h-8 w-8 text-white" />
       </button>
       <button class="flex px-4 py-4 rounded-full hover:bg-white/20">
         <ArrowsPointingInIcon class="h-8 w-8 text-white" @click="toggleChat" />
@@ -21,11 +21,23 @@
 import { ArrowPathIcon, ArrowsPointingInIcon } from '@heroicons/vue/16/solid'
 import { imageConfig } from '@/configs/image.config'
 import { useChatStore } from '@/stores/chatStore'
+import { useAuthStore } from '@/stores/authStore'
 
 const botImage = imageConfig.botImage
 const chatStore = useChatStore()
+const authStore = useAuthStore()
 
 const toggleChat = () => {
   chatStore.toggleChat()
 }
+
+const onRefreshChat = () => {
+  chatStore.clearSession()
+  if (authStore.user?.id) {
+    chatStore.createSession(authStore.user?.id)
+  } else {
+    chatStore.createSession(null)
+  }
+}
+
 </script>

@@ -17,33 +17,11 @@
 
         <div class="hidden md:flex items-center space-x-8">
           <RouterLink
-            to="/"
-            class="px-3 py-2 text-2xl text-gray-700 hover:text-red-600 relative group transition-colors duration-200"
-            active-class="text-red-600 dark:text-red-400"
-          >
-            Home
-            <span
-              class="absolute bottom-0 left-0 w-full h-0.5 bg-red-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
-            ></span>
-          </RouterLink>
-
-          <RouterLink
             :to="{ name: cartRoute.cart }"
             class="px-3 py-2 text-2xl text-gray-700 hover:text-red-600 relative group transition-colors duration-200"
             active-class="text-red-600 dark:text-red-400"
           >
             Cart
-            <span
-              class="absolute bottom-0 left-0 w-full h-0.5 bg-red-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
-            ></span>
-          </RouterLink>
-
-          <RouterLink
-            to="/"
-            class="px-3 py-2 text-2xl text-gray-700 hover:text-red-600 relative group transition-colors duration-200"
-            active-class="text-red-600 dark:text-red-400"
-          >
-            Contact
             <span
               class="absolute bottom-0 left-0 w-full h-0.5 bg-red-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
             ></span>
@@ -110,15 +88,6 @@
             Cart
           </RouterLink>
 
-          <RouterLink
-            to="/"
-            class="block px-3 py-2 rounded-md text-xl font-medium text-gray-700 hover:text-red-500 hover:bg-gray-50 dark:text-gray-300 transition-colors duration-200"
-            active-class="text-red-500 bg-gray-50 dark:bg-gray-700 dark:text-red-400"
-            @click="isMobileMenuOpen = false"
-          >
-            Contact
-          </RouterLink>
-
           <!-- Mobile Menu Auth Buttons -->
           <div v-if="!isAuthenticated" class="pt-4 pb-2 border-t border-gray-200">
             <div class="px-4 pt-2 pb-3 space-y-2">
@@ -152,7 +121,7 @@
               Profile
             </RouterLink>
             <RouterLink
-              to="/order"
+              :to="{ name: orderRoute.order }"
               class="block px-3 py-2 rounded-md text-xl font-medium text-gray-700 hover:text-red-500 hover:bg-gray-50 dark:text-gray-300 transition-colors duration-200"
               active-class="text-red-500 bg-gray-50 dark:bg-gray-700 dark:text-red-400"
               @click="isMobileMenuOpen = false"
@@ -176,7 +145,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import router from '@/router'
-import { authRoute, cartRoute, userRoute } from '@/configs'
+import { authRoute, cartRoute, orderRoute, userRoute } from '@/configs'
 import { useAuthStore } from '@/stores/authStore'
 import UserMenuComponent from '../user/profile/UserMenuComponent.vue'
 

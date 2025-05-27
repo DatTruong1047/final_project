@@ -29,8 +29,14 @@ export const orderSchema = yup.object().shape({
     .required(),
   note: yup.string().nullable(),
   totalAmount: yup.string().matches(/^\d+$/, 'Tổng tiền phải là chuỗi chứa số').required(),
-  orderDate: yup.date().typeError('Ngày đặt không hợp lệ').required(),
+  orderDate: yup.string().typeError('Ngày đặt không hợp lệ').required(),
   orderStatus: yup.mixed().oneOf(['CREATED', 'PROCESSING', 'COMPLETED', 'CANCELLED']).required(),
   orderDetails: yup.array().of(orderDetailSchema).min(1).required(),
   paymentIntent: paymentIntentSchema.nullable(),
+})
+
+export const OrderFilterSchema = yup.object().shape({
+  status: yup.mixed().oneOf(['CREATED', 'PROCESSING', 'COMPLETED', 'CANCELLED']).optional().nullable(),
+  page: yup.number().integer().min(1).default(1),
+  limit: yup.number().integer().min(1).default(8),
 })

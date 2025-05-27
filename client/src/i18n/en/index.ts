@@ -47,9 +47,13 @@ export const en = {
       noProductsFound: 'No products found',
       productNotFound: 'Product not found',
 
+      paymentFailed: 'Payment failed',
+      paymentSuccess: 'Payment successful',
+
       addToCartFail: 'Add to cart fail. Please try again later',
       updateCartFail: 'Update cart fail. Please try again later',
       removeCartFail: 'Remove cart fail. Please try again later',
+      selectAtLeastOneItem: 'Please select at least one item in your cart',
     },
     success: {
       login: 'Login successfull',

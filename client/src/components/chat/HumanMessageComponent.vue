@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="bg-gray-200 justify-end text-xl w-auto px-6 py-4  md:text-2xl p-2 rounded-xl max-w-md flex ">
+    <div class="bg-blue-500 text-white   justify-end text-xl w-auto px-6 py-4  md:text-2xl p-2 rounded-xl max-w-md flex ">
       {{ message }}
     </div>
   </div>

@@ -65,8 +65,13 @@ const router = createRouter({
     },
     {
       path: '/order/',
-      name: orderRoute.order,
+      name: 'order',
       children: [
+        {
+          path: '',
+          name: orderRoute.order,
+          component: () => import('../views/order/list/PageView.vue'),
+        },
         {
           path: orderRoute.checkoutInfo,
           name: orderRoute.checkoutInfo,

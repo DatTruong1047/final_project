@@ -17,7 +17,7 @@ export enum cartRoute {
   cart = 'cart',
 }
 export enum orderRoute {
-  order = 'order',
+  order = 'list-order',
   checkoutInfo = 'checkout-info',
 }
 

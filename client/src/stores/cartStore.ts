@@ -18,9 +18,9 @@ interface State {
 export const useCartStore = defineStore('cart', {
   state: (): State => ({
     cart: {
-      carts: [],
-      total: 0,
-      totalPrice: 0,
+      carts: localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart') || '{}').carts : [],
+      total: localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart') || '{}').total : 0,
+      totalPrice: localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart') || '{}').totalPrice : 0,
     },
     selectedCartIds: [],
     loading: { cart: false },
@@ -45,6 +45,8 @@ export const useCartStore = defineStore('cart', {
       try {
         this.loading.cart = true
         const response = await getCarts()
+        localStorage.setItem('cart', JSON.stringify(response.data))
+
         this.cart = response.data
       } catch (error: any) {
         console.error('Error getting cart:', error.message)
@@ -57,7 +59,7 @@ export const useCartStore = defineStore('cart', {
     async addToCart(data: CartUpsertRequestType) {
       try {
         this.loading.cart = true
-        const response = await addToCart(data)
+        await addToCart(data)
 
         await this.getCarts()
       } catch (error: any) {
@@ -86,7 +88,7 @@ export const useCartStore = defineStore('cart', {
     async removeFromCart(id: string) {
       try {
         this.loading.cart = true
-        const response = await removeFromCart(id)
+        await removeFromCart(id)
 
         await this.getCarts()
 

@@ -178,7 +178,7 @@ onMounted(async () => {
           v-for="product in products"
           :key="product.id"
           :to="{ name: productRoute.productDetail, params: { id: product.id } }"
-          class="bg-white items-center rounded-lg mx-4 md:h-[50rem] overflow-hidden shadow-xl hover:shadow-md hover:shadow-gray-500 transition-shadow duration-300 flex flex-col"
+          class="bg-white items-center rounded-lg mx-4 md:h-[50rem] overflow-hidden shadow hover:shadow-lg hover:shadow-gray-400 transition-shadow duration-300 flex flex-col"
         >
           <!-- Product image -->
           <div class="relative pb-8 mb-4 mt-4 p-8 shadow-xs bg-white flex items-center justify-center w-full h-[20rem]">
@@ -213,7 +213,6 @@ onMounted(async () => {
             </div>
 
             <div class="mb-3">
-              <h4 class="text-xl font-base text-gray-900 mb-1 min-h-auto">Description</h4>
               <div class="text-xl text-gray-600 h-auto overflow-hidden">
                 <div v-if="product.shortDescription">
                   <p
@@ -228,15 +227,6 @@ onMounted(async () => {
                 </div>
                 <p v-else class="text-gray-400 italic">No description</p>
               </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex items-center space-x-3 mt-auto">
-              <button
-                class="flex-1 font-bold text-2xl bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-colors duration-300"
-              >
-                See More
-              </button>
             </div>
           </div>
         </RouterLink>

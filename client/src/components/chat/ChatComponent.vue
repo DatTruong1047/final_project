@@ -8,7 +8,7 @@
     <!-- Messages -->
     <div class="flex-1 mt-2 overflow-y-auto p-4 space-y-4 bg-gray-50 chat-container">
       <template v-for="item in chatStore.messages" :key="item.id">
-        <div class="flex items-start gap-2" v-if="item.role === 'assistant'">
+        <div class="flex items-start gap-2" v-if="item.role === 'Assistant'">
           <BotMessageComponent :message="item.content" />
         </div>
 
@@ -68,15 +68,13 @@ const onSendMessage = () => {
   if (message.value.length > 0) {
     chatStore.addMessage({
       id: new Date().toISOString(),
+      sessionId: chatStore.sessionId,
       content: message.value,
-      role: 'user',
+      role: 'User',
+      createdAt: new Date().toISOString(),
     })
 
-    chatStore.sendUserMessage({
-      id: new Date().toISOString(),
-      content: message.value,
-      role: 'user',
-    })
+    chatStore.sendUserMessage(message.value)
 
     message.value = ''
     onScrollBottom()
@@ -90,6 +88,9 @@ const onScrollBottom = () => {
   }
 }
 
+watch(() => chatStore.sessionId, () => {
+  chatStore.getMessages(chatStore.sessionId)
+})
 
 onMounted(() => {
   onScrollBottom()

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 
 export interface User {
+  id: string | null
   email: string
   fullName: string | null
   phoneNumber: string | null
@@ -15,6 +16,7 @@ interface State {
   refreshToken: string
   user: User | null
   isAuthenticated: boolean
+  id: string | null
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -24,6 +26,8 @@ export const useAuthStore = defineStore('auth', {
       refreshToken: localStorage.getItem('refreshToken') || '',
       user: JSON.parse(localStorage.getItem('user') || '{}'),
       isAuthenticated: localStorage.getItem('accessToken') !== null,
+      id: localStorage.getItem('id') || null,
+
     }
   },
 
@@ -31,6 +35,11 @@ export const useAuthStore = defineStore('auth', {
     setAccessToken(newToken: string) {
       localStorage.setItem('accessToken', newToken)
       this.accessToken = newToken
+    },
+
+    setId(newId: string) {
+      localStorage.setItem('id', newId)
+      this.id = newId
     },
 
     setRefreshToken(newToken: string) {
@@ -49,9 +58,13 @@ export const useAuthStore = defineStore('auth', {
       this.refreshToken = ''
       this.user = null
       this.isAuthenticated = false
+      this.id = null
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
       localStorage.removeItem('user')
+      localStorage.removeItem('id')
+      localStorage.removeItem('sessionId')
+      localStorage.removeItem('cart')
     },
   },
 })
