@@ -9,6 +9,7 @@ import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUI from '@fastify/swagger-ui';
 import { FastifySchemaValidationError } from 'fastify/types/schema';
 import fastifyRawBody from 'fastify-raw-body';
+
 import * as config from '@config';
 import registerRoutes from '@routes';
 
@@ -32,7 +33,7 @@ const startServer = async (): Promise<void> => {
     app.register(fastifyCors, {
       origin: ['*'],
       methods: ['GET', 'PUT', 'PATCH', 'POST', 'DELETE'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'x-anonymous-id'],
     });
 
     // Swagger

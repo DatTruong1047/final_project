@@ -1,7 +1,5 @@
 import { z } from 'zod';
-import { CreateOrderRequestSchema } from './order.schema';
-import { CreateOrderWithChatSchema } from './tool.schema';
-import { ProductMetadataSchema } from './product.schema';
+
 import { RoleEnum } from 'generated/prisma';
 
 export const ChatQuerySchema = z.object({
@@ -61,7 +59,7 @@ export const ChatMessageResponseSchema = z.object({
   chatMessages: z.array(ChatMessageSchema),
 });
 
-export type CreateOrderWithChatType = z.infer<typeof CreateOrderWithChatSchema>;
+// export type CreateOrderWithChatType = z.infer<typeof CreateOrderWithChatSchema>;
 
 export type ChatQueryType = z.infer<typeof ChatQuerySchema>;
 export type ChatMessageType = z.infer<typeof ChatMessageSchema>;

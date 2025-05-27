@@ -1,6 +1,6 @@
-import { Document } from "langchain/document";
+import { Document } from 'langchain/document';
 
-import { ProductListType, ProductMetadataType } from "@app/models";
+import { ProductMetadataType } from '@app/models';
 
 export function mapProductDocumentToMetadata(document: Document): ProductMetadataType {
   return {
@@ -9,14 +9,13 @@ export function mapProductDocumentToMetadata(document: Document): ProductMetadat
     sku: document.metadata.product_sku,
     image: document.metadata.product_image,
     short_description: document.metadata.product_short_description,
-    price: 
+    price:
       typeof document.metadata.product_price === 'string'
-      ? parseFloat(document.metadata.product_price) || 0
-      : document.metadata.product_price ?? 0,
+        ? parseFloat(document.metadata.product_price) || 0
+        : document.metadata.product_price ?? 0,
     category_name: document.metadata.category_name || '',
     brand_name: document.metadata.brand_name || '',
     attributes: document.metadata.product_attributes || {},
     summary: document.metadata.product_summary || '',
   };
 }
-

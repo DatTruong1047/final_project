@@ -114,11 +114,21 @@ export default class ChatRepository {
     return chatMessage;
   }
 
-  async getChatMessagesBySessionId(sessionId: string): Promise<ChatMessage[]> {
+  async getChatMessagesBySessionId(
+    sessionId: string,
+    take = 10,
+    skip = 0,
+    orderBy: 'asc' | 'desc' = 'asc'
+  ): Promise<ChatMessage[]> {
     const chatMessages = await this._prisma.chatMessage.findMany({
       where: {
         sessionId,
       },
+      orderBy: {
+        createdAt: orderBy,
+      },
+      take,
+      skip,
     });
     return chatMessages;
   }

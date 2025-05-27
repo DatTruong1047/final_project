@@ -4,10 +4,10 @@ import authRoutes from './auth.route';
 import cartRoutes from './cart.route';
 import categoryRoutes from './category.route';
 import chatRoutes from './chat.route';
-import productRoutes from './product.route';
-import userRoutes from './user.route';
 import orderRoutes from './order.route';
 import paymentRoutes from './payment.route';
+import productRoutes from './product.route';
+import userRoutes from './user.route';
 
 export default async function registerRoutes(): Promise<void> {
   app.register(

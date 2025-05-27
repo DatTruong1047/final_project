@@ -1,28 +1,38 @@
-import { MessageContent } from '@langchain/core/messages';
+import { ChatMessage, ChatSession, RoleEnum } from 'generated/prisma';
 
 import app from '@app/app';
-import { ErrorResponseType, ResultType } from '@app/models';
+import { ErrorCodes } from '@app/config/error.config';
+import { ResultType } from '@app/models';
+import ChatRepository from '@app/repositories/chat.repository';
 
 import GeminiService from '@services/gemini.service';
-import { ChatMessage, ChatSession, RoleEnum } from 'generated/prisma';
-import { ToolRegistry } from '@app/tools/registry/tool.registry';
-import ChatRepository from '@app/repositories/chat.repository';
-import { ErrorCodes } from '@app/config/error.config';
 
 export default class ChatService {
   private readonly _geminiService: GeminiService;
-  private readonly _toolRegistry: ToolRegistry;
   private readonly _chatRepository: ChatRepository;
 
-  constructor(geminiService: GeminiService, toolRegistry: ToolRegistry, chatRepository: ChatRepository) {
+  constructor(geminiService: GeminiService, chatRepository: ChatRepository) {
     this._geminiService = geminiService;
-    this._toolRegistry = toolRegistry;
     this._chatRepository = chatRepository;
   }
 
   async sendMessage(query: string, sessionId: string): Promise<ResultType<ChatMessage>> {
     try {
-      const generateResponseResult = await this._geminiService.generateResponse(query, this._toolRegistry);
+      const existSession = await this._chatRepository.getChatSession(sessionId);
+      if (!existSession) {
+        return {
+          code: ErrorCodes.SESSION_NOT_FOUND,
+          data: null,
+          success: false,
+          message: 'Session not found',
+        };
+      }
+
+      const generateResponseResult = await this._geminiService.generateResponse(
+        query,
+        sessionId,
+        existSession.userId || null
+      );
 
       let chatMessage: ChatMessage;
       if (!generateResponseResult.success) {
@@ -49,8 +59,13 @@ export default class ChatService {
     }
   }
 
-  async getChatMessagesBySessionId(sessionId: string): Promise<ChatMessage[]> {
-    const chatMessages = await this._chatRepository.getChatMessagesBySessionId(sessionId);
+  async getChatMessagesBySessionId(
+    sessionId: string,
+    take = 10,
+    skip = 0,
+    orderBy: 'asc' | 'desc' = 'asc'
+  ): Promise<ChatMessage[]> {
+    const chatMessages = await this._chatRepository.getChatMessagesBySessionId(sessionId, take, skip, orderBy);
     return chatMessages;
   }
 
@@ -131,7 +146,7 @@ export default class ChatService {
       // User has an active chat session
       await this._chatRepository.mergeChatSession(chatSession.id, anonymousActiveChatSession.id);
       await this.endChatSession(anonymousActiveChatSession.id);
-      
+
       return {
         code: 200,
         data: null,

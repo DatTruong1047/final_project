@@ -22,7 +22,6 @@ enum RoleEnum {
 
 enum OrderStatusEnum {
   CREATED
-  PROCESSING
   COMPLETED
   FAILED
   REFUNDED
@@ -210,6 +209,8 @@ model Order {
   userId          String          @map("user_id")
   user            User            @relation(fields: [userId], references: [id])
   phoneNumber     String          @map("phone_number")
+  fullName        String          @map("full_name")
+  address         String          @map("address")
   note            String?         @map("note")
   totalAmount     Decimal         @map("total_amount") @db.Decimal(15, 2)
   orderDate       DateTime        @map("order_date")

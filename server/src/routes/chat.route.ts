@@ -1,40 +1,28 @@
 import { FastifyInstance } from 'fastify';
 
-import {
-  SuccessResponseSchema,
-  ErrorResponseSchema,
-  ChatQuerySchema,
-  ChatMessageResponseSchema,
-  MergeChatSessionSchema,
-  CreateChatSessionSchema,
-} from '@model';
+import { ErrorResponseSchema, ChatQuerySchema, MergeChatSessionSchema, CreateChatSessionSchema } from '@model';
+
+import ChatRepository from '@app/repositories/chat.repository';
+import GeminiService from '@app/services/gemini.service';
 
 import ChatService from '@services/chat.service';
 
 import ChatController from '@controller/chat.controller';
-import GeminiService from '@app/services/gemini.service';
-import { ToolRegistry } from '@app/tools/registry/tool.registry';
-import ChatRepository from '@app/repositories/chat.repository';
-import { initializeTools } from '@app/tools/init';
-import ProductService from '@services/product.service';
-import OrderService from '@services/order.service';
-import UserService from '@services/user.service';
 
 export default async function chatRoutes(app: FastifyInstance): Promise<void> {
-  const toolRegistry = await initializeTools(new ProductService(), new OrderService(), new UserService());
+  const chatRepository = new ChatRepository();
+  const geminiService = new GeminiService(chatRepository);
 
-  const chatService = new ChatService(new GeminiService(), toolRegistry, new ChatRepository());
+  const chatService = new ChatService(geminiService, chatRepository);
   const chatController = new ChatController(chatService);
 
   app.post('/message', {
     schema: {
       tags: ['Chat'],
-      summary: 'Send message to chatbot',
+      summary: 'Process chat message',
       body: ChatQuerySchema,
       response: {
-        // 200: SuccessResponseSchema(ChatMessageResponseSchema),
-        400: ErrorResponseSchema,
-        500: ErrorResponseSchema,
+        // 200: SuccessResponseSchema,
       },
     },
     handler: chatController.sendMessage,

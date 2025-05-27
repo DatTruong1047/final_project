@@ -1,10 +1,11 @@
-import OrderController from '@app/controllers/order.controller';
 import { FastifyInstance } from 'fastify';
-import OrderService from '@app/services/order.service';
-import { SuccessResponseSchema } from '@app/models/response.schema';
-import { OrderResponseSchema } from '@app/models/order.schema';
-import { ErrorResponseSchema } from '@app/models/response.schema';
+
+import OrderController from '@app/controllers/order.controller';
 import { CreateOrderRequestSchema } from '@app/models';
+import { ListOrderResponseSchema, OrderFilterSchema, OrderResponseSchema } from '@app/models/order.schema';
+import { SuccessResponseSchema } from '@app/models/response.schema';
+import { ErrorResponseSchema } from '@app/models/response.schema';
+import OrderService from '@app/services/order.service';
 
 export default async function orderRoutes(app: FastifyInstance): Promise<void> {
   const orderController = new OrderController(new OrderService());
@@ -30,8 +31,9 @@ export default async function orderRoutes(app: FastifyInstance): Promise<void> {
     schema: {
       tags: ['Order'],
       summary: 'Get orders by user id',
+      querystring: OrderFilterSchema,
       response: {
-        200: SuccessResponseSchema(OrderResponseSchema.array()),
+        200: SuccessResponseSchema(ListOrderResponseSchema),
         400: ErrorResponseSchema,
         401: ErrorResponseSchema,
         403: ErrorResponseSchema,

@@ -2,11 +2,10 @@ import {
   CreateOrderRequestType,
   CartDetailType,
   CreateOrderResultType,
-  OrderResponseType,
-  ProductDetailType,
   CreateOrderWithChatType,
-  ProductBaseType,
   ProductForCreateOrderType,
+  OrderFilterType,
+  ListOrderResponseType,
 } from '@model';
 import { OrderStatusEnum, Prisma, PrismaClient, Order, OrderDetail } from 'generated/prisma';
 
@@ -29,6 +28,8 @@ export default class OrderRepository {
     const result = await tx.order.create({
       data: {
         userId: userId,
+        fullName: req.fullname,
+        address: req.address,
         phoneNumber: req.phoneNumber,
         note: req.note,
         totalAmount: totalAmount,
@@ -70,40 +71,47 @@ export default class OrderRepository {
     req: CreateOrderWithChatType,
     totalAmount: number
   ): Promise<CreateOrderResultType> {
-    const result = await tx.order.create({
-      data: {
-        userId: req.userId,
-        phoneNumber: req.phoneNumber,
-        note: req.note,
-        totalAmount: Number(totalAmount),
-        orderDate: new Date(),
-        orderStatus: OrderStatusEnum.CREATED,
-        orderDetails: {
-          create: {
-            product: {
-              connect: { id: product.id },
+    try {
+      const result = await tx.order.create({
+        data: {
+          userId: req.userId,
+          phoneNumber: req.phoneNumber,
+          fullName: req.fullname,
+          address: req.address,
+          note: req.note || '',
+          totalAmount: Number(totalAmount),
+          orderDate: new Date(),
+          orderStatus: OrderStatusEnum.CREATED,
+          orderDetails: {
+            create: {
+              product: {
+                connect: { id: product.id },
+              },
+              productName: product.name,
+              quantity: req.count,
+              unitPrice: Number(product.price),
+              subtotal: Number(product.price * req.count).toFixed(2),
             },
-            productName: product.name,
-            quantity: req.count,
-            unitPrice: Number(product.price),
-            subtotal: Number(product.price * req.count).toFixed(2),
           },
         },
-      },
-      select: this._createOrderSelectBase,
-    });
+        select: this._createOrderSelectBase,
+      });
 
-    return {
-      ...result,
-      totalAmount: result.totalAmount.toString(),
-      orderDate: result.orderDate.toISOString(),
-      orderStatus: result.orderStatus as OrderStatusEnum,
-      orderDetails: result.orderDetails.map((detail) => ({
-        ...detail,
-        unitPrice: Number(detail.unitPrice),
-        subTotal: Number(detail.subtotal),
-      })),
-    };
+      return {
+        ...result,
+        totalAmount: result.totalAmount.toString(),
+        orderDate: result.orderDate.toISOString(),
+        orderStatus: result.orderStatus as OrderStatusEnum,
+        orderDetails: result.orderDetails.map((detail) => ({
+          ...detail,
+          unitPrice: Number(detail.unitPrice),
+          subTotal: Number(detail.subtotal),
+        })),
+      };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   async updateOrderStatus(orderId: string, orderStatus: OrderStatusEnum): Promise<Order> {
@@ -132,28 +140,43 @@ export default class OrderRepository {
     });
   }
 
-  async getOrdersByUserId(userId: string): Promise<OrderResponseType[]> {
+  async getOrdersByUserId(userId: string, filter: OrderFilterType): Promise<ListOrderResponseType> {
     const orders = await this._prisma.order.findMany({
-      where: { userId },
+      where: { userId, ...(filter.status && { orderStatus: filter.status }) },
+      skip: (filter.page - 1) * filter.limit,
+      take: filter.limit,
+      orderBy: { orderDate: 'desc' },
       select: this._createOrderSelectBase,
     });
 
-    return orders.map((order) => ({
-      ...order,
-      totalAmount: order.totalAmount.toString(),
-      orderDate: order.orderDate.toISOString(),
-      orderDetails: order.orderDetails.map((detail) => ({
-        ...detail,
-        unitPrice: Number(detail.unitPrice),
-        subTotal: Number(detail.subtotal),
+    const total = await this._prisma.order.count({
+      where: { userId, ...(filter.status && { orderStatus: filter.status }) },
+    });
+
+    const response: ListOrderResponseType = {
+      orders: orders.map((order) => ({
+        ...order,
+        totalAmount: order.totalAmount.toString(),
+        orderDate: order.orderDate.toISOString(),
+        orderDetails: order.orderDetails.map((detail) => ({
+          ...detail,
+          unitPrice: Number(detail.unitPrice),
+          subTotal: Number(detail.subtotal),
+        })),
+        paymentIntent: order.paymentIntentId
+          ? {
+              id: order.paymentIntentId,
+              clientSecret: order.clientSecret,
+            }
+          : undefined,
       })),
-      paymentIntent: order.paymentIntentId
-        ? {
-            id: order.paymentIntentId,
-            clientSecret: '',
-          }
-        : undefined,
-    }));
+      page: filter.page,
+      limit: filter.limit,
+      totalOrders: total,
+      totalPages: Math.ceil(total / filter.limit),
+    };
+
+    return response;
   }
 
   async getOrderDetail(orderId: string): Promise<OrderDetail[]> {
@@ -180,7 +203,7 @@ export default class OrderRepository {
         subtotal: true,
       },
     },
-    stripeSessionId: true,
+    clientSecret: true,
     paymentIntentId: true,
   };
 }

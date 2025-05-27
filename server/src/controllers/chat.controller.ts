@@ -1,5 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
+import { ChatSession, RoleEnum } from 'generated/prisma';
+
 import app from '@app/app';
 import { ErrorCodes } from '@app/config';
 import {
@@ -15,7 +17,6 @@ import {
 import ChatService from '@services/chat.service';
 
 import { binding } from '@decorators/binding.decorator';
-import { ChatSession, RoleEnum } from 'generated/prisma';
 
 export default class ChatController {
   constructor(private readonly chatService: ChatService) {}
@@ -90,14 +91,14 @@ export default class ChatController {
 
   @binding
   async getChatMessages(
-    request: FastifyRequest<{ Params: { id: string } }>,
+    request: FastifyRequest<{ Params: { id: string }; Query: { take: number; skip: number; orderBy: 'asc' | 'desc' } }>,
     reply: FastifyReply
   ): Promise<FastifyReply> {
     try {
       const { id } = request.params;
-
+      const { take, skip, orderBy } = request.query as { take: number; skip: number; orderBy: 'asc' | 'desc' };
       // Get by sessionId
-      const messages = await this.chatService.getChatMessagesBySessionId(id);
+      const messages = await this.chatService.getChatMessagesBySessionId(id, take, skip, orderBy);
 
       const response: ChatMessageResponseType = {
         chatMessages: messages.map((message) => ({
@@ -215,6 +216,29 @@ export default class ChatController {
       return app.handleErrorResponse(error, reply);
     }
   }
+
+  // @binding
+  // async processMessage(
+  //   request: FastifyRequest<{ Body: typeof ChatInputSchema._type }>,
+  //   reply: FastifyReply
+  // ): Promise<FastifyReply> {
+  //   try {
+  //     const input = request.body;
+  //     const output = await this.chatService.processMessage(input);
+
+  //     return reply.send({
+  //       code: 200,
+  //       data: output,
+  //       success: true,
+  //     });
+  //   } catch (error) {
+  //     return reply.status(500).send({
+  //       code: 500,
+  //       message: error instanceof Error ? error.message : 'Internal server error',
+  //       success: false,
+  //     });
+  //   }
+  // }
 
   // @binding
   // async search(request: FastifyRequest<{ Body: ChatQueryType }>, reply: FastifyReply): Promise<FastifyReply> {

@@ -1,19 +1,19 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import OrderService from '@app/services/order.service';
-
-import { binding } from '@decorators/binding.decorator';
 import app from '@app/app';
+import { ErrorCodes } from '@app/config';
 import {
   CreateOrderRequestType,
   ErrorResponseType,
+  ListOrderResponseType,
+  OrderFilterType,
   OrderResponseType,
   SuccessResponseType,
-  SuccessResWithoutDataType,
 } from '@app/models';
-import { ErrorCodes } from '@app/config';
+import OrderService from '@app/services/order.service';
 import { createPaymentIntent } from '@app/utils/stripe';
-import { OrderStatusEnum } from 'generated/prisma';
+
+import { binding } from '@decorators/binding.decorator';
 
 export default class OrderController {
   constructor(private readonly _orderService: OrderService) {}
@@ -48,7 +48,6 @@ export default class OrderController {
         clientSecret: paymentIntent.client_secret as string,
       };
 
-      await this._orderService.updateOrderStatus(result.data.id, OrderStatusEnum.PROCESSING);
       await this._orderService.addPaymentIntent(result.data.id, paymentIntentData.id, paymentIntentData.clientSecret);
 
       const responseData: OrderResponseType = {
@@ -68,15 +67,27 @@ export default class OrderController {
   }
 
   @binding
-  async getOrdersByUserId(request: FastifyRequest, reply: FastifyReply): Promise<FastifyReply> {
+  async getOrdersByUserId(
+    request: FastifyRequest<{ Querystring: OrderFilterType }>,
+    reply: FastifyReply
+  ): Promise<FastifyReply> {
     try {
       const { userId } = request.decodedAccessToken;
 
-      const result = await this._orderService.getOrdersByUserId(userId);
+      const result = await this._orderService.getOrdersByUserId(userId, request.query);
 
-      const response: SuccessResponseType<OrderResponseType[]> = {
+      if (!result.success) {
+        const errorResponse: ErrorResponseType = {
+          code: result.code,
+          message: result.message,
+        };
+
+        return reply.BadRequest(errorResponse);
+      }
+
+      const response: SuccessResponseType<ListOrderResponseType> = {
         code: 200,
-        data: result,
+        data: result.data,
       };
 
       return reply.OK(response);

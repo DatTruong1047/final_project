@@ -15,7 +15,6 @@ export const CLIENT_HOST = process.env.CLIENT_HOST || 'http://localhost:5137/';
 export const CLIENT_RESET_PASS_URL = process.env.CLIENT_FORGOT_PASS_URL || 'auth/reset-password';
 export const CLIENT_VERIFICATION_URL = process.env.CLIENT_VERIFICATION_URL || 'auth/verify-email';
 
-
 export const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 
 export const POSTGRES_USER = process.env.POSTGRES_USER || 'postgres';
@@ -28,3 +27,7 @@ export const POSTGRES_VECTOR_DB = process.env.POSTGRES_VECTOR_DB || 'vector_db';
 
 export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 
+export const LANGCHAIN_API_KEY = process.env.LANGCHAIN_API_KEY;
+export const LANGCHAIN_PROJECT = process.env.LANGCHAIN_PROJECT || 'chatbot-project';
+export const LANGCHAIN_ENDPOINT = process.env.LANGCHAIN_ENDPOINT || 'https://api.smith.langchain.com';
+export const LANGSMITH_TRACING = true;

@@ -1,10 +1,6 @@
 import { z } from 'zod';
-import { CreateOrderRequestSchema } from './order.schema';
 
-export const ProductComparisonInputSchema = z.object({
-  productNames: z.array(z.string()),
-  comparisonCriteria: z.string().optional(),
-});
+import { ProductMetadataSchema } from './product.schema';
 
 export const FullTextQuerySchema = z.object({
   productName: z
@@ -19,7 +15,6 @@ export const FullTextQuerySchema = z.object({
   priceMin: z.number().nullish().default(0).describe('The minimum price to search for, not required'),
   priceMax: z.number().nullish().default(1000000000).describe('The maximum price to search for, not required'),
   attributesValues: z.array(z.string()).nullish().describe('The values of the attributes to search for, not required'),
-  limit: z.number().nullish().default(10).describe('The maximum number of products to return, not required'),
 });
 
 export const ProductSearchQuerySchema = FullTextQuerySchema.extend({
@@ -28,16 +23,37 @@ export const ProductSearchQuerySchema = FullTextQuerySchema.extend({
       required_error: 'Query is required',
       invalid_type_error: 'Query must be a string',
     })
-    .min(1),
+    .min(1)
+    .describe(
+      'The query to search for, this can be a product name or a part of the product name, if not provided, the search will be based on the full text query'
+    ),
 });
 
-export const CreateOrderWithChatSchema = CreateOrderRequestSchema.omit({
-  cartIds: true,
-}).extend({
-  productName: z
+export const ProductSearchOutputSchema = z.object({
+  products: z.array(ProductMetadataSchema),
+  total: z.number(),
+});
+
+export const ProductComparisonInputSchema = z.object({
+  productNames: z.array(z.string()).describe('The names of the products to compare'),
+  // comparisonCriteria: z.string().optional().describe('The criteria of the comparison, not required'),
+});
+
+export const CreateOrderWithChatSchema = z.object({
+  address: z.string({
+    required_error: 'Address is required',
+    invalid_type_error: 'Address must be a string',
+  }),
+  fullname: z.string({
+    required_error: 'Fullname is required',
+    invalid_type_error: 'Fullname must be a string',
+  }),
+  phoneNumber: z.string().min(10).max(15),
+  note: z.string().nullish(),
+  productId: z
     .string({
-      required_error: 'Product name is required',
-      invalid_type_error: 'Product name must be a string',
+      required_error: 'Product ID is required',
+      invalid_type_error: 'Product ID must be a string',
     })
     .min(1),
   userId: z.string({
@@ -52,7 +68,31 @@ export const CreateOrderWithChatSchema = CreateOrderRequestSchema.omit({
     .min(1),
 });
 
-export type ProductSearchQueryType = z.infer<typeof ProductSearchQuerySchema>;
+export const ProductComparisonOutputSchema = z.object({
+  productNames: z.array(z.string()).describe('The names of the products to compare'),
+  notFoundProductNames: z.array(z.string()).describe('The names of the products that were not found'),
+  attributes: z
+    .array(
+      z.object({
+        name: z.string(),
+        values: z.array(z.string()),
+      })
+    )
+    .describe('The attributes of the products to compare'),
+  // comparisonCriteria: z.string().describe('The criteria of the comparison, not required'),
+});
 
+export const StructuredErrorResponseSchema = z.object({
+  code: z.number(),
+  message: z.string(),
+  success: z.boolean(),
+});
+
+export type ProductSearchQueryType = z.infer<typeof ProductSearchQuerySchema>;
 export type FullTextQueryType = z.infer<typeof FullTextQuerySchema>;
+export type ProductSearchOutputType = z.infer<typeof ProductSearchOutputSchema>;
+
+export type CreateOrderWithChatType = z.infer<typeof CreateOrderWithChatSchema>;
+
 export type ProductComparisonInputType = z.infer<typeof ProductComparisonInputSchema>;
+export type ProductComparisonOutputType = z.infer<typeof ProductComparisonOutputSchema>;

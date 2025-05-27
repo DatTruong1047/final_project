@@ -136,7 +136,10 @@ export default class AuthController {
 
       const res: SuccessResponseType<LoginResponseType> = {
         code: 200,
-        data: tokens,
+        data: {
+          ...tokens,
+          userId: result.data.id,
+        },
       };
       return reply.OK(res);
     } catch (error) {

@@ -1,18 +1,17 @@
+import removeAccents from 'remove-accents';
+
 import {
   FullTextQueryType,
-  ProductBaseType,
   ProductDetailType,
   ProductFilterType,
   ProductForCreateOrderType,
   ProductListType,
   ProductMetadataType,
-  ProductSearchQueryType,
 } from '@model';
-import { Prisma, PrismaClient, Product } from 'generated/prisma';
+import { Prisma, PrismaClient } from 'generated/prisma';
 
-import prisma from '@app/lib/prisma';
 import app from '@app/app';
-import removeAccents from 'remove-accents';
+import prisma from '@app/lib/prisma';
 
 export default class ProductRepository {
   private readonly _prisma: PrismaClient;
@@ -21,16 +20,16 @@ export default class ProductRepository {
     this._prisma = prisma;
   }
 
-  async getProductForCreateOrder(name: string): Promise<ProductForCreateOrderType > {
+  async getProductForCreateOrder(id: string): Promise<ProductForCreateOrderType> {
     const product = await this._prisma.product.findUnique({
-      where: { name },
+      where: { id },
       select: {
         id: true,
         name: true,
         code: true,
         price: true,
         quantity: true,
-      }
+      },
     });
 
     if (!product) {
@@ -64,7 +63,7 @@ export default class ProductRepository {
     };
   }
 
-  async findProductByApproxName(name: string, limit: number = 1): Promise<ProductMetadataType | null> {
+  async findSimilarProductIds(name: string, limit = 1): Promise<{ id: string; similarity: number }[]> {
     const normalizedName = removeAccents(name.trim().toLowerCase());
 
     const rawResults: ({ id: string } & { sim: number })[] = await this._prisma.$queryRaw<
@@ -79,20 +78,21 @@ export default class ProductRepository {
       `
     );
 
-    if (rawResults.length === 0) {
-      return null;
-    }
+    return rawResults.map((result) => ({
+      id: result.id,
+      similarity: result.sim,
+    }));
+  }
 
+  async getProductMetadataById(id: string): Promise<ProductMetadataType | null> {
     const product = await this._prisma.product.findUnique({
-      where: {
-        id: rawResults[0].id,
-      },
+      where: { id },
       select: this._productSelectMetadata,
     });
 
     if (!product) return null;
 
-    const metadata: ProductMetadataType = {
+    return {
       ...product,
       price: product.price.toNumber() ?? 0,
       attributes: product.attributes.reduce((acc, attribute) => {
@@ -100,7 +100,26 @@ export default class ProductRepository {
         return acc;
       }, {} as Record<string, string>),
     };
-    return metadata;
+  }
+
+  async findProductByApproxName(name: string): Promise<ProductMetadataType | null> {
+    const similarProducts = await this.findSimilarProductIds(name, 1);
+
+    if (similarProducts.length === 0) {
+      return null;
+    }
+
+    return this.getProductMetadataById(similarProducts[0].id);
+  }
+
+  async findManyProductByApproxName(name: string, limit = 2): Promise<ProductMetadataType[] | null> {
+    const similarProducts = await this.findSimilarProductIds(name, limit);
+
+    if (similarProducts.length === 0) {
+      return null;
+    }
+
+    return Promise.all(similarProducts.map((product) => this.getProductMetadataById(product.id)));
   }
 
   async getProductList(filter: ProductFilterType): Promise<ProductListType> {
@@ -163,13 +182,47 @@ export default class ProductRepository {
 
   async fullTextSearch(params: FullTextQueryType): Promise<ProductMetadataType[]> {
     try {
-      const { limit, ...fullTextQuery } = params;
       const products = await this._prisma.product.findMany({
         where: {
-          ...this._fullTextSearchQuery(fullTextQuery),
+          ...(params.brandName && {
+            brand: {
+              name: {
+                contains: params.brandName,
+                mode: Prisma.QueryMode.insensitive,
+              },
+            },
+          }),
+          ...(params.categoryName && {
+            category: {
+              name: {
+                contains: params.categoryName,
+                mode: Prisma.QueryMode.insensitive,
+              },
+            },
+          }),
+          ...(params.priceMin && { price: { gte: params.priceMin } }),
+          ...(params.priceMax && { price: { lte: params.priceMax } }),
+          ...(params.attributesValues && {
+            attributes: {
+              some: {
+                OR: params.attributesValues.map((value) => ({
+                  attributeValue: {
+                    contains: value,
+                    mode: Prisma.QueryMode.insensitive,
+                  },
+                })),
+              },
+            },
+          }),
+          ...(params.productName && {
+            name: {
+              contains: params.productName,
+              mode: Prisma.QueryMode.insensitive,
+            },
+          }),
         },
         select: this._productSelectMetadata,
-        take: limit,
+        take: 10,
         orderBy: {
           price: 'asc',
         },
@@ -180,6 +233,7 @@ export default class ProductRepository {
         slug: product.name,
         sku: product.code,
         summary: product.shortDescription,
+        image: product.productMedias[0]?.media?.url ? [product.productMedias[0].media.url] : null,
         price: product.price.toNumber(),
         attributes: product.attributes.reduce((acc, attribute) => {
           acc[attribute.attributeKey] = attribute.attributeValue;
@@ -224,45 +278,55 @@ export default class ProductRepository {
     };
   }
 
-  private _fullTextSearchQuery(params: FullTextQueryType): Prisma.ProductWhereInput {
-    const andConditions: Prisma.ProductWhereInput[] = [];
-
-    if (params.categoryName) {
-      andConditions.push({
-        category: { name: { equals: params.categoryName } },
-      });
-    }
-
-    if (params.brandName) {
-      andConditions.push({ brand: { name: { equals: params.brandName } } });
-    }
-
-    if (params.priceMin != undefined) {
-      andConditions.push({ price: { gte: params.priceMin } });
-    }
-
-    if (params.priceMax != undefined) {
-      andConditions.push({ price: { lte: params.priceMax } });
-    }
-
+  private _fullTextSearchQuery(
+    productName = '',
+    categoryName = '',
+    brandName = '',
+    priceMin = 0,
+    priceMax = 1000000000,
+    attributesValues: string[] = []
+  ): Prisma.ProductWhereInput {
     const orConditions: Prisma.ProductWhereInput[] = [];
 
-    if (params.productName) {
-      orConditions.push({ name: { contains: params.productName, mode: Prisma.QueryMode.insensitive } });
-    }
-
-    if (params.attributesValues) {
+    if (categoryName) {
       orConditions.push({
-        attributes: { some: { attributeValue: { in: params.attributesValues, mode: Prisma.QueryMode.insensitive } } },
+        category: { name: { contains: categoryName, mode: Prisma.QueryMode.insensitive } },
       });
     }
 
-    if (orConditions.length > 0) {
-      andConditions.push({ OR: orConditions });
+    if (brandName) {
+      orConditions.push({
+        brand: { name: { contains: brandName, mode: Prisma.QueryMode.insensitive } },
+      });
+    }
+
+    if (priceMin !== undefined) {
+      orConditions.push({ price: { gte: priceMin } });
+    }
+
+    if (priceMax !== undefined) {
+      orConditions.push({ price: { lte: priceMax } });
+    }
+
+    if (productName) {
+      orConditions.push({ name: { contains: productName, mode: Prisma.QueryMode.insensitive } });
+    }
+
+    if (attributesValues.length > 0) {
+      orConditions.push({
+        attributes: {
+          some: {
+            attributeValue: {
+              in: attributesValues,
+              mode: Prisma.QueryMode.insensitive,
+            },
+          },
+        },
+      });
     }
 
     return {
-      AND: andConditions.filter(Boolean),
+      OR: orConditions.filter(Boolean),
     };
   }
 
@@ -288,6 +352,9 @@ export default class ProductRepository {
     },
     productMedias: {
       take: 1,
+      orderBy: {
+        id: Prisma.SortOrder.asc,
+      },
       select: {
         id: true,
         media: {
@@ -351,3 +418,45 @@ export default class ProductRepository {
     attributes: { select: { attributeKey: true, attributeValue: true } },
   };
 }
+
+// private _fullTextSearchQuery(productName: string ="", categoryName: string ="", brandName: string ="", priceMin: number = 0, priceMax: number = 1000000000, attributesValues: string[] = []): Prisma.ProductWhereInput {
+//   const andConditions: Prisma.ProductWhereInput[] = [];
+
+//   if (categoryName) {
+//     andConditions.push({
+//       category: { name: { contains: categoryName, mode: Prisma.QueryMode.insensitive } },
+//     });
+//   }
+
+//   if (brandName) {
+//     andConditions.push({ brand: { name: { contains: brandName, mode: Prisma.QueryMode.insensitive } } });
+//   }
+
+//   if (priceMin != undefined) {
+//     andConditions.push({ price: { gte: priceMin } });
+//   }
+
+//   if (priceMax != undefined) {
+//     andConditions.push({ price: { lte: priceMax } });
+//   }
+
+//   const orConditions: Prisma.ProductWhereInput[] = [];
+
+//   if (productName) {
+//     orConditions.push({ name: { contains: productName, mode: Prisma.QueryMode.insensitive } });
+//   }
+
+//   if (attributesValues) {
+//     orConditions.push({
+//       attributes: { some: { attributeValue: { in: attributesValues, mode: Prisma.QueryMode.insensitive } } },
+//     });
+//   }
+
+//   if (orConditions.length > 0) {
+//     andConditions.push({ OR: orConditions });
+//   }
+
+//   return {
+//     AND: andConditions.filter(Boolean),
+//   };
+// }
