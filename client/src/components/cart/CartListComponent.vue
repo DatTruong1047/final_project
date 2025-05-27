@@ -1,11 +1,22 @@
 <template>
-  <div class="bg-white h-full rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6">
-    <div class="hidden md:grid md:grid-cols-5 text-left p-4 border-b border-gray-200">
-      <h2 class="text-xl font-bold text-gray-900">Product</h2>
-      <h2 class="text-xl font-bold text-gray-900 ml-2">Price</h2>
-      <h2 class="text-xl font-bold text-gray-900 ml-2">Quantity</h2>
-      <h2 class="text-xl font-bold text-gray-900 ml-2">Total</h2>
-      <h2 class="text-xl font-bold text-gray-900 ml-2">Select</h2>
+  <div class="bg-white h-full m-1 md:min-h-[500px] rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6">
+    <!-- Desktop Header -->
+    <div class="hidden md:grid md:grid-cols-12 gap-6 p-4 border-b border-gray-200 bg-gray-50">
+      <div class="col-span-5">
+        <h2 class="text-xl font-semibold text-gray-700">Product</h2>
+      </div>
+      <div class="col-span-2">
+        <h2 class="text-xl font-semibold text-gray-700">Price</h2>
+      </div>
+      <div class="col-span-3">
+        <h2 class="text-xl font-semibold text-gray-700">Quantity</h2>
+      </div>
+      <div class="col-span-1">
+        <h2 class="text-xl font-semibold text-gray-700">Total</h2>
+      </div>
+      <div class="col-span-1">
+        <h2 class="text-xl font-semibold text-gray-700 text-right">Select</h2>
+      </div>
     </div>
 
     <CartItemComponent
@@ -19,6 +30,7 @@
     />
   </div>
 </template>
+
 <script setup lang="ts">
 import type { CartListType } from '@/types/cartType'
 import CartItemComponent from './CartItemComponent.vue'

@@ -5,31 +5,31 @@
       <h2 class="text-3xl font-bold text-red-500">Related Items</h2>
     </div>
 
-    <div class="grid grid-cols-2 bg-gray-50 lg:grid-cols-3 gap-2 mb-16">
+    <div class="grid grid-cols-2 bg-gray-50 md:grid-cols-4 gap-2 mb-16">
       <RouterLink
-        class="bg-red-50 rounded overflow-hidden group hover:shadow-md transition-shadow duration-500"
+        class="bg-gray-50 rounded-xl h-[35rem] md:h-[50rem] border border-gray-200 overflow-hidden group hover:shadow  hover:shadow-gray-500 transition-shadow duration-300"
         v-for="product in products"
         :key="product.id"
         :to="{ name: productRoute, params: { id: product.id } }"
       >
-        <div class="relative bg-white h-64">
+        <div class="relative bg-white h-2/3">
           <img
             :src="product.thumbnail.media.url"
             :alt="`Product Image ${product.name}`"
-            class="w-full h-full object-contain p-4"
+            class="w-full h-full object-contain p-4 hover:scale-105 transition-all duration-300"
           />
         </div>
-        <div class="p-4 h-40">
+        <div class="p-4 h-1/3 mt-8">
           <h3 class="text-lg font-medium">
-            <span class="text-gray-500">
+            <span class="text-red-500 text-xl font-medium uppercase">
               {{ product.brand?.name }}
             </span>
           </h3>
-          <h2 class="text-lg sm:text-2xl h-16 font-medium">{{ product.name }}</h2>
+          <h2 class="text-lg mt-2 sm:text-2xl h-16 font-medium">{{ product.name }}</h2>
 
-          <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center justify-between mt-2">
             <div>
-              <span class="text-red-500 font-medium mr-2 text-2xl">
+              <span class="text-red-500 font-medium  sm:text-2xl">
                 {{ vndFormat(product.price) }}
               </span>
             </div>
@@ -39,7 +39,7 @@
                 <svg
                   v-for="i in 5"
                   :key="i"
-                  class="w-3 h-3 text-yellow-400"
+                  class="w-6 h-6 md:w-8 md:h-8 text-yellow-400"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -48,7 +48,7 @@
                   ></path>
                 </svg>
               </div>
-              <span class="text-xs text-gray-500 ml-1"> 100 </span>
+              <span class="md:text-xl text-gray-500 ml-1 pt-1"> 100 </span>
             </div>
           </div>
         </div>

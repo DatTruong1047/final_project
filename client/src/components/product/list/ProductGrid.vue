@@ -173,57 +173,58 @@ onMounted(async () => {
         </p>
       </div>
 
-      <div v-else class="bg-gray-50 grid pt-8 grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-8">
+      <div v-else class="bg-[#e1f4fc] grid py-8 grid-cols-1 sm:grid-cols-3 xl:grid-cols-4  gap-y-8">
         <RouterLink
           v-for="product in products"
           :key="product.id"
           :to="{ name: productRoute.productDetail, params: { id: product.id } }"
-          class="bg-white rounded-lg md:h-[60rem] overflow-hidden shadow-xl hover:shadow-lg transition-shadow duration-300 flex flex-col"
+          class="bg-white items-center rounded-lg mx-4 md:h-[50rem] overflow-hidden shadow-xl hover:shadow-md hover:shadow-gray-500 transition-shadow duration-300 flex flex-col"
         >
           <!-- Product image -->
-          <div class="relative bg-white flex items-center justify-center p-4 w-full h-full">
+          <div class="relative pb-8 mb-4 mt-4 p-8 shadow-xs bg-white flex items-center justify-center w-full h-[20rem]">
             <img
               :src="product.thumbnail.media.url || imageConfig.productDefault"
               :alt="product.name"
-              class="max-h-full max-w-full object-contain"
+              class="max-h-full max-w-full object-contain hover:scale-110 transition-all duration-300"
             />
           </div>
 
           <!-- Product details -->
-          <div class="p-6 flex-1 flex flex-col">
+          <div class="px-6 py-8 flex-1 flex flex-col w-full ">
             <!-- Brand and Category -->
-            <div class="flex items-center space-x-2 mb-2">
-              <span class="text-lg font-medium text-gray-600 truncate">{{
+            <div class="flex w-full space-x-2 mb-2 text-lg text-gray-600 ">
+              <span class=" font-medium  truncate uppercase">{{
                 product.brand.name
               }}</span>
-              <span class="text-gray-400 flex-shrink-0">•</span>
-              <span class="text-sm text-gray-600 truncate">{{ product.category.name }}</span>
+              <span class="text-gray-400 flex-shrink-0">-</span>
+              <span class="truncate font-base uppercase">{{ product.category.name }}</span>
             </div>
 
             <h3
-              class="text-2xl mt-4 font-semibold text-gray-900 mb-2 line-clamp-2 h-14 overflow-hidden"
+              class="text-2xl font-semibold text-gray-900 mb-2 line-clamp-2 h-auto overflow-hidden"
             >
               {{ product.name }}
             </h3>
 
-            <div class="mb-3">
+            <div class="mb-1">
               <span class="text-2xl font-bold text-red-600">
                 {{ vndFormat(product.price ?? 0) }}
               </span>
             </div>
 
             <div class="mb-3">
-              <h4 class="text-sm font-medium text-gray-900 mb-1">Attributes</h4>
-              <div class="text-sm text-gray-600 h-16 overflow-hidden">
+              <h4 class="text-xl font-base text-gray-900 mb-1 min-h-auto">Description</h4>
+              <div class="text-xl text-gray-600 h-auto overflow-hidden">
                 <div v-if="product.shortDescription">
                   <p
-                    v-for="(line, index) in product.shortDescription.split('\n').slice(0, 3)"
+                    v-for="(line, index) in product.shortDescription.split('\n').slice(0, 4)"
                     :key="index"
                     class="line-clamp-1"
+
                   >
                     {{ line }}
                   </p>
-                  <span class="text-gray-400 italic">...</span>
+                  <span class="text-gray-400  italic">...</span>
                 </div>
                 <p v-else class="text-gray-400 italic">No description</p>
               </div>

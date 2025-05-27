@@ -2,11 +2,11 @@
   <div class="p-6 mx-auto bg-white shadow-md rounded-lg border border-gray-100">
     <div class="grid grid-cols-1 md:grid-cols-6 gap-6 items-center">
       <div class="relative col-span-12 md:col-span-3">
-        <label class="block text-xs font-medium text-gray-500 mb-4 uppercase tracking-wider"
+        <label class="block text-xl font-medium text-gray-500 mb-4 uppercase tracking-wider"
           >Search</label
         >
         <div
-          class="absolute inset-y-0 mb-1 left-3 flex items-center text-gray-400 pointer-events-none"
+          class="absolute  -inset-y-2 mb-1 left-3 flex items-center text-gray-400 pointer-events-none"
           style="top: 24px"
         >
           <svg
@@ -25,20 +25,20 @@
         </div>
         <input
           type="text"
-          class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 outline-none text-gray-700 bg-gray-50 hover:bg-white"
+          class="w-full text-2xl pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 outline-none text-gray-700 bg-gray-50 hover:bg-white"
           v-model="localSearchText"
           placeholder="Search for products..."
         />
       </div>
 
       <div class="relative col-span-12 md:col-span-1">
-        <label class="block text-xs font-medium text-gray-500 mb-4 uppercase tracking-wider"
+        <label class="block text-xl font-medium text-gray-500 mb-4 uppercase tracking-wider"
           >Sort by</label
         >
         <div class="relative">
           <select
             v-model="localSortBy"
-            class="w-full appearance-none bg-gray-50 hover:bg-white border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
+            class="w-full text-xl appearance-none bg-gray-50 hover:bg-white border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
           >
             <option v-for="sortBy in ProductSortBy" :key="sortBy" :value="sortBy">
               {{ sortBy === 'createdAt' ? 'Date' : 'Price' }}
@@ -61,13 +61,13 @@
       </div>
 
       <div class="relative col-span-12 md:col-span-1">
-        <label class="block text-xs mb-4 font-medium text-gray-500 uppercase tracking-wider"
+        <label class="block text-xl mb-4 font-medium text-gray-500 uppercase tracking-wider"
           >Order</label
         >
         <div class="relative">
           <select
             v-model="localSortOrder"
-            class="w-full appearance-none bg-gray-50 hover:bg-white border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
+            class="w-full text-xl appearance-none bg-gray-50 hover:bg-white border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
           >
             <option v-for="sortOrder in ProductSort" :key="sortOrder" :value="sortOrder">
               {{ sortOrder === 'asc' ? 'Ascending' : 'Descending' }}

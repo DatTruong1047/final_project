@@ -31,3 +31,4 @@ export const LANGCHAIN_API_KEY = process.env.LANGCHAIN_API_KEY;
 export const LANGCHAIN_PROJECT = process.env.LANGCHAIN_PROJECT || 'chatbot-project';
 export const LANGCHAIN_ENDPOINT = process.env.LANGCHAIN_ENDPOINT || 'https://api.smith.langchain.com';
 export const LANGSMITH_TRACING = true;
+

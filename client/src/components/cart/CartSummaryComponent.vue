@@ -35,53 +35,23 @@
 import { vndFormat } from '@/helpers/processPrice'
 import { useCartStore } from '@/stores/cartStore'
 import { useRouter } from 'vue-router'
-import { paymentRoute } from '@/configs'
-import type { CreateOrderType } from '@/types/orderType'
-import { useAuthStore } from '@/stores/authStore'
+import { cartRoute, orderRoute } from '@/configs/routeConfig'
 import { useToast } from '@/hooks/useToast'
 import { ToastEnum } from '@/types/enum'
-import { useOrderStore } from '@/stores/orderStore'
 
 const cartStore = useCartStore()
-const authStore = useAuthStore()
-const orderStore = useOrderStore()
 
 const router = useRouter()
 const { showToast } = useToast()
 
 const onProceedToCheckout = async () => {
-  try {
-    if (!authStore.user?.phoneNumber) {
-      showToast(ToastEnum.Error, 'Please add your phone number to your profile')
-      return
-    }
-
-    if (!cartStore.getSelectedCartItems.length) {
-      showToast(ToastEnum.Error, 'Please select at least one item in your cart')
-      return
-    }
-
-    const cartIds = cartStore.getSelectedCartItems.map((item) => item.id)
-    console.log('Selected cart IDs:', cartIds)
-
-    const createOrderRequest: CreateOrderType = {
-      cartIds,
-      phoneNumber: authStore.user?.phoneNumber,
-      note: '123',
-    }
-
-    const result = await orderStore.createOrder(createOrderRequest)
-    console.log('Create order result:', result)
-
-    if (orderStore.order) {
-      router.push({ name: paymentRoute.payment })
-    } else {
-      showToast(ToastEnum.Error, 'Failed to create order')
-    }
-  } catch (error: any) {
-    console.error('Checkout error:', error)
-    const errorMessage = error?.message || 'Failed to create order'
-    showToast(ToastEnum.Error, errorMessage)
+  if (!cartStore.getSelectedCartItems.length) {
+    showToast(ToastEnum.Error, 'Please select at least one item in your cart')
+    return
   }
+
+  console.log('cartStore.getSelectedCartItems', cartStore.getSelectedCartItems)
+
+  router.push({ name: orderRoute.checkoutInfo })
 }
 </script>

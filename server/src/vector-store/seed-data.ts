@@ -1,3 +1,6 @@
+import { createProductEmbedding } from '@app/utils/document.util';
+
+
 import fs from 'fs/promises';
 import path from 'path';
 
