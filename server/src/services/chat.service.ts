@@ -2,7 +2,7 @@ import { ChatMessage, ChatSession, RoleEnum } from 'generated/prisma';
 
 import app from '@app/app';
 import { ErrorCodes } from '@app/config/error.config';
-import { ResultType } from '@app/models';
+import { GeminiResponseData, ResultType } from '@app/models';
 import ChatRepository from '@app/repositories/chat.repository';
 
 import GeminiService from '@services/gemini.service';
@@ -16,7 +16,10 @@ export default class ChatService {
     this._chatRepository = chatRepository;
   }
 
-  async sendMessage(query: string, sessionId: string): Promise<ResultType<ChatMessage>> {
+  async sendMessage(
+    query: string,
+    sessionId: string
+  ): Promise<ResultType<{ content: string; tool: string; chatMessage: ChatMessage }>> {
     try {
       const existSession = await this._chatRepository.getChatSession(sessionId);
       if (!existSession) {
@@ -28,7 +31,7 @@ export default class ChatService {
         };
       }
 
-      const generateResponseResult = await this._geminiService.generateResponse(
+      const generateResponseResult = await this._geminiService.generateResponseWithAgent(
         query,
         sessionId,
         existSession.userId || null
@@ -38,20 +41,30 @@ export default class ChatService {
       if (!generateResponseResult.success) {
         chatMessage = await this._chatRepository.createChatMessage(
           sessionId,
-          "Sorry, I can't help with that. Please try again later.",
-          RoleEnum.Assistant
+          `\`\`\`json
+          {
+            "message": "Sorry, I can't help with that. Please try again later."
+          }
+          \`\`\``,
+          RoleEnum.Assistant,
+          'general_message'
         );
       } else {
         chatMessage = await this._chatRepository.createChatMessage(
           sessionId,
-          generateResponseResult.data?.toString() || '',
-          RoleEnum.Assistant
+          generateResponseResult.data || '',
+          RoleEnum.Assistant,
+          'general_message'
         );
       }
 
       return {
         code: 200,
-        data: chatMessage,
+        data: {
+          content: generateResponseResult.data || '',
+          tool: 'general_message',
+          chatMessage,
+        },
         success: true,
       };
     } catch (error) {
@@ -61,7 +74,7 @@ export default class ChatService {
 
   async getChatMessagesBySessionId(
     sessionId: string,
-    take = 10,
+    take = 40,
     skip = 0,
     orderBy: 'asc' | 'desc' = 'asc'
   ): Promise<ChatMessage[]> {

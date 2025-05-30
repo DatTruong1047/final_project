@@ -4,12 +4,8 @@ import { z } from 'zod';
 import app from '@app/app';
 
 import ProductService from '@services/product.service';
+import { ProductComparisonInputType, ProductComparisonSchema } from '@app/models/product.schema';
 
-const ProductComparisonSchema = z.object({
-  productNames: z.array(z.string()).describe('The names of the products to compare').min(2).max(5),
-});
-
-type ProductComparisonInputType = z.infer<typeof ProductComparisonSchema>;
 export class ProductComparisonTool extends StructuredTool {
   name = 'product_comparison';
   description = 'Lấy dữ liệu để so sánh giữa các sản phẩm';

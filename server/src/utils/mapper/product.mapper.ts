@@ -1,10 +1,10 @@
 import { Document } from 'langchain/document';
-
+ 
 import { ProductMetadataType } from '@app/models';
-
+ 
 export function mapProductDocumentToMetadata(document: Document): ProductMetadataType {
   return {
-    name: document.metadata.product_name,
+    name: document.metadata.product_name, 
     slug: document.metadata.product_slug,
     sku: document.metadata.product_sku,
     image: document.metadata.product_image,

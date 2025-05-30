@@ -63,7 +63,7 @@ export const CreateOrderRequestSchema = z.object({
 export const CreateOrderResultSchema = z.object({
   id: z.string(),
   userId: z.string(),
-  phoneNumber: z.string().min(10).max(15),
+  phoneNumber: z.string().min(1).max(15),
   note: z.string().optional(),
   totalAmount: z.string(),
   orderDate: z.string(),
@@ -88,6 +88,17 @@ export const ListOrderResponseSchema = z.object({
   totalOrders: z.number(),
   totalPages: z.number(),
 });
+
+export const CreateOrderSchema = z.object({
+  address: z.string().describe('The address of the user'),
+  fullname: z.string().describe('The fullname of the user'),
+  phoneNumber: z.string().describe('The phone number of the user'),
+  note: z.string().describe('The note of the user').optional().default(''),
+  productName: z.string().describe('The name of the product to order'),
+  count: z.number().describe('The count of the product to order').min(1),
+});
+
+export type CreateOrderInputType = z.infer<typeof CreateOrderSchema>;
 
 export type CreateOrderRequestType = z.infer<typeof CreateOrderRequestSchema>;
 export type CreateOrderResultType = z.infer<typeof CreateOrderResultSchema>;

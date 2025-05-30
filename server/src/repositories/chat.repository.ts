@@ -103,12 +103,13 @@ export default class ChatRepository {
     });
   }
 
-  async createChatMessage(sessionId: string, content: string, role: RoleEnum): Promise<ChatMessage> {
+  async createChatMessage(sessionId: string, content: string, role: RoleEnum, tool?: string): Promise<ChatMessage> {
     const chatMessage = await this._prisma.chatMessage.create({
       data: {
         sessionId,
         content,
         role,
+        tool,
       },
     });
     return chatMessage;
