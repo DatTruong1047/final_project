@@ -8,12 +8,6 @@
           <h2 class="text-2xl font-semibold mb-4 text-gray-800">Profile Picture</h2>
           <div class="flex flex-col items-center mt-[4rem]">
             <AvatarComponent />
-            <button
-              class="inline-flex text-xl items-end mt-2 px-4 py-2 border-2 border-red-500 text-red-500 rounded-lg font-medium hover:bg-red-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
-            >
-              <PencilSquareIcon class="h-6 w-6 mr-2" />
-              Change Picture
-            </button>
           </div>
         </div>
       </div>

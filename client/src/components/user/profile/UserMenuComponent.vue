@@ -28,8 +28,8 @@
                 :to="{ name: userRoute.profile }"
                 class="flex items-center px-4 py-4 rounded-lg hover:bg-orange-50 text-gray-700 hover:text-orange-600 transition-colors"
               >
-                <UserCircleIcon class="w-6 h-6 mr-3" />
-                <span class="font-medium text-lg">Profile</span>
+                <UserCircleIcon class="w-8 h-8 mr-3" />
+                <span class="font-medium text-xl">Profile</span>
               </RouterLink>
             </li>
             <li class="w-full">
@@ -37,10 +37,10 @@
                 :to="{ name: orderRoute.order }"
                 class="flex items-center px-4 py-4 rounded-lg hover:bg-orange-50 text-gray-700 hover:text-orange-600 transition-colors"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
-                <span class="font-medium text-lg">Orders</span>
+                <span class="font-medium text-xl">Orders</span>
               </RouterLink>
             </li>
             <div class="border-t border-gray-100 my-2"></div>
@@ -49,10 +49,10 @@
                 @click="handleLogout"
                 class="flex items-center w-full px-4 py-4 rounded-lg hover:bg-red-50 text-gray-700 hover:text-red-600 transition-colors"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                <span class="font-medium text-lg">Logout</span>
+                <span class="font-medium text-xl">Logout</span>
               </button>
             </li>
           </template>

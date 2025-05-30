@@ -1,35 +1,43 @@
 <template>
   <div class="h-[60%] bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+    <div class="overflow-x-auto h-full">
+      <table class="min-w-full divide-y divide-gray-200 relative">
+        <thead class="bg-gray-50 sticky top-0 z-10">
           <tr>
-            <th class="px-8 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              class="px-8 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"
+            >
               Order ID
             </th>
-            <th class="px-8 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              class="px-8 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"
+            >
               Contact Info
             </th>
-            <th class="px-8 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              class="px-8 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"
+            >
               Products
             </th>
-            <th class="px-8 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              class="px-8 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"
+            >
               Order Date
             </th>
-            <th class="px-8 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              class="px-8 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"
+            >
               Total Amount
             </th>
-            <th class="px-8 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              class="px-8 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"
+            >
               Status
             </th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <OrderTableRowComponent
-            v-for="order in orders"
-            :key="order.id"
-            :order="order"
-          />
+        <tbody class="bg-white divide-y divide-gray-200 overflow-y-auto max-h-[calc(100%-60px)]">
+          <OrderTableRowComponent v-for="order in orders" :key="order.id" :order="order" />
         </tbody>
       </table>
     </div>
@@ -47,7 +55,7 @@ import type { PropType } from 'vue'
 defineProps({
   orders: {
     type: Array as PropType<OrderBaseType[]>,
-    required: true
-  }
+    required: true,
+  },
 })
 </script>

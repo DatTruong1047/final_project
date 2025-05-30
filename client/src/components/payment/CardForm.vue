@@ -33,10 +33,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, defineEmits } from 'vue'
+import { ref, onMounted } from 'vue'
 import { loadStripe } from '@stripe/stripe-js'
 
-import { env } from '@/configs'
 
 defineProps({
   clientSecret: {

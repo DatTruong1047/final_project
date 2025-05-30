@@ -63,10 +63,8 @@ const selectedStatus = ref('CREATED')
 const orderStatuses = [
   { value: '', label: 'All' },
   { value: 'CREATED', label: 'Created' },
-  { value: 'PROCESSING', label: 'Processing' },
   { value: 'COMPLETED', label: 'Completed' },
   { value: 'FAILED', label: 'Failed' },
-  { value: 'REFUNDED', label: 'Refunded' },
 ]
 
 const changeStatus = (status: OrderStatus | '') => {

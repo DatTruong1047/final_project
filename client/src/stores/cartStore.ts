@@ -10,6 +10,7 @@ import { defineStore } from 'pinia'
 interface State {
   cart: CartListType
   selectedCartIds: string[]
+  cartTotal: number
   loading: {
     cart: boolean
   }
@@ -18,12 +19,21 @@ interface State {
 export const useCartStore = defineStore('cart', {
   state: (): State => ({
     cart: {
-      carts: localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart') || '{}').carts : [],
-      total: localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart') || '{}').total : 0,
-      totalPrice: localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart') || '{}').totalPrice : 0,
+      carts: localStorage.getItem('cart')
+        ? JSON.parse(localStorage.getItem('cart') || '{}').carts
+        : [],
+      total: localStorage.getItem('cart')
+        ? JSON.parse(localStorage.getItem('cart') || '{}').total
+        : 0,
+      totalPrice: localStorage.getItem('cart')
+        ? JSON.parse(localStorage.getItem('cart') || '{}').totalPrice
+        : 0,
     },
     selectedCartIds: [],
     loading: { cart: false },
+    cartTotal: localStorage.getItem('cartTotal')
+      ? JSON.parse(localStorage.getItem('cartTotal') || '{}')
+      : 0,
   }),
 
   getters: {
@@ -48,6 +58,10 @@ export const useCartStore = defineStore('cart', {
         localStorage.setItem('cart', JSON.stringify(response.data))
 
         this.cart = response.data
+        this.cartTotal = this.cart.carts.reduce((total, item) => {
+          return total + item.quantity
+        }, 0)
+        localStorage.setItem('cartTotal', JSON.stringify(this.cartTotal))
       } catch (error: any) {
         console.error('Error getting cart:', error.message)
         return Promise.reject(error)
@@ -109,6 +123,14 @@ export const useCartStore = defineStore('cart', {
       } else {
         this.selectedCartIds = this.selectedCartIds.filter((item) => item !== id)
       }
+    },
+
+    clearCart() {
+      localStorage.removeItem('cart')
+      localStorage.removeItem('cartTotal')
+      this.cart = { carts: [], total: 0, totalPrice: 0 }
+      this.cartTotal = 0
+      this.selectedCartIds = []
     },
   },
 })

@@ -1,5 +1,7 @@
 <template>
-  <div class="bg-white h-full m-1 md:min-h-[500px] rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6">
+  <div
+    class="bg-white md:h-180 h-150 m-1  rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6"
+  >
     <!-- Desktop Header -->
     <div class="hidden md:grid md:grid-cols-12 gap-6 p-4 border-b border-gray-200 bg-gray-50">
       <div class="col-span-5">
@@ -19,15 +21,17 @@
       </div>
     </div>
 
-    <CartItemComponent
-      v-for="cart in data.carts || []"
-      :key="cart.id"
-      :cart="cart"
-      :on-increase-quantity="onIncreaseQuantity"
-      :on-decrease-quantity="onDecreaseQuantity"
-      :on-remove-item="onRemoveItem"
-      :on-select-item="onSelectItem"
-    />
+    <div class="overflow-y-auto p-4 h-150">
+      <CartItemComponent
+        v-for="cart in data.carts || []"
+        :key="cart.id"
+        :cart="cart"
+        :on-increase-quantity="onIncreaseQuantity"
+        :on-decrease-quantity="onDecreaseQuantity"
+        :on-remove-item="onRemoveItem"
+        :on-select-item="onSelectItem"
+      />
+    </div>
   </div>
 </template>
 

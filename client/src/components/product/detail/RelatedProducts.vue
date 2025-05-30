@@ -7,7 +7,7 @@
 
     <div class="grid grid-cols-2 bg-gray-50 md:grid-cols-4 gap-2 mb-16">
       <RouterLink
-        class="bg-gray-50 rounded-xl h-[35rem] md:h-[50rem] border border-gray-200 overflow-hidden group hover:shadow  hover:shadow-gray-500 transition-shadow duration-300"
+        class="bg-gray-50 rounded-xl h-[35rem] md:h-[50rem] border border-gray-200 overflow-hidden group hover:shadow hover:shadow-gray-500 transition-shadow duration-300"
         v-for="product in products"
         :key="product.id"
         :to="{ name: productRoute, params: { id: product.id } }"
@@ -29,7 +29,7 @@
 
           <div class="flex items-center justify-between mt-2">
             <div>
-              <span class="text-red-500 font-medium  sm:text-2xl">
+              <span class="text-red-500 font-medium sm:text-2xl">
                 {{ vndFormat(product.price) }}
               </span>
             </div>
@@ -48,7 +48,7 @@
                   ></path>
                 </svg>
               </div>
-              <span class="md:text-xl text-gray-500 ml-1 pt-1"> 100 </span>
+              <span class="md:text-xl text-gray-500 ml-1 pt-1"> (100) </span>
             </div>
           </div>
         </div>

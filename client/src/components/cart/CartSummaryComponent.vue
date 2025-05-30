@@ -47,12 +47,10 @@ const router = useRouter()
 const { showToast } = useToast()
 
 const onProceedToCheckout = async () => {
-  if (!cartStore.getSelectedCartItems.length) {
-    showToast(ToastEnum.Error, t('message.error.selectAtLeastOneItem'))
+  if (cartStore.getCartTotalPrice > 99999999) {
+    showToast(ToastEnum.Error, t('message.error.cartTotalPrice'))
     return
   }
-
-  console.log('cartStore.getSelectedCartItems', cartStore.getSelectedCartItems)
 
   router.push({ name: orderRoute.checkoutInfo })
 }

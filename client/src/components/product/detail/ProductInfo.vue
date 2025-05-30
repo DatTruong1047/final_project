@@ -5,17 +5,15 @@
       {{ product.name }}
     </h1>
     <div class="flex items-center gap-4">
-      <!-- Brand -->
       <h1 class="text-xl md:text-xl font-bold text-gray-500 mb-4">
         Brand: <span class="text-red-500">{{ (product.brand?.name || '').toUpperCase() }}</span>
       </h1>
 
-      <!-- Brand -->
       <h1 class="text-xl md:text-xl font-bold text-gray-500 mb-4">
         SKU: <span class="text-red-500">{{ (product.code || '').toUpperCase() }}</span>
       </h1>
     </div>
-    <!-- Price -->
+
     <div class="flex items-center mb-4 text-red-500 font-bold text-2xl sm:text-4xl">
       <span class="">
         {{ vndFormat(product.price || 0) }}
@@ -39,11 +37,11 @@
     <!-- Add to cart -->
     <div class="flex items-center gap-4 mb-8">
       <!-- Quantity -->
-      <div class="flex items-center sm:px-2 sm:py-4">
+      <div class="flex items-center sm:px-2 h-20 sm:py-4">
         <input
           type="number"
           v-model="quantity"
-          class="w-20 h-12 text-center text-xl sm:text-2xl font-bold focus:ring-0 border border-gray-300 rounded-md"
+          class="w-20 h-16 text-center text-xl sm:text-2xl font-bold focus:ring-0 border border-gray-300 rounded-md"
           min="1"
           :disabled="!authStore.isAuthenticated"
           :class="{ 'opacity-50 cursor-not-allowed': !authStore.isAuthenticated }"
@@ -52,20 +50,13 @@
       </div>
 
       <button
-        class="flex bg-green-600 text-lg md:text-2xl font-bold text-white px-2 py-2 sm:px-4 sm:py-5 hover:bg-green-500 transition-colors duration-300 rounded-md cursor-pointer"
+        class="flex bg-green-600 w-2/3 items-center justify-center text-lg text-center md:text-2xl font-bold text-white px-2 py-2 sm:px-4 sm:py-5 hover:bg-green-500 transition-colors duration-300 rounded-md cursor-pointer"
         @click="$emit('add-to-cart', quantity)"
         :disabled="!authStore.isAuthenticated"
         :class="{ 'opacity-50 cursor-not-allowed': !authStore.isAuthenticated }"
       >
+        <ShoppingCartIcon class="w-6 h-6 mr-2" />
         Add to cart
-      </button>
-      <button
-        class="flex bg-red-500 text-lg md:text-2xl font-bold text-white px-2 py-2 sm:px-4 sm:py-5 hover:bg-red-600 transition-colors duration-300 rounded-md cursor-pointer"
-        @click="$emit('buy-now', quantity)"
-        :disabled="!authStore.isAuthenticated"
-        :class="{ 'opacity-50 cursor-not-allowed': !authStore.isAuthenticated }"
-      >
-        Buy now
       </button>
     </div>
 
@@ -130,6 +121,7 @@
 import { ref, watch } from 'vue'
 import { vndFormat } from '@/helpers/processPrice'
 import { useAuthStore } from '@/stores/authStore'
+import { ShoppingCartIcon } from '@heroicons/vue/16/solid'
 
 const authStore = useAuthStore()
 

@@ -33,7 +33,6 @@
       <div class="text-sm md:text-lg font-medium text-red-500">
         {{ vndFormat(Number(order.totalAmount)) }}
       </div>
-      <div class="text-sm text-gray-500">{{ order.totalAmount}} items</div>
     </td>
     <td class="px-8 py-6 whitespace-nowrap">
       <span
@@ -45,7 +44,13 @@
         {{ getStatusLabel(order.orderStatus as OrderStatus) }}
       </span>
 
-      <button v-if="order.orderStatus === 'CREATED' && order.paymentIntent?.clientSecret" class="ml-2" @click="onPayment">Pay now</button>
+      <button
+        v-if="order.orderStatus === 'CREATED' && order.paymentIntent?.clientSecret"
+        class="ml-2 inline-flex px-3 py-1.5 text-sm font-bold rounded-full uppercase bg-blue-500 hover:bg-blue-600 hover:scale-105 transition-all duration-300 text-white"
+        @click="onPayment"
+      >
+        Pay now
+      </button>
     </td>
   </tr>
 </template>
@@ -58,6 +63,7 @@ import type { OrderBaseType, OrderStatus } from '@/types/orderType'
 import type { PropType } from 'vue'
 import { useOrderStore } from '@/stores/orderStore'
 import { useRouter } from 'vue-router'
+import { paymentRoute } from '@/configs'
 
 const orderStore = useOrderStore()
 const router = useRouter()
@@ -74,7 +80,6 @@ console.log(props.order)
 const getStatusColor = (status: OrderStatus) => {
   const colors = {
     CREATED: 'bg-yellow-100 text-yellow-800',
-    PROCESSING: 'bg-blue-100 text-blue-800',
     COMPLETED: 'bg-purple-100 text-purple-800',
     FAILED: 'bg-red-100 text-red-800',
     REFUNDED: 'bg-red-100 text-red-800',
@@ -85,7 +90,6 @@ const getStatusColor = (status: OrderStatus) => {
 const getStatusLabel = (status: OrderStatus) => {
   const labels = {
     CREATED: 'Created',
-    PROCESSING: 'Processing',
     COMPLETED: 'Completed',
     FAILED: 'Failed',
     REFUNDED: 'Refunded',
@@ -96,7 +100,9 @@ const getStatusLabel = (status: OrderStatus) => {
 const onPayment = () => {
   console.log('Payment')
   orderStore.order = props.order
-  router.push('/payment')
+  router.push({
+    name: paymentRoute.payment,
+    params: { clientSecret: props.order.paymentIntent?.clientSecret },
+  })
 }
-
 </script>

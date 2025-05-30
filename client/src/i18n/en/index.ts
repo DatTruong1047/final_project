@@ -54,6 +54,7 @@ export const en = {
       updateCartFail: 'Update cart fail. Please try again later',
       removeCartFail: 'Remove cart fail. Please try again later',
       selectAtLeastOneItem: 'Please select at least one item in your cart',
+      cartTotalPrice: 'Cart total price must be less than 99,999,999 VNĐ',
     },
     success: {
       login: 'Login successfull',

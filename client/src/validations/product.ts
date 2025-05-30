@@ -1,5 +1,6 @@
 import { ProductSort, ProductSortBy } from '@/types/productType'
 import * as yup from 'yup'
+import * as Yup from 'yup'
 
 export const ProductBaseSchema = yup.object({
   id: yup.string().required(),
@@ -108,3 +109,4 @@ export const ProductFilterSchema = yup.object({
     .oneOf([ProductSortBy.CREATED_AT, ProductSortBy.PRICE])
     .default(ProductSortBy.CREATED_AT),
 })
+

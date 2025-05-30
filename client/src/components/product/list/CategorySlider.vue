@@ -108,10 +108,10 @@ const getCategoryIcon = () => {
   <div class="mx-auto px-4 py-8 mt-10">
     <div class="flex items-center mb-6">
       <div class="flex-1">
-        <div class="inline-block bg-red-100 text-red-500 px-2 py-1 text-xl font-bold mb-2">
-          Categories
+        <div class="flex items-center mb-6">
+          <div class="bg-red-600 md:px-2 md:py-5 px-1 py-3 text-xl font-medium rounded mr-2"></div>
+          <h2 class="md:text-3xl text-2xl font-bold text-red-500">Categories</h2>
         </div>
-        <h2 class="text-2xl font-bold text-gray-900">Browse By Category</h2>
       </div>
 
       <div class="hidden sm:flex items-center space-x-2">

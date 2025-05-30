@@ -80,7 +80,7 @@ const router = createRouter({
       ],
     },
     {
-      path: '/payment/',
+      path: '/payment/:clientSecret',
       name: paymentRoute.payment,
       component: () => import('../views/payment/PageView.vue'),
     },
