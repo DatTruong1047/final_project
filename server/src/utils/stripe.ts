@@ -10,7 +10,7 @@ export const createPaymentIntent = async (
   userId: string
 ): Promise<Stripe.PaymentIntent> => {
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: amount / 100,
+    amount: amount,
     currency: 'vnd',
     metadata: {
       orderId,

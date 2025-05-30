@@ -145,7 +145,7 @@ export default class OrderRepository {
       where: { userId, ...(filter.status && { orderStatus: filter.status }) },
       skip: (filter.page - 1) * filter.limit,
       take: filter.limit,
-      orderBy: { orderDate: 'desc' },
+      orderBy: { updatedAt: 'desc' },
       select: this._createOrderSelectBase,
     });
 

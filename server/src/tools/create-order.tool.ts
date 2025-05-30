@@ -4,23 +4,12 @@ import { z } from 'zod';
 import { OrderStatusEnum } from 'generated/prisma';
 
 import app from '@app/app';
-import { OrderResponseType } from '@app/models';
+import { CreateOrderInputType, CreateOrderSchema, OrderResponseType } from '@app/models';
 import OrderService from '@app/services/order.service';
 import UserService from '@app/services/user.service';
 import { createPaymentIntent } from '@app/utils/stripe';
 
 import ProductService from '@services/product.service';
-
-const CreateOrderSchema = z.object({
-  address: z.string().describe('The address of the user'),
-  fullname: z.string().describe('The fullname of the user'),
-  phoneNumber: z.string().describe('The phone number of the user'),
-  note: z.string().describe('The note of the user').optional().default(''),
-  productName: z.string().describe('The name of the product to order'),
-  count: z.number().describe('The count of the product to order').min(1),
-});
-
-type CreateOrderInputType = z.infer<typeof CreateOrderSchema>;
 
 export class CreateOrderTool extends StructuredTool {
   name = 'create_order';

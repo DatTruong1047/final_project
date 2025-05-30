@@ -52,12 +52,81 @@ export const ChatMessageSchema = z.object({
   content: z.string().min(1),
   sessionId: z.string(),
   role: z.nativeEnum(RoleEnum),
+  tool: z.string().nullish(),
   createdAt: z.string(),
 });
+
+// Schema cho ProductSearchTool (tìm kiếm sản phẩm)
+export const ProductSearchResponseSchema = z.object({
+  products: z.array(
+    z.object({
+      name: z.string(),
+      image: z.string(),
+      brand: z.string(),
+      })
+    )
+    .default([])
+    .nullish(),
+  message: z.string(),
+});
+
+// Schema cho trường hợp ProductSearchTool bị lỗi
+export const ProductSearchErrorResponseSchema = z.object({
+  products: z.array(z.any()).max(0), // Đảm bảo mảng rỗng
+  message: z.string(),
+});
+
+// Schema cho ProductComparisonTool (so sánh sản phẩm)
+export const ProductComparisonResponseSchema = z.object({
+  product_names: z.array(z.string()),
+  attributes: z.array(
+    z.object({
+      name: z.string(),
+      values: z.array(z.string()),
+    })
+  ),
+  message: z.string(),
+});
+
+// Schema cho CreateOrderTool khi thành công
+export const CreateOrderSuccessResponseSchema = z.object({
+  status: z.literal('success'),
+  message: z.string(),
+  client_serect: z.string(),
+});
+
+// Schema cho CreateOrderTool khi thất bại
+export const CreateOrderErrorResponseSchema = z.object({
+  status: z.literal('error'),
+  message: z.string(),
+  client_serect: z.literal(''), // Đảm bảo là chuỗi rỗng
+});
+
+// Schema cho câu hỏi thông thường
+export const GeneralMessageResponseSchema = z.object({
+  message: z.string(),
+});
+
+export const GeminiResponseDataSchema = z.union([
+  ProductSearchResponseSchema,
+  ProductSearchErrorResponseSchema,
+  ProductComparisonResponseSchema,
+  CreateOrderSuccessResponseSchema,
+  CreateOrderErrorResponseSchema,
+  GeneralMessageResponseSchema,
+]);
 
 export const ChatMessageResponseSchema = z.object({
   chatMessages: z.array(ChatMessageSchema),
 });
+
+export type GeminiResponseData =
+  | z.infer<typeof ProductSearchResponseSchema>
+  | z.infer<typeof ProductSearchErrorResponseSchema>
+  | z.infer<typeof ProductComparisonResponseSchema>
+  | z.infer<typeof CreateOrderSuccessResponseSchema>
+  | z.infer<typeof CreateOrderErrorResponseSchema>
+  | z.infer<typeof GeneralMessageResponseSchema>;
 
 // export type CreateOrderWithChatType = z.infer<typeof CreateOrderWithChatSchema>;
 

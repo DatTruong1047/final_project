@@ -106,6 +106,7 @@ export default class ChatController {
           content: message.content,
           role: message.role,
           createdAt: message.createdAt.toISOString(),
+          tool: message.tool,
         })),
       };
 
@@ -171,10 +172,11 @@ export default class ChatController {
           chatMessages: [
             {
               sessionId,
-              id: response.data.id,
-              content: response.data.content,
+              id: response.data.chatMessage.id,
+              content: response.data.chatMessage.content.toString(),
               role: RoleEnum.Assistant,
-              createdAt: response.data.createdAt.toISOString(),
+              createdAt: response.data.chatMessage.createdAt.toISOString(),
+              tool: response.data.tool || 'general_message',
             },
           ],
         },

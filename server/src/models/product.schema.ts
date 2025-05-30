@@ -130,6 +130,40 @@ export const ProductMetadataSchema = z.object({
   summary: z.string().nullish(),
 });
 
+export const ProductComparisonSchema = z.object({
+  productNames: z.array(z.string()).describe('The names of the products to compare').min(2).max(5),
+});
+
+export type ProductComparisonInputType = z.infer<typeof ProductComparisonSchema>;
+
+export const ProductSearchSchema = z.object({
+  query: z
+    .string()
+    .describe(
+      'Từ khóa hoặc câu mô tả chung về sản phẩm cần tìm kiếm (ví dụ: "điện thoại thông minh", "máy giặt cửa ngang", "tai nghe bluetooth"). Bắt buộc phải có.'
+    ),
+  productName: z
+    .string()
+    .describe('Tên sản phẩm cụ thể hoặc một phần của tên sản phẩm (ví dụ: "iPhone 15 Pro Max", "Tủ lạnh Samsung").')
+    .default(''),
+  categoryName: z
+    .string()
+    .describe('Tên danh mục sản phẩm (ví dụ: "Điện thoại", "Tủ lạnh", "Tivi", "Máy giặt").')
+    .optional(),
+  brandName: z.string().describe('Tên thương hiệu của sản phẩm (ví dụ: "Samsung", "Apple", "LG").').optional(),
+  priceMin: z.number().describe('Giá tối thiểu của sản phẩm.').min(0).default(0).optional(),
+  priceMax: z.number().describe('Giá tối đa của sản phẩm.').min(0).default(1000000000).optional(),
+  attributesValues: z
+    .array(z.string())
+    .describe(
+      'Các giá trị của thuộc tính kỹ thuật của sản phẩm (ví dụ: "8GB", "6.5 inch", "256GB", "1000W", "Android", "15kg").'
+    )
+    .default([])
+    .optional(),
+});
+
+export type ProductSearchQueryType = z.infer<typeof ProductSearchSchema>;
+
 export type ProductMetadataType = z.infer<typeof ProductMetadataSchema>;
 export type ProductFilterType = z.infer<typeof ProductFilterSchema>;
 
