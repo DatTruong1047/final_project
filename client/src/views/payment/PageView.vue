@@ -70,7 +70,7 @@
               </div>
               <PaymentForm
                 v-else
-                :client-secret="orderStore.order.paymentIntent!.clientSecret"
+                :client-secret="clientSecret"
                 @payment-success="handlePaymentSuccess"
                 @payment-error="handlePaymentError"
               />
@@ -86,19 +86,29 @@
 import { ref } from 'vue'
 import PaymentForm from '@/components/payment/PaymentForm.vue'
 import OrderSummary from '@/components/payment/OrderSummary.vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useOrderStore } from '@/stores/orderStore'
+import { useToast } from '@/hooks/useToast'
+import { ToastEnum } from '@/types/enum'
+import { useI18n } from 'vue-i18n'
 
 const orderStore = useOrderStore()
 const paymentStatus = ref('idle')
+const { showToast } = useToast()
+const { t } = useI18n()
+
+const route = useRoute()
+const clientSecret = route.params.clientSecret as string
 
 const router = useRouter()
 const handlePaymentSuccess = () => {
   paymentStatus.value = 'success'
+  showToast(ToastEnum.Success, t('message.success.paymentSuccess'))
 }
 
 const handlePaymentError = () => {
   paymentStatus.value = 'error'
+  showToast(ToastEnum.Error, t('message.error.paymentFailed'))
 }
 
 const goBack = () => {

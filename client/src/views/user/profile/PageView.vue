@@ -4,13 +4,15 @@
       <FormComponent />
     </template>
     <div v-else class="flex justify-center items-center h-screen w-full">
-      <LoadingComponent />
+      <div>
+        <h1 class="text-2xl font-bold">Please login to continue</h1>
+        <router-link to="/login" class="text-blue-500 hover:text-blue-600">Login</router-link>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import LoadingComponent from '@/components/atoms/_utils/LoadingComponent.vue'
 import FormComponent from '@/components/user/profile/FormComponent.vue'
 import { useAuthStore } from '@/stores/authStore'
 

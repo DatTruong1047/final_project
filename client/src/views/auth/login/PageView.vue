@@ -1,13 +1,13 @@
 <template>
-  <div class="bg-gray-50 dark:bg-gray-600">
+  <div class="bg-gray-50 dark:bg-gray-600 h-full">
     <div v-if="isLoading" class="flex justify-center-safe items-center h-[80vh]">
       <LoadingComponent />
     </div>
 
     <template v-else>
-      <div class="flex lg:grid lg:grid-cols-2 max-lg:p-4 justify-center-safe items-center">
-        <div class="side_image col-span max-lg:hidden">
-          <img src="/images/side-image.png" class="w-[60rem]" />
+      <div class="flex xl:h-full h-[60vh] lg:grid lg:grid-cols-2 max-lg:p-4 justify-center-safe items-center">
+        <div class="side_image col-span max-lg:hidden h-full">
+          <img src="/images/side-image.png" class="w-[80rem] h-full" />
         </div>
         <FormComponent :data="user" :handler="onLogin" />
       </div>
@@ -49,6 +49,7 @@ const redirectToHome = () => {
 const saveTokens = (res: AxiosResponse) => {
   authStore.setAccessToken(res.data.accessToken)
   authStore.setRefreshToken(res.data.refreshToken)
+  authStore.setId(res.data.userId)
 }
 
 const onLogin = async () => {
@@ -66,6 +67,7 @@ const onLogin = async () => {
       media: {
         url: userInfo.data?.media?.url ?? '',
       },
+      id: userInfo.data.id,
     }
     authStore.setUser(profile)
 

@@ -15,11 +15,10 @@ defineProps<{
 </script>
 
 <template>
-  <div class="shadow-sm shadow-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors">
-    <div class="p-3 sm:p-4">
+  <div class="shadow  shadow-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
+    <div class="p-3 sm:p-4 ">
       <!-- Mobile Layout -->
       <div class="md:hidden">
-        <!-- Product Info Row -->
         <div class="flex gap-3 mb-3">
           <div class="relative flex-shrink-0">
             <div class="absolute -top-2 -left-2 z-10">
@@ -113,6 +112,7 @@ defineProps<{
 
       <!-- Desktop Layout -->
       <div class="hidden  md:grid md:grid-cols-12 gap-6 items-center">
+
         <!-- Product Info -->
         <div class="col-span-5">
           <div class="flex items-center gap-4">
@@ -141,7 +141,7 @@ defineProps<{
               <img
                 :src="cart.product.thumbnail?.media?.url || imageConfig.productDefault"
                 :alt="cart.product.name"
-                class="w-28 h-28 rounded-lg object-cover shadow-sm"
+                class="w-20 h-20 rounded-lg object-cover shadow-sm"
               />
             </div>
 

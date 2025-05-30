@@ -32,6 +32,12 @@ import PaymentSuccess from './PaymentSuccess.vue'
 import PaymentFooter from './PaymentFooter.vue'
 import ProcessingIndicator from './ProcessingIndicator.vue'
 import SubmitButton from './SubmitButton.vue'
+import { useToast } from '@/hooks/useToast'
+import { useOrderStore } from '@/stores/orderStore'
+import { ToastEnum } from '@/types/enum'
+
+const orderStore = useOrderStore()
+const { showToast } = useToast()
 
 const props = defineProps({
   clientSecret: {
@@ -101,7 +107,6 @@ const handleSubmit = async () => {
       emit('payment-success', paymentIntent)
     }
   } catch (err: any) {
-    error.value = err.message || 'Đã xảy ra lỗi không mong muốn. Vui lòng thử lại sau.'
     emit('payment-error')
   } finally {
     loading.value = false

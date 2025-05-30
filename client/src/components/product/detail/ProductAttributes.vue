@@ -27,7 +27,16 @@
               {{ attribute.attributeKey }}
             </th>
             <td class="px-6 py-4 sm:text-xl">
-              {{ attribute.attributeValue }}
+              <div v-if="attribute.attributeValue.includes('-')">
+                <ul class="list-disc ml-6 ">
+                  <li v-for="(item, i) in splitValue(attribute.attributeValue)" :key="i">
+                    {{ item }}
+                  </li>
+                </ul>
+              </div>
+              <div v-else>
+                {{ attribute.attributeValue }}
+              </div>
             </td>
           </tr>
         </tbody>
@@ -40,6 +49,13 @@
 interface Attribute {
   attributeKey: string
   attributeValue: string
+}
+
+const splitValue = (value: string) => {
+  return value
+    .split('-') // Tách theo dấu gạch ngang
+    .map((v) => v.trim()) // Loại bỏ khoảng trắng
+    .filter((v) => v.length) // Bỏ mục rỗng
 }
 
 defineProps({

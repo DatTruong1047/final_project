@@ -12,7 +12,7 @@ const chatStore = useChatStore()
 <template>
   <div class="flex flex-col min-h-screen">
     <NavBarComponent />
-    <main class="pt-[6rem]">
+    <main class="pt-[6rem] h-[100vh]">
       <template v-if="chatStore.isShowChat">
         <ChatPageView />
       </template>

@@ -23,7 +23,6 @@
         <ProductInfo
           :product="productStore.productDetail || {}"
           @add-to-cart="onAddToCart"
-          @buy-now="onBuyNow"
         />
       </div>
     </div>
@@ -77,7 +76,6 @@ const authStore = useAuthStore()
 const { showToast } = useToast()
 const { t } = useI18n()
 
-// Only include related products from same category
 const relatedProducts = computed(() => {
   return productStore.products.filter(
     (product) =>
@@ -105,12 +103,6 @@ const onAddToCart = (quantity: number) => {
   } catch (error) {
     console.error('Error adding to cart:', error)
     showToast(ToastEnum.Error, t('message.error.addToCartFail'))
-  }
-}
-
-const onBuyNow = (quantity: number) => {
-  if (productStore.productDetail) {
-    showToast(ToastEnum.Success, 'Đã mua sản phẩm')
   }
 }
 </script>

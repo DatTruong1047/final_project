@@ -38,19 +38,19 @@ import { useRouter } from 'vue-router'
 import { cartRoute, orderRoute } from '@/configs/routeConfig'
 import { useToast } from '@/hooks/useToast'
 import { ToastEnum } from '@/types/enum'
+import { useI18n } from 'vue-i18n'
 
 const cartStore = useCartStore()
+const { t } = useI18n()
 
 const router = useRouter()
 const { showToast } = useToast()
 
 const onProceedToCheckout = async () => {
-  if (!cartStore.getSelectedCartItems.length) {
-    showToast(ToastEnum.Error, 'Please select at least one item in your cart')
+  if (cartStore.getCartTotalPrice > 99999999) {
+    showToast(ToastEnum.Error, t('message.error.cartTotalPrice'))
     return
   }
-
-  console.log('cartStore.getSelectedCartItems', cartStore.getSelectedCartItems)
 
   router.push({ name: orderRoute.checkoutInfo })
 }

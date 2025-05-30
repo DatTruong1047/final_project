@@ -46,6 +46,13 @@ const parseQueryParams = (): ProductFilterType => {
 
 const filter = ref<ProductFilterType>(parseQueryParams())
 
+const onScrollBottom = () => {
+  const productGrid = document.querySelector('.product-grid')
+  if (productGrid) {
+    productGrid.scrollTop = productGrid.scrollHeight
+  }
+}
+
 watch(
   () => categoryStore.selectedCategory,
   (newCategoryId) => {
@@ -144,15 +151,10 @@ onMounted(async () => {
 
 <template>
   <section class="mx-auto px-4 py-8">
-    <div class="mb-2">
-      <div class="inline-block bg-red-100 text-red-500 px-2 py-1 text-xl font-bold rounded">
-        Products
-      </div>
+    <div class="flex items-center mb-6">
+      <div class="bg-red-600 md:px-2 md:py-5 px-1 py-3 text-xl font-medium rounded mr-2"></div>
+      <h2 class="md:text-3xl text-2xl font-bold text-red-500">Products</h2>
     </div>
-    <div class="flex items-center justify-between mb-8">
-      <h2 class="text-lg md:text-2xl font-bold text-gray-900">Explore Our Products</h2>
-    </div>
-
     <SearchFilterComponent
       :searchText="filter.searchText"
       :sortBy="filter.sortBy"
@@ -162,10 +164,7 @@ onMounted(async () => {
       @update:sortOrder="filter.sortOrder = $event"
     />
 
-    <div class="flex justify-center items-center h-80" v-if="isLoading">
-      <LoadingComponent />
-    </div>
-    <template v-else>
+    <div>
       <div v-if="products.length === 0" class="text-center py-12">
         <p class="text-gray-500 text-xl">No products found</p>
         <p v-if="filter.categoryId" class="text-gray-400 mt-2">
@@ -173,15 +172,17 @@ onMounted(async () => {
         </p>
       </div>
 
-      <div v-else class="bg-[#e1f4fc] grid py-8 grid-cols-1 sm:grid-cols-3 xl:grid-cols-4  gap-y-8">
+      <div v-else class="bg-[#e1f4fc] grid py-8 grid-cols-1 sm:grid-cols-3 xl:grid-cols-4 gap-y-8">
         <RouterLink
           v-for="product in products"
           :key="product.id"
           :to="{ name: productRoute.productDetail, params: { id: product.id } }"
-          class="bg-white items-center rounded-lg mx-4 md:h-[50rem] overflow-hidden shadow-xl hover:shadow-md hover:shadow-gray-500 transition-shadow duration-300 flex flex-col"
+          class="bg-white items-center rounded-lg mx-4 md:h-[40rem] overflow-hidden shadow hover:shadow-lg hover:shadow-gray-400 transition-shadow duration-300 flex flex-col"
         >
           <!-- Product image -->
-          <div class="relative pb-8 mb-4 mt-4 p-8 shadow-xs bg-white flex items-center justify-center w-full h-[20rem]">
+          <div
+            class="relative pb-8 mb-4 mt-4 p-8 shadow-xs bg-white flex items-center justify-center w-full h-[20rem]"
+          >
             <img
               :src="product.thumbnail.media.url || imageConfig.productDefault"
               :alt="product.name"
@@ -190,12 +191,10 @@ onMounted(async () => {
           </div>
 
           <!-- Product details -->
-          <div class="px-6 py-8 flex-1 flex flex-col w-full ">
+          <div class="px-6 py-8 flex-1 flex flex-col w-full">
             <!-- Brand and Category -->
-            <div class="flex w-full space-x-2 mb-2 text-lg text-gray-600 ">
-              <span class=" font-medium  truncate uppercase">{{
-                product.brand.name
-              }}</span>
+            <div class="flex w-full space-x-2 mb-2 text-lg text-gray-600">
+              <span class="font-medium truncate uppercase">{{ product.brand.name }}</span>
               <span class="text-gray-400 flex-shrink-0">-</span>
               <span class="truncate font-base uppercase">{{ product.category.name }}</span>
             </div>
@@ -213,35 +212,26 @@ onMounted(async () => {
             </div>
 
             <div class="mb-3">
-              <h4 class="text-xl font-base text-gray-900 mb-1 min-h-auto">Description</h4>
               <div class="text-xl text-gray-600 h-auto overflow-hidden">
                 <div v-if="product.shortDescription">
                   <p
-                    v-for="(line, index) in product.shortDescription.split('\n').slice(0, 4)"
+                    v-for="(line, index) in product.shortDescription.split('\n').slice(0, 3)"
                     :key="index"
                     class="line-clamp-1"
-
                   >
                     {{ line }}
                   </p>
-                  <span class="text-gray-400  italic">...</span>
+                  <span class="text-gray-400 italic">...</span>
                 </div>
                 <p v-else class="text-gray-400 italic">No description</p>
               </div>
             </div>
-
-            <!-- Action Buttons -->
-            <div class="flex items-center space-x-3 mt-auto">
-              <button
-                class="flex-1 font-bold text-2xl bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-colors duration-300"
-              >
-                See More
-              </button>
-            </div>
           </div>
         </RouterLink>
       </div>
-
+      <div class="flex justify-center items-center h-80" v-if="isLoading">
+        <LoadingComponent />
+      </div>
       <div class="flex justify-center mt-12">
         <button
           class="px-8 py-3 text-white text-xl font-medium rounded-md transition-colors duration-300"
@@ -255,6 +245,6 @@ onMounted(async () => {
           View more products
         </button>
       </div>
-    </template>
+    </div>
   </section>
 </template>

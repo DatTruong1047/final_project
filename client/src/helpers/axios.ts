@@ -39,9 +39,14 @@ axiosInstance.interceptors.response.use(
         break
       case 401:
         errorCode = error.response.data.code
-        if (!originalRequest._retry) {
+        if (!originalRequest._retry && error.response.data.code === ErrorCodes.UNAUTHORIZED) {
           originalRequest._retry = true
           const authStore = useAuthStore()
+
+          if (!authStore.refreshToken) {
+            authStore.logout()
+            return Promise.reject(ErrorCodes.UNAUTHORIZED)
+          }
 
           try {
             const response: { data: { accessToken: string; refreshToken: string } } =
