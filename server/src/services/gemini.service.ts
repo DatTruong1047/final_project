@@ -83,122 +83,6 @@ export default class GeminiService {
     });
   }
 
-  // Code cũ -> Agent Hỗn hơp
-  async generateResponse(
-    query: string,
-    sessionId: string,
-    userId: string | null
-  ): Promise<ResultType<{ content: GeminiResponseData; tool: string; aiMessage: string }>> {
-    try {
-      const chatHistory = await this.loadChatHistory(sessionId);
-      const systemPrompt = readFileSync('src/config/sys_prompt_main.txt', 'utf-8');
-      app.log.info('System prompt:', systemPrompt);
-
-      const prompt = ChatPromptTemplate.fromMessages([
-        ['system', systemPrompt],
-        new MessagesPlaceholder('chat_history'),
-        ['human', '{input}'],
-        new MessagesPlaceholder('agent_scratchpad'),
-      ]);
-
-      const tools = [
-        new ProductSearchTool(new ProductService()),
-        new ProductComparisonTool(new ProductService()),
-        new CreateOrderTool(new OrderService(), new UserService(), new ProductService(), userId),
-      ];
-
-      const agent = createToolCallingAgent({
-        llm: this._genai,
-        tools,
-        prompt,
-      });
-
-      const agentExecutor = AgentExecutor.fromAgentAndTools({
-        agent,
-        tools,
-        verbose: true,
-        maxIterations: 3,
-        returnIntermediateSteps: true,
-      });
-
-      let result: ChainValues = await agentExecutor.invoke({
-        input: query,
-        chat_history: chatHistory,
-      });
-
-      // app.log.info('Agent result:', result.output as string);
-      // app.log.info('Intermediate steps:', result.intermediateSteps);
-
-      let hasToolCall = result.intermediateSteps && result.intermediateSteps.length > 0;
-      let aiMessage = '';
-      let toolName = '';
-
-      let response: GeminiResponseData = {};
-      if (!hasToolCall) {
-        const forceToolPrompt = `WARNING: Bạn vưà không sử dụng tool nào cả cho yêu cầu "${query}". Nếu câu hỏi cần lấy hoặc tạo dữ liệu hãy thực hiện lại và sử dụng 1 trong 3 tool sau: product_search, product_comparison, create_order. Để có kết quả phản hồi tốt nhất.`;
-
-        result = await agentExecutor.invoke({
-          input: forceToolPrompt,
-          chat_history: chatHistory,
-        });
-
-        hasToolCall = result.intermediateSteps && result.intermediateSteps.length > 0;
-      }
-
-      if (hasToolCall) {
-        const jsonResult = this.extractJSON(result.output as string);
-        const tool = result.intermediateSteps[0].action.tool;
-        if (tool === 'product_search') {
-          aiMessage = result.output as string;
-          toolName = 'product_search';
-
-          response = ProductSearchResponseSchema.safeParse(jsonResult).success
-            ? ProductSearchResponseSchema.parse(jsonResult)
-            : ProductSearchErrorResponseSchema.parse(jsonResult);
-        } else if (tool === 'product_comparison') {
-          aiMessage = result.output as string;
-          toolName = 'product_comparison';
-
-          response = ProductComparisonResponseSchema.parse(jsonResult);
-        } else if (tool === 'create_order') {
-          aiMessage = result.output as string;
-          toolName = 'create_order';
-
-          response = CreateOrderSuccessResponseSchema.safeParse(jsonResult).success
-            ? CreateOrderSuccessResponseSchema.parse(jsonResult)
-            : CreateOrderErrorResponseSchema.parse(jsonResult);
-        }
-      } else {
-        const jsonResult = this.extractJSON(result.output as string);
-        aiMessage = result.output as string;
-        toolName = 'general_message';
-
-        response = GeneralMessageResponseSchema.parse(jsonResult);
-      }
-
-      // const response = result.output as string;
-
-      if (!response) {
-        throw new GeminiServiceError('Empty response from Gemini API', 'EMPTY_RESPONSE');
-      }
-
-      return {
-        code: 200,
-        success: true,
-        message: 'Success',
-        data: { content: response, tool: toolName, aiMessage },
-      };
-    } catch (error) {
-      app.log.error('Error in generateResponse:', error);
-      return {
-        code: 500,
-        success: false,
-        message: 'Internal server error',
-        data: null,
-      };
-    }
-  }
-
   // Code mới -> Multi Agent
   async generateResponseWithAgent(
     query: string,
@@ -262,12 +146,18 @@ export default class GeminiService {
           messages: state.messages,
           agent_history: state.agent_history,
         };
-        const supervisor_result = await (await supervisor_chain).invoke(supervisor_input);
-        console.log('Supervisor LLM raw output:', supervisor_result);
+        try {
+          const supervisor_result = await (await supervisor_chain).invoke(supervisor_input);
+          console.log('Supervisor LLM raw output:', supervisor_result);
 
-        validateNextAgent(supervisor_result.next);
-        state.next = supervisor_result.next;
-        continue;
+          validateNextAgent(supervisor_result.next);
+          state.next = supervisor_result.next;
+          continue;
+        } catch (error) {
+          console.error('Error in supervisor agent:', error);
+          state.next = 'Communicate';
+          continue;
+        }
       }
 
       const current_agent = agentsMap[state.next];
@@ -292,7 +182,6 @@ export default class GeminiService {
         message: 'Success',
         data: agent_result.output,
       };
-
     }
 
     return {
@@ -331,13 +220,17 @@ export default class GeminiService {
   4. If user provide imformation like phone number, address, name, email, etc → CreateOrder
   5. If we have completed all necessary tasks, other → Communicate
   6. If you don't know what to do, → Communicate
+  IMPORTANT: Always respond with ONLY a valid JSON object. No explanation.
+If you cannot parse the request properly, default to "Communicate".
   
   ANALYSIS GUIDELINES:
   - Look at the latest user message to understand their intent
   - Check agent_history to see what tasks have been completed
   - Don't repeat the same agent type consecutively unless needed
   - Always end with Communicate to provide final response
-  
+
+  IMPORTANT: Always respond with ONLY a valid JSON object. No explanation.
+  If you cannot parse the request properly, default to "Communicate".
   Based on the above, determine the next agent from: {options}
   
   {format_instructions}`;
@@ -361,43 +254,6 @@ export default class GeminiService {
       options: Object.values(members).join(' | '),
       format_instructions: format_instructions,
     });
-
-    // const parser = new RunnableLambda({
-    //   func: async (response: any) => {
-    //     let raw = response?.content ?? response?.[0]?.text ?? '';
-    //     console.log('🔍 Supervisor raw LLM output:', raw);
-
-    //     // Clean markdown block
-    //     raw = raw.trim();
-    //     if (raw.startsWith('```')) {
-    //       raw = raw.replace(/```json|```/g, '').trim();
-    //     }
-
-    //     try {
-    //       const json = JSON.parse(raw);
-    //       const result = SupervisorOutputSchema.safeParse(json);
-    //       if (!result.success) {
-    //         console.error('❌ Zod validation failed:', result.error);
-    //         // Fallback logic based on content analysis
-    //         const content = raw.toLowerCase();
-    //         if (content.includes('search') || content.includes('find')) {
-    //           return { next: 'ProductSearch' };
-    //         } else if (content.includes('compare')) {
-    //           return { next: 'ProductComparison' };
-    //         } else if (content.includes('order') || content.includes('buy')) {
-    //           return { next: 'CreateOrder' };
-    //         } else {
-    //           return { next: 'Communicate' };
-    //         }
-    //       }
-    //       return result.data;
-    //     } catch (e) {
-    //       console.error('❌ Failed to parse JSON supervisor output:', e);
-    //       // Default fallback
-    //       return { next: 'Communicate' };
-    //     }
-    //   },
-    // });
 
     const supervisor_chain = RunnableSequence.from([prompt, llm, output_parser]);
     return supervisor_chain;
@@ -508,14 +364,9 @@ export default class GeminiService {
 
     const responseGenerator = new RunnableLambda({
       func: async (msg: AIMessage) => {
-        // Enhanced response generation with better context understanding
         const content = msg.content.toString();
 
-        // Add some intelligence to format the response better
         let formattedResponse = content;
-
-        // You could add additional formatting logic here
-        // For example, parsing structured data, adding bullet points, etc.
 
         return {
           output: formattedResponse,
@@ -587,16 +438,5 @@ export default class GeminiService {
         };
       },
     };
-  }
-
-  private extractJSON(text: string): any | null {
-    try {
-      const match = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-      const jsonText = match ? match[1].trim() : text.trim();
-      return JSON.parse(jsonText);
-    } catch (err) {
-      console.error('Lỗi khi parse JSON:', err);
-      return { message: text.trim() };
-    }
   }
 }
