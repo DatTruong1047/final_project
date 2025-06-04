@@ -11,7 +11,8 @@ import {
   ErrorResponseType,
   ChatSessionResponseType,
   CreateChatSessionType,
-  MergeChatSessionType
+  MergeChatSessionType,
+  GetMessagesQueryType
 } from '@app/models';
 
 import ChatService from '@services/chat.service';
@@ -91,23 +92,25 @@ export default class ChatController {
 
   @binding
   async getChatMessages(
-    request: FastifyRequest<{ Params: { id: string }; Query: { take: number; skip: number; orderBy: 'asc' | 'desc' } }>,
+    request: FastifyRequest<{ Params: { id: string }; Querystring: GetMessagesQueryType }>,
     reply: FastifyReply
   ): Promise<FastifyReply> {
     try {
       const { id } = request.params;
-      const { take, skip, orderBy } = request.query as { take: number; skip: number; orderBy: 'asc' | 'desc' };
+      const { take, skip, orderBy } = request.query;
       // Get by sessionId
-      const messages = await this.chatService.getChatMessagesBySessionId(id, take, skip, orderBy);
+      const { chatMessages, total } = await this.chatService.getChatMessagesBySessionId(id, take, skip, orderBy);
 
       const response: ChatMessageResponseType = {
-        chatMessages: messages.map((message) => ({
+        chatMessages: chatMessages.map((message) => ({
           id: message.id,
           content: message.content,
           role: message.role,
           createdAt: message.createdAt.toISOString(),
           tool: message.tool,
         })),
+        total,
+        hasMore: total > skip + take,
       };
 
       const res: SuccessResponseType<ChatMessageResponseType> = {
@@ -172,10 +175,10 @@ export default class ChatController {
           chatMessages: [
             {
               sessionId,
-              id: response.data.chatMessage.id,
-              content: response.data.chatMessage.content.toString(),
+              id: response.data.id,
+              content: response.data.content.toString(),
               role: RoleEnum.Assistant,
-              createdAt: response.data.chatMessage.createdAt.toISOString(),
+              createdAt: response.data.createdAt.toISOString(),
               tool: response.data.tool || 'general_message',
             },
           ],

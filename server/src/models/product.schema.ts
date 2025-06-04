@@ -140,17 +140,17 @@ export const ProductSearchSchema = z.object({
   query: z
     .string()
     .describe(
-      'Từ khóa hoặc câu mô tả chung về sản phẩm cần tìm kiếm (ví dụ: "điện thoại thông minh", "máy giặt cửa ngang", "tai nghe bluetooth"). Bắt buộc phải có.'
+      'Từ khóa hoặc câu mô tả chung về sản phẩm cần tìm kiếm (ví dụ: "điện thoại thông minh", "máy giặt cửa ngang", "tai nghe bluetooth"). Bắt buộc phải có. Có thể suy ra từ câu hỏi của người dùng.'
     ),
   productName: z
     .string()
-    .describe('Tên sản phẩm cụ thể hoặc một phần của tên sản phẩm (ví dụ: "iPhone 15 Pro Max", "Tủ lạnh Samsung").')
+    .describe('Tên sản phẩm cụ thể hoặc một phần của tên sản phẩm. Phân tích từ khóa tìm kiếm của người dùng để tìm tên sản phẩm phù hợp.')
     .default(''),
   categoryName: z
     .string()
-    .describe('Tên danh mục sản phẩm (ví dụ: "Điện thoại", "Tủ lạnh", "Tivi", "Máy giặt").')
+    .describe('Tên danh mục sản phẩm (ví dụ: "Điện thoại", "Tủ lạnh", "Tivi", "Máy giặt"). Phân tích từ khóa tìm kiếm của người dùng để tìm danh mục sản phẩm phù hợp.')
     .optional(),
-  brandName: z.string().describe('Tên thương hiệu của sản phẩm (ví dụ: "Samsung", "Apple", "LG").').optional(),
+  brandName: z.string().describe('Tên thương hiệu của sản phẩm (ví dụ: "Samsung", "Apple", "LG"). Phân tích từ khóa tìm kiếm của người dùng để tìm thương hiệu sản phẩm phù hợp.').optional(),
   priceMin: z.number().describe('Giá tối thiểu của sản phẩm.').min(0).default(0).optional(),
   priceMax: z.number().describe('Giá tối đa của sản phẩm.').min(0).default(1000000000).optional(),
   attributesValues: z

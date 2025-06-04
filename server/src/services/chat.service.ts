@@ -2,10 +2,10 @@ import { ChatMessage, ChatSession, RoleEnum } from 'generated/prisma';
 
 import app from '@app/app';
 import { ErrorCodes } from '@app/config/error.config';
-import { GeminiResponseData, ResultType } from '@app/models';
 import ChatRepository from '@app/repositories/chat.repository';
 
 import GeminiService from '@services/gemini.service';
+import { ResultType, AgentResultType } from '@app/models';
 
 export default class ChatService {
   private readonly _geminiService: GeminiService;
@@ -16,10 +16,7 @@ export default class ChatService {
     this._chatRepository = chatRepository;
   }
 
-  async sendMessage(
-    query: string,
-    sessionId: string
-  ): Promise<ResultType<{ content: string; tool: string; chatMessage: ChatMessage }>> {
+  async sendMessage(query: string, sessionId: string): Promise<ResultType<ChatMessage>> {
     try {
       const existSession = await this._chatRepository.getChatSession(sessionId);
       if (!existSession) {
@@ -37,34 +34,35 @@ export default class ChatService {
         existSession.userId || null
       );
 
+      if (!generateResponseResult.data) {
+        return {
+          code: ErrorCodes.GENERATE_RESPONSE_FAILED,
+          data: null,
+          success: false,
+          message: 'Failed to generate response',
+        };
+      }
+
       let chatMessage: ChatMessage;
       if (!generateResponseResult.success) {
         chatMessage = await this._chatRepository.createChatMessage(
           sessionId,
-          `\`\`\`json
-          {
-            "message": "Sorry, I can't help with that. Please try again later."
-          }
-          \`\`\``,
+          generateResponseResult.data.content || '',
           RoleEnum.Assistant,
-          'general_message'
+          generateResponseResult.data.tool || 'general_message'
         );
       } else {
         chatMessage = await this._chatRepository.createChatMessage(
           sessionId,
-          generateResponseResult.data || '',
+          generateResponseResult.data.content || '',
           RoleEnum.Assistant,
-          'general_message'
+          generateResponseResult.data.tool || 'general_message'
         );
       }
 
       return {
         code: 200,
-        data: {
-          content: generateResponseResult.data || '',
-          tool: 'general_message',
-          chatMessage,
-        },
+        data: chatMessage,
         success: true,
       };
     } catch (error) {
@@ -74,12 +72,17 @@ export default class ChatService {
 
   async getChatMessagesBySessionId(
     sessionId: string,
-    take = 40,
-    skip = 0,
+    take: number = 40,
+    skip: number = 0,
     orderBy: 'asc' | 'desc' = 'asc'
-  ): Promise<ChatMessage[]> {
-    const chatMessages = await this._chatRepository.getChatMessagesBySessionId(sessionId, take, skip, orderBy);
-    return chatMessages;
+  ): Promise<{ chatMessages: ChatMessage[]; total: number }> {
+    const { chatMessages, total } = await this._chatRepository.getChatMessagesBySessionId(
+      sessionId,
+      take,
+      skip,
+      orderBy
+    );
+    return { chatMessages, total };
   }
 
   async createChatSession(userId: string): Promise<ChatSession> {

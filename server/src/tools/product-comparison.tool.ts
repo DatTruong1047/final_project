@@ -8,7 +8,7 @@ import { ProductComparisonInputType, ProductComparisonSchema } from '@app/models
 
 export class ProductComparisonTool extends StructuredTool {
   name = 'product_comparison';
-  description = 'Lấy dữ liệu để so sánh giữa các sản phẩm';
+  description = 'Get product details for comparison';
   schema = ProductComparisonSchema;
 
   private readonly _productService: ProductService;

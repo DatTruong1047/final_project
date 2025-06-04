@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 
-import { ErrorResponseSchema, ChatQuerySchema, MergeChatSessionSchema, CreateChatSessionSchema } from '@model';
+import { ErrorResponseSchema, ChatQuerySchema, MergeChatSessionSchema, CreateChatSessionSchema, GetMessagesQuerySchema } from '@model';
 
 import ChatRepository from '@app/repositories/chat.repository';
 import GeminiService from '@app/services/gemini.service';
@@ -72,6 +72,7 @@ export default async function chatRoutes(app: FastifyInstance): Promise<void> {
     schema: {
       tags: ['Chat'],
       summary: 'Get chat messages',
+      querystring: GetMessagesQuerySchema,
       response: {
         // 200: SuccessResponseSchema(ChatMessageResponseSchema),
         400: ErrorResponseSchema,

@@ -8,11 +8,10 @@ import ProductService from '@app/services/product.service';
 import { mapProductDocumentToMetadata } from '@app/utils/mapper/product.mapper';
 import VectorStore from '@app/vector-store/init';
 
-
-
 export class ProductSearchTool extends StructuredTool {
   name = 'product_search';
-  description = 'Tìm kiếm thông tin sản phẩm của cửa hàng TMS_SHOP, trường query là bắt buộc và có thể lấy từ câu hỏi của người dùng';
+  description =
+    'Tìm kiếm thông tin sản phẩm của cửa hàng TMS_SHOP, trường query là bắt buộc và có thể lấy từ câu hỏi của người dùng';
   schema = ProductSearchSchema;
 
   private readonly _productService: ProductService;
@@ -63,9 +62,31 @@ export class ProductSearchTool extends StructuredTool {
       const products = Array.from(uniqueProducts.values());
       const total = products.length;
 
+      /** if (total === 0) {
+        return 'Không tìm thấy sản phẩm nào phù hợp với yêu cầu.';
+      }
+
+      const productTexts = products.map((product, index) => {
+        return [
+
+          `Sản phẩm ${index + 1}:`,
+          `- SKU: ${product.sku || 'Không có'}`,
+          `- Tên: ${product.name || 'Không có'}`,
+          `- Thương hiệu: ${product.brand_name || 'Không có'}`,
+          `- Giá: ${product.price?.toLocaleString('vi-VN')} VND`,
+          `- Danh mục: ${product.category_name || 'Không có'}`,
+          `- Thuộc tính: ${product.attributes ? JSON.stringify(product.attributes) : 'Không có'}`,
+          `- Hình ảnh: ${product.image || 'Không có'}`,
+          '',
+        ].join('\n');
+      });
+
+      return `Đã tìm thấy ${total} sản phẩm:\n\n${productTexts.join('\n')}`;
+      */
+
       if (total === 0) {
         return JSON.stringify({
-          result: [],
+          product_list: [],
           message: 'Không tìm thấy sản phẩm nào phù hợp với yêu cầu.',
         });
       }
@@ -74,14 +95,14 @@ export class ProductSearchTool extends StructuredTool {
         sku: product.sku || '',
         name: product.name || '',
         brand_name: product.brand_name || '',
-        price: product.price || 0, // Đảm bảo là số
+        price: product.price || 0,
         category_name: product.category_name || '',
         attributes: product.attributes || {},
         image: product.image || '',
       }));
 
       const finalOutput = {
-        result: formattedProducts,
+        product_list: formattedProducts,
         message: 'Đã tìm thấy sản phẩm sau.',
       };
 

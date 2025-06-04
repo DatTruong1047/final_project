@@ -120,17 +120,25 @@ export default class ChatRepository {
     take = 10,
     skip = 0,
     orderBy: 'asc' | 'desc' = 'asc'
-  ): Promise<ChatMessage[]> {
-    const chatMessages = await this._prisma.chatMessage.findMany({
-      where: {
-        sessionId,
-      },
+  ): Promise<{ chatMessages: ChatMessage[]; total: number }> {
+    const [chatMessages, total] = await this._prisma.$transaction([
+      this._prisma.chatMessage.findMany({
+        where: {
+          sessionId,
+        },
       orderBy: {
         createdAt: orderBy,
       },
       take,
-      skip,
-    });
-    return chatMessages;
+        skip,
+      }),
+      this._prisma.chatMessage.count({
+        where: {
+        sessionId,
+        },
+      }),
+    ]);
+
+    return { chatMessages, total };
   }
 }

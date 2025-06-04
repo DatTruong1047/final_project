@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { RoleEnum } from 'generated/prisma';
+import { ProductMetadataSchema } from './product.schema';
 
 export const ChatQuerySchema = z.object({
   content: z
@@ -33,15 +34,6 @@ export const ChatSessionResponseSchema = z.object({
   anonymousId: z.string().nullish(),
 });
 
-// export const ChatResponseSchema = z.object({
-//   query: z.string().min(1),
-//   response: z.array(
-//     z.object({
-//       metadata: ProductMetadataSchema,
-//     })
-//   ),
-// });
-
 export const MergeChatSessionSchema = z.object({
   userId: z.string(),
   anonymousId: z.string(),
@@ -56,77 +48,96 @@ export const ChatMessageSchema = z.object({
   createdAt: z.string(),
 });
 
-// Schema cho ProductSearchTool (tìm kiếm sản phẩm)
-export const ProductSearchResponseSchema = z.object({
-  products: z.array(
-    z.object({
-      name: z.string(),
-      image: z.string(),
-      brand: z.string(),
-      })
-    )
-    .default([])
-    .nullish(),
-  message: z.string(),
+export const GetMessagesQuerySchema = z.object({
+  skip: z
+    .preprocess((val) => {
+      const num = parseInt(String(val), 10);
+      return isNaN(num) ? 0 : num;
+    }, z.number().min(0).default(0))
+    .optional(),
+  take: z
+    .preprocess((val) => {
+      const num = parseInt(String(val), 10);
+      return isNaN(num) ? 8 : num;
+    }, z.number().min(1).default(8))
+    .optional(),
+  orderBy: z.enum(['asc', 'desc']).optional(),
 });
 
-// Schema cho trường hợp ProductSearchTool bị lỗi
-export const ProductSearchErrorResponseSchema = z.object({
-  products: z.array(z.any()).max(0), // Đảm bảo mảng rỗng
-  message: z.string(),
-});
-
-// Schema cho ProductComparisonTool (so sánh sản phẩm)
-export const ProductComparisonResponseSchema = z.object({
-  product_names: z.array(z.string()),
-  attributes: z.array(
+export const ProductSearchOutputSchema = z.object({
+  answer: z.string().describe("Answer to the user's question"),
+  product_list: z.array(
     z.object({
-      name: z.string(),
-      values: z.array(z.string()),
+      sku: z.string().describe('SKU of the product'),
+      name: z.string().describe('Name of the product'),
+      price: z.number().describe('Price of the product'),
+      image: z.string().describe('Image url of the product'),
     })
   ),
-  message: z.string(),
 });
 
-// Schema cho CreateOrderTool khi thành công
-export const CreateOrderSuccessResponseSchema = z.object({
-  status: z.literal('success'),
-  message: z.string(),
-  client_serect: z.string(),
+export const ProductComparisonOutputSchema = z.object({
+  answer: z.string().describe("Answer to the user's question"),
+  comparison_result: z.object({
+    productNames: z.array(z.string()).describe('The names of the products to compare'),
+    attributes: z.array(
+      z.object({
+        name: z.string().describe('The key of the attribute'),
+        values: z.array(z.string()).describe('The values of the attribute'),
+      })
+    ),
+  }),
 });
 
-// Schema cho CreateOrderTool khi thất bại
-export const CreateOrderErrorResponseSchema = z.object({
-  status: z.literal('error'),
-  message: z.string(),
-  client_serect: z.literal(''), // Đảm bảo là chuỗi rỗng
+export const CreateOrderOutputSchema = z.object({
+  answer: z.string().describe("Answer to the user's question"),
+  orderResult: z.object({
+    paymentIntent: z
+      .object({
+        clientSecret: z.string().optional().describe('The client secret of the order'),
+        id: z.string().optional().describe('The id of the order'),
+      })
+      .optional(),
+    success: z.boolean().describe('Whether the order is successful').default(false),
+  }),
 });
 
-// Schema cho câu hỏi thông thường
-export const GeneralMessageResponseSchema = z.object({
-  message: z.string(),
+export const CreateOrderExtractionSchema = z.object({
+  address: z.string().optional().describe('Địa chỉ giao hàng đầy đủ'),
+  fullname: z.string().optional().describe('Tên đầy đủ của khách hàng'),
+  phoneNumber: z.string().optional().describe('Số điện thoại liên hệ'),
+  productName: z.string().optional().describe('Tên sản phẩm cần đặt'),
+  count: z.number().optional().describe('Số lượng sản phẩm muốn đặt'),
+  note: z.string().optional().describe('Ghi chú thêm cho đơn hàng'),
+  user_response: z
+    .string()
+    .describe(
+      'Câu trả lời cho người dùng. Nếu thiếu thông tin, hãy hỏi. Nếu đủ, hãy xác nhận thông tin đã thu thập được và sẵn sàng tạo đơn.'
+    ),
 });
 
-export const GeminiResponseDataSchema = z.union([
-  ProductSearchResponseSchema,
-  ProductSearchErrorResponseSchema,
-  ProductComparisonResponseSchema,
-  CreateOrderSuccessResponseSchema,
-  CreateOrderErrorResponseSchema,
-  GeneralMessageResponseSchema,
-]);
+export const CommunicateOutputSchema = z.object({
+  answer: z.string().describe('The response to the user'),
+});
+
+export const AgentResultSchema = z.object({
+  content: z.string(),
+  error_detail: z.string().optional(),
+  tool: z.string().optional(),
+});
+
+// export const GeminiResponseData = z.object({
+//   code: z.number(),
+//   success: z.boolean(),
+//   message: z.string(),
+//   data: AgentResultSchema,
+// });
 
 export const ChatMessageResponseSchema = z.object({
   chatMessages: z.array(ChatMessageSchema),
+  total: z.number(),
+  hasMore: z.boolean(),
 });
-
-export type GeminiResponseData =
-  | z.infer<typeof ProductSearchResponseSchema>
-  | z.infer<typeof ProductSearchErrorResponseSchema>
-  | z.infer<typeof ProductComparisonResponseSchema>
-  | z.infer<typeof CreateOrderSuccessResponseSchema>
-  | z.infer<typeof CreateOrderErrorResponseSchema>
-  | z.infer<typeof GeneralMessageResponseSchema>;
 
 // export type CreateOrderWithChatType = z.infer<typeof CreateOrderWithChatSchema>;
 
@@ -137,3 +148,13 @@ export type ChatMessageResponseType = z.infer<typeof ChatMessageResponseSchema>;
 export type CreateChatSessionType = z.infer<typeof CreateChatSessionSchema>;
 export type ChatSessionResponseType = z.infer<typeof ChatSessionResponseSchema>;
 export type MergeChatSessionType = z.infer<typeof MergeChatSessionSchema>;
+export type GetMessagesQueryType = z.infer<typeof GetMessagesQuerySchema>;
+
+export type CreateOrderExtractionType = z.infer<typeof CreateOrderExtractionSchema>;
+export type CreateOrderOutputType = z.infer<typeof CreateOrderOutputSchema>;
+export type ProductSearchOutputType = z.infer<typeof ProductSearchOutputSchema>;
+export type ProductComparisonOutputType = z.infer<typeof ProductComparisonOutputSchema>;
+export type CommunicateOutputType = z.infer<typeof CommunicateOutputSchema>;
+
+// export type GeminiResponseDataType = z.infer<typeof GeminiResponseData>;
+export type AgentResultType = z.infer<typeof AgentResultSchema>;

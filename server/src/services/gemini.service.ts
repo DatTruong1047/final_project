@@ -1,441 +1,130 @@
-import { readFileSync } from 'fs';
-
-import { HumanMessage, BaseMessage, AIMessage, SystemMessage } from '@langchain/core/messages';
-import {
-  ChatPromptTemplate,
-  MessagesPlaceholder,
-  PromptTemplate,
-  SystemMessagePromptTemplate,
-} from '@langchain/core/prompts';
-import { ChainValues } from '@langchain/core/utils/types';
+import { HumanMessage, BaseMessage, AIMessage } from '@langchain/core/messages';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
-import { AgentExecutor, createToolCallingAgent } from 'langchain/agents';
+import { z } from 'zod';
 
-import { geminiApiKey, geminiModel } from '@config';
+import { geminiApiKey, geminiModel_2_0, geminiModel_1_5, ErrorCodes } from '@app/config';
 import { RoleEnum } from 'generated/prisma';
-
-import app from '@app/app';
 import {
-  CreateOrderErrorResponseSchema,
-  CreateOrderSuccessResponseSchema,
-  GeminiResponseData,
-  GeneralMessageResponseSchema,
-  ProductComparisonResponseSchema,
-  ProductSearchErrorResponseSchema,
-  ProductSearchResponseSchema,
-  ResultType,
+  ProductSearchOutputSchema,
+  ProductComparisonOutputSchema,
+  CreateOrderOutputSchema,
+  CommunicateOutputSchema,
+  CreateOrderExtractionSchema,
+  CreateOrderExtractionType,
+  AgentResultType,
 } from '@app/models';
 import ChatRepository from '@app/repositories/chat.repository';
-import { CreateOrderTool } from '@app/tools/create-order.tool';
-import { ProductComparisonTool } from '@app/tools/product-comparison.tool';
-import { ProductSearchTool } from '@app/tools/product-seach.tool';
 
-import OrderService from './order.service';
-import ProductService from './product.service';
-import UserService from './user.service';
-import { JsonOutputParser, StructuredOutputParser } from '@langchain/core/output_parsers';
-import { StructuredTool } from '@langchain/core/tools';
-import { z } from 'zod';
-import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
-
-interface AgentInvokeResult {
-  output: string;
-  intermediateSteps: any[];
-}
-
-interface AgentWithInvoke {
-  invoke: (input: any) => Promise<AgentInvokeResult>;
-}
-
-export class GeminiServiceError extends Error {
-  constructor(message: string, public readonly code: string) {
-    super(message);
-    this.name = 'GeminiServiceError';
-  }
-}
+import { AgentInvokeResult, AgentState, AgentWithInvoke, GeminiServiceError, ResultType } from '@app/types/agent.types';
+import { AgentFactory } from '@app/agents/agent.factory';
+import { AgentManager } from '@app/agents/agent.manager';
 
 export default class GeminiService {
-  private readonly _genai: ChatGoogleGenerativeAI;
+  private readonly _genai_2_0: ChatGoogleGenerativeAI;
+  private readonly _genai_1_5: ChatGoogleGenerativeAI;
   private readonly _chatRepository: ChatRepository;
+  private _agentManager: AgentManager | null = null;
 
   constructor(chatRepository: ChatRepository) {
     if (!geminiApiKey) {
       throw new GeminiServiceError('Gemini API key is not configured', 'CONFIG_ERROR');
     }
 
-    this._genai = new ChatGoogleGenerativeAI({
+    this._genai_2_0 = new ChatGoogleGenerativeAI({
       apiKey: geminiApiKey,
-      model: geminiModel,
+      model: geminiModel_2_0,
+      temperature: 0.5,
+    });
+
+    this._genai_1_5 = new ChatGoogleGenerativeAI({
+      apiKey: geminiApiKey,
+      model: geminiModel_1_5,
       temperature: 0,
     });
 
     this._chatRepository = chatRepository;
   }
 
-  async loadChatHistory(sessionId: string): Promise<BaseMessage[]> {
-    const messagesFromDB = await this._chatRepository.getChatMessagesBySessionId(sessionId, 20, 0, 'asc');
-    const messages = messagesFromDB.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-    return messages.map((message) => {
-      if (message.role === RoleEnum.User) {
-        return new HumanMessage(message.content);
-      }
-      return new AIMessage(message.content);
-    });
+  private initializeAgentManager(userId: string | null) {
+    if (!this._agentManager) {
+      this._agentManager = new AgentManager(new AgentFactory(userId), this._genai_1_5);
+    }
   }
 
-  // Code mới -> Multi Agent
-  async generateResponseWithAgent(
-    query: string,
-    sessionId: string,
-    userId: string | null
-  ): Promise<ResultType<string>> {
-    const search_product_agent: AgentWithInvoke = this.create_search_product_agent();
-    const product_comparison_agent: AgentWithInvoke = this.create_product_comparison_agent();
-    const create_order_agent: AgentWithInvoke = this.create_create_order_agent(userId);
-    const generate_response_agent: AgentWithInvoke = this.create_generate_response_agent();
-    const supervisor_chain = this.supervisor_agent(this._genai);
+  async loadChatHistory(sessionId: string): Promise<BaseMessage[]> {
+    const { chatMessages } = await this._chatRepository.getChatMessagesBySessionId(sessionId, 20, 0, 'desc');
 
+    const messages = chatMessages.reverse();
+
+    return messages
+      .filter((message) => message.content && message.content.trim() !== '')
+      .map((message) => {
+        if (!message.content) {
+          console.warn('Empty message content found:', message);
+          return null;
+        }
+        if (message.role === RoleEnum.User) {
+          return new HumanMessage(message.content);
+        }
+        return new AIMessage(message.content);
+      })
+      .filter((message): message is BaseMessage => message !== null); // Remove null messages
+  }
+
+  async generateResponseWithAgent(query: string, sessionId: string, userId: string | null): Promise<ResultType<AgentResultType>> {
+    this.initializeAgentManager(userId);
     const chatHistory = await this.loadChatHistory(sessionId);
-
     const userMessage: HumanMessage = new HumanMessage({ content: query });
 
-    let state = {
+    let state: AgentState = {
       messages: [userMessage],
-      agent_history: [...chatHistory],
+      agent_history: chatHistory,
       next: 'Supervisor',
-    };
-
-    const agentsMap: Record<string, any> = {
-      Supervisor: supervisor_chain,
-      ProductSearch: search_product_agent,
-      ProductComparison: product_comparison_agent,
-      CreateOrder: create_order_agent,
-      Communicate: generate_response_agent,
-    };
-
-    const validateNextAgent = (next: string) => {
-      if (!Object.keys(agentsMap).includes(next)) {
-        throw new Error(`Invalid next agent: ${next}`);
-      }
     };
 
     let iteration = 0;
     const maxIteration = 10;
 
     while (iteration < maxIteration) {
-      iteration++;
+      try {
+        iteration++;
 
-      if (state.next === 'Communicate') {
-        const comms_input = {
-          messages: state.messages,
-          agent_history: state.agent_history,
-          agent_scratchpad: [],
-        };
-        const response = await agentsMap['Communicate'].invoke(comms_input);
-        console.log('Communicate LLM raw output:', response);
-        return {
-          code: 200,
-          success: true,
-          message: 'Success',
-          data: response.output,
-        };
-      }
-
-      if (state.next === 'Supervisor') {
-        const supervisor_input = {
-          messages: state.messages,
-          agent_history: state.agent_history,
-        };
-        try {
-          const supervisor_result = await (await supervisor_chain).invoke(supervisor_input);
-          console.log('Supervisor LLM raw output:', supervisor_result);
-
-          validateNextAgent(supervisor_result.next);
-          state.next = supervisor_result.next;
-          continue;
-        } catch (error) {
-          console.error('Error in supervisor agent:', error);
-          state.next = 'Communicate';
-          continue;
+        const result = await this._agentManager.executeAgent(state);
+        if (result.isFinal) {
+          return {
+            code: 200,
+            success: true,
+            message: 'Success',
+            data: {
+              content: result.data!.content,
+              tool: result.data!.tool,
+              error_detail: '',
+            },
+          };
+        } else {
+          state = result.newState;
         }
+      } catch (error) {
+        console.error('Error executing agent:', error);
+        return {
+          code: 500,
+          success: false,
+          message: 'Error executing agent',
+          data: {
+            content: 'Hệ thống đang bảo trì, vui lòng thử lại sau',
+            error_detail: error instanceof Error ? error.message : String(error),
+          },
+        };
       }
-
-      const current_agent = agentsMap[state.next];
-      const current_agent_input = {
-        messages: [state.messages[state.messages.length - 1]],
-        agent_history: state.agent_history,
-        agent_scratchpad: [],
-      };
-
-      const agent_result = await current_agent.invoke(current_agent_input);
-      // const aiMsg = new AIMessage({
-      //   content: agent_result.output,
-      //   additional_kwargs: {
-      //     intermediate_steps: agent_result.intermediateSteps,
-      //     name: state.next,
-      //   },
-      // });
-
-      return {
-        code: 200,
-        success: true,
-        message: 'Success',
-        data: agent_result.output,
-      };
     }
 
     return {
       code: 500,
       success: false,
-      message: 'Sorry, something went wrong while processing your request.',
-      data: null,
-    };
-  }
-
-  private async supervisor_agent(llm: ChatGoogleGenerativeAI) {
-    enum members {
-      ProductSearch = 'ProductSearch',
-      ProductComparison = 'ProductComparison',
-      CreateOrder = 'CreateOrder',
-      Communicate = 'Communicate',
-    }
-
-    const SupervisorOutputSchema = z.object({
-      next: z.nativeEnum(members).default(members.Communicate),
-    });
-
-    const sys_prompt_main = `You are an intelligent supervisor managing a team of specialized agents: {members}. 
-  Your job is to analyze the user's request and conversation history to determine which agent should handle the next task.
-  
-  AGENT CAPABILITIES:
-  - ProductSearch: Search for products based on criteria (name, category, price range, features)
-  - ProductComparison: Compare multiple products side-by-side 
-  - CreateOrder: Create orders for products (requires user authentication)
-  - Communicate: Generate final response to user with gathered information
-  
-  DECISION LOGIC:
-  1. If user asks to search/find products/product details (like price, features, etc) → ProductSearch
-  2. If user wants to compare products (and we have product data) → ProductComparison  
-  3. If user wants to buy/order something (and we have product info) → CreateOrder
-  4. If user provide imformation like phone number, address, name, email, etc → CreateOrder
-  5. If we have completed all necessary tasks, other → Communicate
-  6. If you don't know what to do, → Communicate
-  IMPORTANT: Always respond with ONLY a valid JSON object. No explanation.
-If you cannot parse the request properly, default to "Communicate".
-  
-  ANALYSIS GUIDELINES:
-  - Look at the latest user message to understand their intent
-  - Check agent_history to see what tasks have been completed
-  - Don't repeat the same agent type consecutively unless needed
-  - Always end with Communicate to provide final response
-
-  IMPORTANT: Always respond with ONLY a valid JSON object. No explanation.
-  If you cannot parse the request properly, default to "Communicate".
-  Based on the above, determine the next agent from: {options}
-  
-  {format_instructions}`;
-
-    const format_instructions = `
-  Format your response strictly as a JSON object like this:
-  {
-    "next": "ProductSearch" | "ProductComparison" | "CreateOrder" | "Communicate"
-  }
-  Do not include any explanation or preamble.
-    `;
-
-    const output_parser = new StructuredOutputParser(SupervisorOutputSchema);
-
-    const prompt = await ChatPromptTemplate.fromMessages([
-      ['system', sys_prompt_main],
-      new MessagesPlaceholder('messages'),
-      new MessagesPlaceholder('agent_history'),
-    ]).partial({
-      members: Object.values(members).join(', '),
-      options: Object.values(members).join(' | '),
-      format_instructions: format_instructions,
-    });
-
-    const supervisor_chain = RunnableSequence.from([prompt, llm, output_parser]);
-    return supervisor_chain;
-  }
-
-  private create_search_product_agent() {
-    const tools = [new ProductSearchTool(new ProductService())];
-    const system_prompt = `
-    You are a product search specialist. Your job is to find products that match user requirements.
-    
-    CAPABILITIES:
-    - Search products by name, category, brand, price range
-    - Filter products based on specific features
-    - Find similar or alternative products
-    
-    INSTRUCTIONS:
-    - Use the product_search tool to find relevant products
-    - Extract search criteria from the user's request
-    - If the user's query is vague, search broadly and let them refine
-    - Always provide product details found in your search
-    - If no products found, suggest alternative search terms
-    `;
-    const agent = this.create_tool_agent(this._genai, tools, system_prompt);
-    return agent;
-  }
-
-  private create_product_comparison_agent() {
-    const tools = [new ProductComparisonTool(new ProductService())];
-    const system_prompt = `
-    You are a product comparison specialist. Your job is to compare products and help users make informed decisions.
-    
-    CAPABILITIES:
-    - Compare products side-by-side
-    - Highlight key differences and similarities
-    - Provide recommendations based on user needs
-    
-    INSTRUCTIONS:
-    - Use the product_comparison tool to compare specific products
-    - Look at agent_history to find products that were previously searched
-    - Compare products on relevant criteria (price, features, quality, reviews)
-    - Provide clear pros/cons for each product
-    - If specific products weren't mentioned, ask for clarification
-    `;
-    const agent = this.create_tool_agent(this._genai, tools, system_prompt);
-    return agent;
-  }
-
-  private create_create_order_agent(userId: string) {
-    const tools = [new CreateOrderTool(new OrderService(), new UserService(), new ProductService(), userId)];
-    const system_prompt = `
-    You are an order creation specialist. Your job is to help users create orders for products.
-    
-    CAPABILITIES:
-    - Create orders for selected products
-    - Handle quantity, shipping, and payment details
-    - Validate user information and product availability
-    
-    INSTRUCTIONS:
-    - Use the create_order tool to process orders
-    - Check agent_history for products the user has shown interest in
-    - Confirm order details before processing
-    - Handle any order-related questions or issues
-    - If user is not authenticated, explain the requirement
-    `;
-    const agent = this.create_tool_agent(this._genai, tools, system_prompt);
-    return agent;
-  }
-
-  private create_generate_response_agent() {
-    const template = `
-    You are a communication specialist responsible for creating the final response to the user.
-    Your job is to synthesize all the work done by other agents and provide a comprehensive, helpful response.
-  
-    INSTRUCTIONS:
-    1. ANALYZE the original user query: {messages}
-    2. REVIEW all agent actions and results: {agent_history}
-    3. SYNTHESIZE the information into a coherent response
-    4. STRUCTURE your response appropriately (use lists, sections if helpful)
-    5. INCLUDE all relevant details found by the agents
-    6. ANSWER the user's original question completely
-    7. PROVIDE actionable next steps if appropriate
-  
-    RESPONSE GUIDELINES:
-    - Start by directly addressing the user's question
-    - Include specific product information if found
-    - Mention prices, features, comparisons made
-    - If orders were created, confirm details
-    - If no results found, explain why and suggest alternatives
-    - Keep the tone helpful and conversational
-    - Don't just summarize - provide value-added insights
-  
-    Agent History Summary:
-    {agent_history}
-    `;
-
-    const system_prompt_template = new PromptTemplate({
-      template: template,
-      inputVariables: ['agent_history', 'messages'],
-    });
-
-    const system_message_prompt = new SystemMessagePromptTemplate(system_prompt_template);
-
-    const prompt = ChatPromptTemplate.fromMessages([
-      system_message_prompt,
-      new MessagesPlaceholder('messages'),
-      new MessagesPlaceholder('agent_scratchpad'),
-    ]);
-
-    const responseGenerator = new RunnableLambda({
-      func: async (msg: AIMessage) => {
-        const content = msg.content.toString();
-
-        let formattedResponse = content;
-
-        return {
-          output: formattedResponse,
-          intermediateSteps: [],
-        };
-      },
-    });
-
-    const agentRunnable = RunnableSequence.from([prompt, this._genai, responseGenerator]);
-
-    return agentRunnable;
-  }
-
-  private create_tool_agent(llm: ChatGoogleGenerativeAI, tools: StructuredTool[], system_prompt: string) {
-    const system_prompt_template = new PromptTemplate({
-      template:
-        system_prompt +
-        `
-        CONTEXT AWARENESS:
-        Previous agent actions and results: {agent_history}
-        
-        EXECUTION GUIDELINES:
-        - Focus ONLY on tasks relevant to your specialization
-        - Use the agent_history to understand what has been done before
-        - Don't repeat work that has already been completed
-        - If you can't complete a task, clearly state why
-        - Provide specific, actionable results
-
-        ALWAY RESPONSE WITH VIETNAMESE  
-        `,
-      inputVariables: ['agent_history'],
-    });
-
-    const system_message_prompt = new SystemMessagePromptTemplate(system_prompt_template);
-    const prompt = ChatPromptTemplate.fromMessages([
-      system_message_prompt,
-      new MessagesPlaceholder('messages'),
-      new MessagesPlaceholder('agent_scratchpad'),
-    ]);
-
-    const agent = createToolCallingAgent({
-      llm,
-      tools,
-      prompt: prompt,
-    });
-
-    const executor = AgentExecutor.fromAgentAndTools({
-      agent,
-      tools,
-      verbose: true,
-      maxIterations: 3,
-      returnIntermediateSteps: true,
-    });
-
-    return this.wrapAgentExecutor(executor);
-  }
-
-  private wrapAgentExecutor(executor: AgentExecutor): AgentWithInvoke {
-    return {
-      async invoke(input: any): Promise<AgentInvokeResult> {
-        const result = await executor.invoke(input);
-        if (!('output' in result) || !('intermediateSteps' in result)) {
-          throw new Error('AgentExecutor result does not match AgentInvokeResult format');
-        }
-
-        return {
-          output: result.output,
-          intermediateSteps: result.intermediateSteps,
-        };
+      message: 'Hệ thống không thể xử lý yêu cầu của bạn vào lúc này. Vui lòng thử lại sau.',
+      data: {
+        content: 'Hệ thống đang bảo trì, vui lòng thử lại sau',
+        error_detail: 'Max iterations reached without a final response.',
       },
     };
   }

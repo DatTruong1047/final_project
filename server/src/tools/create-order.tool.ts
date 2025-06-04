@@ -13,7 +13,7 @@ import ProductService from '@services/product.service';
 
 export class CreateOrderTool extends StructuredTool {
   name = 'create_order';
-  description = 'Create an order';
+  description = 'This tool to create an order if you have all required fields';
   schema = CreateOrderSchema;
 
   private readonly _orderService: OrderService;
@@ -37,32 +37,36 @@ export class CreateOrderTool extends StructuredTool {
     try {
       if (!this._userId) {
         return JSON.stringify({
-          result: [],
-          message: 'Yêu cầu đăng nhập để tạo đơn hàng',
+          success: false,
+          message: 'Yêu cầu đăng nhập để tạo đơn hàng.',
+          paymentIntent: null,
         });
       }
 
       const user = await this._userService.getUserById(this._userId);
       if (!user) {
         return JSON.stringify({
-          result: [],
-          message: `Không tìm thấy tài khoản với ID: ${this._userId}`,
+          success: false,
+          message: `Không tìm thấy tài khoản với ID: ${this._userId}.`,
+          paymentIntent: null,
         });
       }
 
       const findSimilarProduct = await this._productService.findSimilarProductIds(input.productName, 5);
       if (findSimilarProduct.data.length === 0) {
         return JSON.stringify({
-          result: [],
-          message: `Không tìm thấy sản phẩm với tên: ${input.productName}`,
+          success: false,
+          message: `Không tìm thấy sản phẩm với tên: "${input.productName}". Vui lòng kiểm tra lại tên sản phẩm.`,
+          paymentIntent: null,
         });
       }
 
-      const product = findSimilarProduct.data.find((product) => product.similarity > 0.95);
-      if (!product) {
+      const product = findSimilarProduct.data.find((product) => product.similarity > 0.8);
+      if (!product ) {
         return JSON.stringify({
-          result: [],
-          message: `Tìm thấy ${findSimilarProduct.data.length} sản phẩm với các tên: ${input.productName}. Hỏi lại khách hàng về tên chính xác sản phẩm muốn mua`,
+          success: false,
+          message: `Tìm thấy ${findSimilarProduct.data.length} sản phẩm tương tự với tên: "${input.productName}". Vui lòng cung cấp tên chính xác sản phẩm muốn mua.`,
+          paymentIntent: null,
         });
       }
 
@@ -74,8 +78,9 @@ export class CreateOrderTool extends StructuredTool {
 
       if (!createOrderResult.success) {
         return JSON.stringify({
-          result: [],
-          message: `Lỗi khi tạo đơn hàng: ${createOrderResult.message}`,
+          success: false,
+          message: `Lỗi khi tạo đơn hàng: ${createOrderResult.message || 'Lỗi không xác định'}.`,
+          paymentIntent: null,
         });
       }
 
@@ -103,21 +108,18 @@ export class CreateOrderTool extends StructuredTool {
       };
 
       return JSON.stringify({
-        result: [
-          {
-            ...responseData,
-          },
-        ],
-        message: 'Đơn hàng đã được tạo thành công',
+        success: true,
+        message: 'Đơn hàng của bạn đã được tạo thành công!',
+        paymentIntent: paymentIntentData,
       });
     } catch (error) {
       app.log.error('Error in createOrder:', error);
       return JSON.stringify({
-        result: [],
-        message: `Đã xảy ra lỗi khi tìm kiếm sản phẩm. Vui lòng thử lại: ${
+        success: false,
+        message: `Đã xảy ra lỗi hệ thống khi tạo đơn hàng. Vui lòng thử lại sau. Chi tiết lỗi: ${
           error instanceof Error ? error.message : String(error)
         }`,
-        errorDetail: error instanceof Error ? error.message : String(error),
+        paymentIntent: null,
       });
     }
   }
