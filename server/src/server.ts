@@ -1,5 +1,10 @@
 import path from 'path';
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+import { buildRouter } from '@adminjs/fastify';
 import fastifyAuth from '@fastify/auth';
 import fastifyCors from '@fastify/cors';
 import fastifyJwt from '@fastify/jwt';
@@ -13,6 +18,7 @@ import fastifyRawBody from 'fastify-raw-body';
 import * as config from '@config';
 import registerRoutes from '@routes';
 
+import { adminJs } from '@app/admin';
 import app from '@app/app';
 
 import authPlugin from '@plugins/auth.plugin';
@@ -28,6 +34,8 @@ const startServer = async (): Promise<void> => {
   try {
     // Reply plugin
     app.register(replyPlugin);
+
+    await buildRouter(adminJs, app);
 
     // CROS
     app.register(fastifyCors, {
@@ -61,9 +69,11 @@ const startServer = async (): Promise<void> => {
     app.register(fastifyAuth);
 
     // Multipart
-    app.register(fastifyMultipart, {
-      limits: config.uploadFileConfig.limits,
-    });
+    if (!app.hasDecorator('multipartErrors')) {
+      app.register(fastifyMultipart, {
+        limits: config.uploadFileConfig.limits,
+      });
+    }
 
     // Plugins
     app.register(authPlugin);
@@ -106,4 +116,4 @@ const startServer = async (): Promise<void> => {
   }
 };
 
-startServer();
+await startServer();

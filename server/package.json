@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "This project was server ecommerce and rag",
   "private": true,
+  "type": "module",
   "scripts": {
     "prettier:check": "prettier --check ./**/*.{ts,js,json,*rc}",
     "format": "prettier --write \"./**/*.{ts,js,json,*rc}\"",
@@ -15,6 +16,8 @@
     "build": "tsc",
     "start:dev": "tsx watch src/server.ts",
     "seed": "tsx src/seed.ts",
+    "db:generate": "npx prisma generate",
+    "db:migrate": "npx prisma migrate dev"
     "test": "tsx src/utils/document.util.ts",
     "seed-vector": "tsx src/vector-store/seed-data.ts"
   },
@@ -22,6 +25,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@adminjs/fastify": "^4.2.0",
+    "@adminjs/prisma": "^5.0.3",
     "@fastify/auth": "^5.0.2",
     "@fastify/autoload": "^6.0.0",
     "@fastify/cookie": "^11.0.2",
@@ -36,8 +41,10 @@
     "@langchain/core": "^0.3.56",
     "@langchain/google-genai": "^0.2.9",
     "@prisma/client": "^6.5.0",
+    "@tiptap/pm": "^2.12.0",
     "@types/bcrypt": "^5.0.2",
     "@types/nodemailer": "^6.4.17",
+    "adminjs": "^7.8.15",
     "bcrypt": "^5.1.1",
     "crypto": "^1.0.1",
     "date-fns": "^4.1.0",
@@ -53,6 +60,7 @@
     "module-alias": "^2.2.3",
     "node-cache": "^5.1.2",
     "nodemailer": "^6.10.1",
+    "tslib": "^2.8.1",
     "pg": "^8.16.0",
     "pino-pretty": "^13.0.0",
     "prisma": "^6.5.0",
@@ -80,6 +88,7 @@
     "husky": "^7.0.4",
     "lint-staged": "^12.5.0",
     "module-alias": "^2.2.3",
+    "pino-pretty": "^13.0.0",
     "prettier": "^2.7.1",
     "ts-loader": "^9.3.1",
     "tsconfig-paths": "^3.15.0",

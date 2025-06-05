@@ -1,6 +1,5 @@
 import Fastify, { FastifyInstance } from 'fastify';
 import { serializerCompiler, validatorCompiler, ZodTypeProvider } from 'fastify-type-provider-zod';
-
 import { loggerConfig } from '@config';
 
 function app(): FastifyInstance {
